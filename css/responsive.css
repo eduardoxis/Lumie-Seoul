@@ -178,7 +178,7 @@
 
     /* Floating benefits card - mobile compact version */
     .benefits-overlay-wrapper {
-        margin-top: -60px;
+        margin-top: 0;
         margin-bottom: var(--space-md);
         position: relative;
         z-index: 3;
