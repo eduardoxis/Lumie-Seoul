@@ -58,13 +58,13 @@
 
     /* Hero adjustments - full bleed image layout (matches campaign reference) */
     .hero-section {
-        height: 85svh !important;
-        min-height: 560px;
-        max-height: 760px;
+        height: 72svh !important;
+        min-height: 480px;
+        max-height: 640px;
         text-align: left;
         align-items: flex-end !important;
         padding-top: 90px;
-        padding-bottom: 9rem;
+        padding-bottom: 3rem;
     }
 
     .hero-bg img {
