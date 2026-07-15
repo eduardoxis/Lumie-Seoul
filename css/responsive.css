@@ -58,17 +58,17 @@
 
     /* Hero adjustments - full bleed image layout (matches campaign reference) */
     .hero-section {
-        height: 100svh !important;
-        min-height: 640px;
-        max-height: 900px;
+        height: 85svh !important;
+        min-height: 560px;
+        max-height: 760px;
         text-align: left;
         align-items: flex-end !important;
         padding-top: 90px;
-        padding-bottom: 8rem;
+        padding-bottom: 9rem;
     }
 
     .hero-bg img {
-        object-position: center 30%;
+        object-position: center 45%;
     }
 
     /* Replace the desktop left->right gradient with a bottom-heavy scrim so
