@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Categorias & Marcas | Lumié Seoul</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
+    </style>
+</head>
+<body class="admin-body">
+
+    <!-- Auth check -->
+    <script src="../js/firebase.js"></script>
+    <script>
+        if (!DB.auth.getCurrentUser()) {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <div class="admin-shell">
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar">
+            <div class="admin-logo">Lumié <span>Seoul</span></div>
+            <nav class="admin-menu">
+                <a href="dashboard.html" class="admin-menu-link"><i class="fa-solid fa-chart-line"></i> <span>Dashboard</span></a>
+                <a href="produtos.html" class="admin-menu-link"><i class="fa-solid fa-spa"></i> <span>Produtos</span></a>
+                <a href="categorias.html" class="admin-menu-link active"><i class="fa-solid fa-tags"></i> <span>Categorias & Marcas</span></a>
+                <a href="blog.html" class="admin-menu-link"><i class="fa-solid fa-pen-nib"></i> <span>Blog</span></a>
+                <a href="usuarios.html" class="admin-menu-link"><i class="fa-solid fa-users-gear"></i> <span>Administradores</span></a>
+                <a href="configuracoes.html" class="admin-menu-link"><i class="fa-solid fa-sliders"></i> <span>Configurações</span></a>
+                <a href="#" id="logout-btn" class="admin-menu-link" style="margin-top: auto; color: var(--admin-color-danger);"><i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span></a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="admin-main">
+            <div class="admin-header">
+                <div>
+                    <h1 class="admin-title">Categorias e Marcas</h1>
+                    <p style="font-size: 12px; color: #70655C; margin-top: 4px;">Gerencie as categorias e marcas que classificam seus produtos.</p>
+                </div>
+            </div>
+
+            <!-- Double column layout -->
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 30px; display: grid;">
+                
+                <!-- Categories Manager -->
+                <div>
+                    <div class="flex justify-between align-center" style="margin-bottom: var(--space-sm); display: flex; align-items: center;">
+                        <h3 class="serif-title" style="font-size: 20px;">Categorias</h3>
+                        <button class="admin-btn admin-btn-accent" style="font-size: 10px; padding: 6px 12px;" onclick="addCategory()">
+                            <i class="fa-solid fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                    
+                    <div class="admin-table-card">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome da Categoria</th>
+                                    <th style="width: 100px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categories-tbody">
+                                <tr>
+                                    <td colspan="2" style="text-align: center; color: #9B8E85;">Carregando categorias...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Brands Manager -->
+                <div>
+                    <div class="flex justify-between align-center" style="margin-bottom: var(--space-sm); display: flex; align-items: center;">
+                        <h3 class="serif-title" style="font-size: 20px;">Marcas</h3>
+                        <button class="admin-btn admin-btn-accent" style="font-size: 10px; padding: 6px 12px;" onclick="addBrand()">
+                            <i class="fa-solid fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                    
+                    <div class="admin-table-card">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome da Marca</th>
+                                    <th style="width: 100px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="brands-tbody">
+                                <tr>
+                                    <td colspan="2" style="text-align: center; color: #9B8E85;">Carregando marcas...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        let config = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.DB) {
+                loadConfigData();
+            } else {
+                document.addEventListener('db-ready', loadConfigData);
+            }
+            
+            document.getElementById('logout-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                await DB.auth.logout();
+                window.location.href = 'login.html';
+            });
+        });
+
+        async function loadConfigData() {
+            try {
+                config = await DB.config.get();
+                renderCategoriesTable();
+                renderBrandsTable();
+            } catch (e) {
+                console.error("Error loading configurations: ", e);
+            }
+        }
+
+        function renderCategoriesTable() {
+            const tbody = document.getElementById('categories-tbody');
+            const cats = config.categorias || [];
+
+            if (cats.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: #9B8E85;">Nenhuma categoria configurada.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = cats.map((c, index) => `
+                <tr>
+                    <td><strong>${c}</strong></td>
+                    <td class="admin-actions-cell">
+                        <a class="admin-action-link admin-action-delete" onclick="deleteCategory(${index})" title="Remover"><i class="fa-regular fa-trash-can"></i></a>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderBrandsTable() {
+            const tbody = document.getElementById('brands-tbody');
+            const marcas = config.marcas || [];
+
+            if (marcas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: #9B8E85;">Nenhuma marca configurada.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = marcas.map((m, index) => `
+                <tr>
+                    <td><strong>${m}</strong></td>
+                    <td class="admin-actions-cell">
+                        <a class="admin-action-link admin-action-delete" onclick="deleteBrand(${index})" title="Remover"><i class="fa-regular fa-trash-can"></i></a>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function addCategory() {
+            const name = prompt("Digite o nome da nova categoria:");
+            if (!name || name.trim() === "") return;
+
+            config.categorias = config.categorias || [];
+            if (config.categorias.includes(name.trim())) {
+                alert("Esta categoria já existe.");
+                return;
+            }
+
+            config.categorias.push(name.trim());
+            await saveConfig();
+        }
+
+        async function addBrand() {
+            const name = prompt("Digite o nome da nova marca:");
+            if (!name || name.trim() === "") return;
+
+            config.marcas = config.marcas || [];
+            if (config.marcas.includes(name.trim())) {
+                alert("Esta marca já existe.");
+                return;
+            }
+
+            config.marcas.push(name.trim());
+            await saveConfig();
+        }
+
+        async function deleteCategory(index) {
+            if (confirm(`Tem certeza que deseja remover a categoria "${config.categorias[index]}"?`)) {
+                config.categorias.splice(index, 1);
+                await saveConfig();
+            }
+        }
+
+        async function deleteBrand(index) {
+            if (confirm(`Tem certeza que deseja remover a marca "${config.marcas[index]}"?`)) {
+                config.marcas.splice(index, 1);
+                await saveConfig();
+            }
+        }
+
+        async function saveConfig() {
+            try {
+                await DB.config.save(config);
+                renderCategoriesTable();
+                renderBrandsTable();
+            } catch (e) {
+                console.error("Error saving categories config: ", e);
+                alert("Falha ao salvar configuração.");
+            }
+        }
+    </script>
+</body>
+</html>

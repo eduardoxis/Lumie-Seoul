@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Login Administrativo | Lumié Seoul</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; margin: 0; }
+    </style>
+</head>
+<body class="admin-body">
+
+    <div class="login-wrapper">
+        <div class="login-card">
+            <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; margin-bottom: 8px;">Lumié <span>Seoul</span></h1>
+            <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: #9B8E85; margin-bottom: 30px;">Console Administrativo</p>
+            
+            <div id="error-message" style="display: none; background: #FAF0ED; border: 1px solid #E8D7D0; color: #A34E36; padding: 12px; border-radius: 4px; font-size: 12px; margin-bottom: 20px; text-align: left;"></div>
+            
+            <form id="login-form">
+                <div class="admin-input-group">
+                    <label class="admin-label" for="login-email">E-mail</label>
+                    <input type="email" id="login-email" class="admin-input" placeholder="seu-email@dominio.com" required value="admin@lumie.com">
+                </div>
+                
+                <div class="admin-input-group">
+                    <label class="admin-label" for="login-password">Senha</label>
+                    <input type="password" id="login-password" class="admin-input" placeholder="Digite sua senha" required value="admin">
+                </div>
+                
+                <button type="submit" class="admin-btn admin-btn-accent" style="width: 100%; justify-content: center; padding: 14px;">Entrar no Painel</button>
+            </form>
+            <p style="font-size: 10px; color: #9B8E85; margin-top: 20px;">*Se Firebase não configurado, use as credenciais padrão: admin@lumie.com / admin</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/firebase.js"></script>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorBox = document.getElementById('error-message');
+            
+            errorBox.style.display = 'none';
+            
+            try {
+                // Call Auth layer (Firebase Auth or Local Storage shim)
+                await DB.auth.login(email, password);
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                errorBox.innerText = err.message;
+                errorBox.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

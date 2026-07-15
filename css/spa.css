@@ -1,0 +1,196 @@
+/*
+ * Lumié Seoul - SPA layer
+ * Regras de exibição das "páginas" (sections) controladas via JS,
+ * + estilos que antes viviam inline em produto.html e blog.html.
+ */
+
+/* ---------------------------------------------------------------- */
+/* Sistema de páginas (mesmo padrão do Papelaria Futura)             */
+/* ---------------------------------------------------------------- */
+.page[hidden] {
+    display: none !important;
+}
+
+.page {
+    display: block;
+    animation: pageFadeIn .35s ease;
+}
+
+@keyframes pageFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.nav-link.active,
+.footer-link.active {
+    color: var(--color-gold);
+}
+
+.bottom-nav-link.active i,
+.bottom-nav-link.active span {
+    color: var(--color-gold);
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.4);
+    z-index: 998;
+}
+
+.sidebar-overlay.active {
+    display: block;
+}
+
+/* ---------------------------------------------------------------- */
+/* Filtros do catálogo (antes inline)                                */
+/* ---------------------------------------------------------------- */
+.filter-select {
+    padding: 0.6rem 2rem 0.6rem 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-card);
+    font-size: 11px;
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    outline: none;
+    cursor: pointer;
+}
+
+/* ---------------------------------------------------------------- */
+/* Página de Produto (grid, galeria, tabs, tabela de specs)          */
+/* ---------------------------------------------------------------- */
+.product-page-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: var(--space-lg);
+    margin-top: var(--space-md);
+}
+
+.product-gallery-main {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg-base);
+    position: relative;
+    cursor: zoom-in;
+}
+
+.product-gallery-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s ease-out;
+}
+
+.product-gallery-thumbs {
+    display: flex;
+    gap: var(--space-xs);
+    margin-top: var(--space-xs);
+}
+
+.product-tab-btn {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-light);
+    padding: 10px 20px;
+    border-bottom: 2px solid transparent;
+    transition: var(--transition-fast);
+}
+
+.product-tab-btn.active {
+    color: var(--color-text-primary);
+    border-color: var(--color-gold);
+}
+
+.product-tab-panel {
+    display: none;
+    font-size: var(--fs-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+    padding: var(--space-sm) 0;
+    min-height: 120px;
+}
+
+.product-tab-panel.active {
+    display: block;
+}
+
+.spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--space-sm);
+    font-size: var(--fs-xs);
+}
+
+.spec-table td {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.spec-table td:first-child {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    width: 120px;
+}
+
+.spec-table td:last-child {
+    color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+    .product-page-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+}
+
+/* ---------------------------------------------------------------- */
+/* Página de Blog (listagem + leitura de artigo)                     */
+/* ---------------------------------------------------------------- */
+.blog-container {
+    display: grid;
+    grid-template-columns: 2.5fr 1fr;
+    gap: var(--space-lg);
+    margin-top: var(--space-md);
+}
+
+.single-post-body {
+    line-height: 1.8;
+    font-size: var(--fs-sm);
+    color: var(--color-text-secondary);
+}
+
+.single-post-body p {
+    margin-bottom: var(--space-sm);
+}
+
+.single-post-body h3 {
+    font-family: var(--font-serif);
+    font-size: var(--fs-md);
+    color: var(--color-text-primary);
+    margin: var(--space-md) 0 var(--space-xs);
+    font-weight: 500;
+}
+
+.single-post-body ul, .single-post-body ol {
+    margin-bottom: var(--space-sm);
+    padding-left: var(--space-md);
+}
+
+.single-post-body li {
+    list-style: inherit;
+    margin-bottom: 6px;
+}
+
+@media (max-width: 768px) {
+    .blog-container {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+}

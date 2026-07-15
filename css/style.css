@@ -1,0 +1,184 @@
+/*
+ * Lumié Seoul - Brand Design System & Global Styles
+ * Pure Vanilla CSS3
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Color Palette */
+    --color-bg-base: #FAF9F6;       /* Warm Alabaster White */
+    --color-bg-card: #FFFFFF;       /* Pure White */
+    --color-bg-hover: #F3ECE6;      /* Very Light Warm Beige */
+    --color-text-primary: #2C2621;  /* Dark Warm Ebony */
+    --color-text-secondary: #70655C;/* Earthy Brownish Gray */
+    --color-text-light: #9B8E85;    /* Soft Muted Taupe */
+    --color-gold: #C5A880;          /* Satin Gold */
+    --color-gold-hover: #B4966E;    /* Deep Gold Accent */
+    --color-gold-light: #F4EFEA;    /* Soft Gold Background */
+    --color-rose: #E8D7D0;          /* Delicate Rose Quartz */
+    --color-border: #EAE3DB;        /* Warm Cream Border */
+    --color-success: #607255;       /* Sage Green (Organic/Nature) */
+    
+    /* Shadows */
+    --shadow-subtle: 0 4px 20px rgba(44, 38, 33, 0.03);
+    --shadow-medium: 0 8px 30px rgba(44, 38, 33, 0.06);
+    --shadow-lux: 0 20px 50px rgba(44, 38, 33, 0.08);
+
+    /* Fonts */
+    --font-serif: 'Cormorant Garamond', serif;
+    --font-sans: 'Inter', sans-serif;
+    
+    /* Dynamic Sizing (Fluid Typography) */
+    --fs-xs: clamp(0.7rem, 0.65rem + 0.25vw, 0.85rem);
+    --fs-sm: clamp(0.8rem, 0.75rem + 0.25vw, 0.95rem);
+    --fs-base: clamp(0.95rem, 0.9rem + 0.25vw, 1.1rem);
+    --fs-md: clamp(1.1rem, 1rem + 0.5vw, 1.35rem);
+    --fs-lg: clamp(1.4rem, 1.25rem + 0.75vw, 1.85rem);
+    --fs-xl: clamp(1.8rem, 1.6rem + 1vw, 2.5rem);
+    --fs-xxl: clamp(2.5rem, 2.2rem + 1.5vw, 4rem);
+    
+    /* Transitions */
+    --transition-smooth: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    --transition-fast: all 0.2s ease;
+    
+    /* Spacings */
+    --space-xs: 0.5rem;
+    --space-sm: 1rem;
+    --space-md: 2rem;
+    --space-lg: 4rem;
+    --space-xl: 8rem;
+    
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 12px;
+    --radius-lg: 24px;
+    --radius-full: 9999px;
+    
+    /* Container Width */
+    --container-width: 1280px;
+}
+
+/* Base Reset */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    background-color: var(--color-bg-base);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--fs-base);
+    line-height: 1.6;
+    overflow-x: hidden;
+    letter-spacing: -0.01em;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+button {
+    font-family: inherit;
+    background: none;
+    border: none;
+    cursor: pointer;
+    outline: none;
+}
+
+img, video {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+li {
+    list-style: none;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: var(--color-bg-base);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gold);
+}
+
+html {
+    touch-action: manipulation;
+}
+
+.container {
+    width: 100%;
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+}
+
+/* Flex Helper Classes */
+.flex { display: flex; }
+.align-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.flex-column { flex-direction: column; }
+
+/* Grid Helper Classes */
+.grid {
+    display: grid;
+    gap: var(--space-md);
+}
+
+/* Typography styles */
+.serif-title {
+    font-family: var(--font-serif);
+    font-weight: 300;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+}
+
+.text-center { text-align: center; }
+.uppercase { text-transform: uppercase; letter-spacing: 0.15em; }
+
+/* Section Header */
+.section-header {
+    text-align: center;
+    margin-bottom: var(--space-lg);
+}
+.section-header .subtitle {
+    font-family: var(--font-sans);
+    font-size: var(--fs-xs);
+    color: var(--color-gold);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: var(--space-xs);
+}
+.section-header .title {
+    font-size: var(--fs-xl);
+    color: var(--color-text-primary);
+}
+.section-header .divider {
+    width: 50px;
+    height: 1px;
+    background-color: var(--color-gold);
+    margin: var(--space-sm) auto 0;
+}

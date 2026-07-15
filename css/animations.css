@@ -1,0 +1,262 @@
+/*
+ * Lumié Seoul - Responsive Grid, Layout Overrides & Viewport Rules
+ * Pure Vanilla CSS3
+ */
+
+/* ==========================================
+   1. TABLETS (Up to 1024px)
+   ========================================== */
+@media (max-width: 1024px) {
+    :root {
+        --space-lg: 3rem;
+        --space-xl: 6rem;
+    }
+    
+    .footer-grid {
+        grid-template-columns: 1.5fr 1fr 1fr;
+        gap: var(--space-md);
+    }
+    
+    .footer-brand {
+        grid-column: span 3;
+        margin-bottom: var(--space-sm);
+    }
+
+    .modal-body {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+}
+
+/* ==========================================
+   2. MOBILE / SMALL DEVICES (Up to 768px)
+   ========================================== */
+@media (max-width: 768px) {
+    :root {
+        --space-md: 1.5rem;
+        --space-lg: 2.5rem;
+        --space-xl: 4rem;
+    }
+
+    body {
+        padding-bottom: 60px; /* Space for the bottom navigation bar */
+    }
+
+    /* Navigation header changes */
+    .desktop-nav {
+        display: none; /* Hide standard desktop link strip */
+    }
+
+    .menu-toggle {
+        display: flex; /* Show Hamburger */
+    }
+
+    /* Show Bottom Navigation on mobile */
+    .bottom-nav {
+        display: flex;
+    }
+
+    /* Hero adjustments - full bleed image layout (matches campaign reference) */
+    .hero-section {
+        height: 100svh !important;
+        min-height: 640px;
+        max-height: 900px;
+        text-align: left;
+        align-items: flex-end !important;
+        padding-top: 90px;
+        padding-bottom: var(--space-lg);
+    }
+
+    .hero-bg img {
+        object-position: center 30%;
+    }
+
+    /* Replace the desktop left->right gradient with a bottom-heavy scrim so
+       the image reads full-bleed while the copy stays legible on mobile */
+    .hero-bg > div {
+        background: linear-gradient(
+            to top,
+            rgba(250, 249, 246, 0.97) 0%,
+            rgba(250, 249, 246, 0.88) 22%,
+            rgba(250, 249, 246, 0.35) 48%,
+            rgba(250, 249, 246, 0.05) 68%,
+            rgba(250, 249, 246, 0) 100%
+        ) !important;
+    }
+
+    .hero-content {
+        align-items: flex-start;
+        max-width: 100% !important;
+    }
+
+    .hero-content .serif-title {
+        font-size: 2.6rem !important;
+        line-height: 1.1;
+    }
+
+    .hero-buttons {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: var(--space-xs) !important;
+    }
+
+    .hero-buttons .btn {
+        flex: 1 1 auto;
+        white-space: nowrap;
+        padding: 0.9rem 1.1rem;
+    }
+
+    .hero-buttons .btn-secondary {
+        background-color: rgba(255, 255, 255, 0.35);
+        backdrop-filter: blur(4px);
+        border-color: rgba(44, 38, 33, 0.15);
+    }
+
+    /* Grids */
+    .grid {
+        gap: var(--space-sm);
+    }
+
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: var(--space-sm);
+    }
+    
+    .product-card-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .product-card-info {
+        padding: var(--space-xs);
+    }
+
+    /* Footer layout on mobile */
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+
+    .footer-brand {
+        grid-column: span 1;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: var(--space-sm);
+        text-align: center;
+    }
+
+    /* Modal adjustments for small screens (Drawer Style) */
+    .modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .modal-content {
+        max-height: 85vh;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        transform: translateY(100%);
+    }
+
+    .modal-body {
+        padding: var(--space-sm);
+        gap: var(--space-sm);
+    }
+
+    .modal-close-btn {
+        top: 15px;
+        right: 15px;
+        width: 34px;
+        height: 34px;
+    }
+
+    .benefit-card {
+        padding: var(--space-sm);
+    }
+
+    /* Floating benefits card - mobile compact version */
+    .benefits-overlay-wrapper {
+        margin-top: -60px;
+        margin-bottom: var(--space-md);
+        position: relative;
+        z-index: 3;
+    }
+
+    .benefits-float-card {
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-xs);
+        padding: var(--space-md) var(--space-xs);
+        border-radius: 20px;
+        background: #FFFFFF;
+        box-shadow: var(--shadow-lux);
+    }
+
+    .benefits-float-card .benefit-icon {
+        font-size: 1.3rem;
+        margin-bottom: 8px;
+        color: var(--color-gold);
+    }
+
+    .benefits-float-card .benefit-title {
+        font-size: 9px;
+        line-height: 1.3;
+        letter-spacing: 0.01em;
+        font-weight: 700;
+    }
+
+    .benefits-float-card .benefit-desc {
+        display: none;
+    }
+    .sidebar-drawer {
+        width: 100%;
+        max-width: 100%;
+        right: -100%;
+    }
+
+    .sidebar-drawer.active {
+        right: 0;
+    }
+}
+
+/* ==========================================
+   3. EXTRA SMALL DEVICES (Up to 480px)
+   ========================================== */
+@media (max-width: 480px) {
+    .logo {
+        font-size: var(--fs-md);
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr; /* Single column on very small phones like iPhone SE for luxury card focus */
+        padding: 0 var(--space-xs);
+    }
+    
+    .product-card-img-wrapper {
+        aspect-ratio: 1.2; /* Slightly wider images on single-column mobile list */
+    }
+
+    .hero-content h1 {
+        font-size: 1.8rem;
+    }
+
+    .btn {
+        padding: 0.7rem 1.5rem;
+        font-size: 9px;
+    }
+}
+
+/* ==========================================
+   4. ULTRAWIDE & LARGE MONITORS (From 1400px)
+   ========================================== */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1400px;
+    }
+    
+    :root {
+        --fs-xxl: 4.5rem;
+        --space-xl: 10rem;
+    }
+}

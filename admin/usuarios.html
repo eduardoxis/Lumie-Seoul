@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Administradores | Lumié Seoul</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
+    </style>
+</head>
+<body class="admin-body">
+
+    <!-- Auth check -->
+    <script src="../js/firebase.js"></script>
+    <script>
+        if (!DB.auth.getCurrentUser()) {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <div class="admin-shell">
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar">
+            <div class="admin-logo">Lumié <span>Seoul</span></div>
+            <nav class="admin-menu">
+                <a href="dashboard.html" class="admin-menu-link"><i class="fa-solid fa-chart-line"></i> <span>Dashboard</span></a>
+                <a href="produtos.html" class="admin-menu-link"><i class="fa-solid fa-spa"></i> <span>Produtos</span></a>
+                <a href="categorias.html" class="admin-menu-link"><i class="fa-solid fa-tags"></i> <span>Categorias & Marcas</span></a>
+                <a href="blog.html" class="admin-menu-link"><i class="fa-solid fa-pen-nib"></i> <span>Blog</span></a>
+                <a href="usuarios.html" class="admin-menu-link active"><i class="fa-solid fa-users-gear"></i> <span>Administradores</span></a>
+                <a href="configuracoes.html" class="admin-menu-link"><i class="fa-solid fa-sliders"></i> <span>Configurações</span></a>
+                <a href="#" id="logout-btn" class="admin-menu-link" style="margin-top: auto; color: var(--admin-color-danger);"><i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span></a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="admin-main">
+            <div class="admin-header">
+                <div>
+                    <h1 class="admin-title">Administradores Autorizados</h1>
+                    <p style="font-size: 12px; color: #70655C; margin-top: 4px;">Gerencie as contas que possuem acesso ao painel de controle do catálogo.</p>
+                </div>
+                <button id="add-admin-btn" class="admin-btn admin-btn-accent" onclick="openPanel()">
+                    <i class="fa-solid fa-user-plus"></i> Novo Administrador
+                </button>
+            </div>
+
+            <!-- Warning Callout for Firebase -->
+            <div id="fb-auth-warning" style="display: none; background: #FAF9F6; border: 1px solid var(--admin-color-border); padding: 15px; border-radius: 4px; margin-bottom: 20px; font-size: 12px; line-height: 1.6;">
+                <h4 style="color: var(--admin-color-accent); font-family: 'Cormorant Garamond', serif; font-size: 16px; margin-bottom: 4px;">Nota sobre Autenticação Firebase</h4>
+                Como o Firebase Authentication está conectado, novos administradores devem ser adicionados diretamente pelo Console do Firebase (aba Authentication) para segurança dos dados corporativos. A lista abaixo exibe apenas as contas registradas no ambiente local de fallback.
+            </div>
+
+            <!-- Administrators Table -->
+            <div class="admin-table-card">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>E-mail</th>
+                            <th>Status de Acesso</th>
+                            <th style="width: 100px;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admins-tbody">
+                        <!-- Dynamic list -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- PANEL SLIDE -->
+    <div id="admin-panel" class="admin-panel-overlay" style="height: auto; top: 15%; border-radius: 8px; max-width: 450px; margin: 0 auto;">
+        <div class="admin-panel-header">
+            <h3 class="serif-title" style="font-size: 20px;">Cadastrar Administrador</h3>
+            <button onclick="closePanel()" style="font-size: 20px; color: #70655C;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="admin-panel-body">
+            <form id="admin-form">
+                <div class="admin-input-group">
+                    <label class="admin-label" for="adm-email">E-mail de Acesso</label>
+                    <input type="email" id="adm-email" class="admin-input" required placeholder="admin2@lumie.com">
+                </div>
+                <div class="admin-input-group">
+                    <label class="admin-label" for="adm-password">Senha Provisória</label>
+                    <input type="password" id="adm-password" class="admin-input" required placeholder="Min 6 caracteres">
+                </div>
+            </form>
+        </div>
+        <div class="admin-panel-footer">
+            <button class="admin-btn admin-btn-secondary" onclick="closePanel()">Cancelar</button>
+            <button class="admin-btn admin-btn-accent" onclick="saveAdmin()">Criar Usuário</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.DB) {
+                loadAdminsTable();
+            } else {
+                document.addEventListener('db-ready', loadAdminsTable);
+            }
+            
+            document.getElementById('logout-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                await DB.auth.logout();
+                window.location.href = 'login.html';
+            });
+        });
+
+        function loadAdminsTable() {
+            if (DB.getMode() === 'firebase') {
+                document.getElementById('fb-auth-warning').style.display = 'block';
+            }
+
+            const tbody = document.getElementById('admins-tbody');
+            const admins = JSON.parse(localStorage.getItem('lumie_admins')) || [];
+
+            if (admins.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #9B8E85;">Nenhum administrador local cadastrado.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = admins.map((adm, index) => `
+                <tr>
+                    <td><strong>${adm.email}</strong></td>
+                    <td><span style="font-size: 11px; background: #EBF6EE; color: #607255; padding: 2px 8px; border-radius: 99px; font-weight:600;">Ativo</span></td>
+                    <td class="admin-actions-cell">
+                        ${adm.email === 'admin@lumie.com' ? '-' : `
+                            <a class="admin-action-link admin-action-delete" onclick="deleteAdmin(${index})" title="Remover"><i class="fa-regular fa-trash-can"></i></a>
+                        `}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openPanel() {
+            document.getElementById('admin-panel').classList.add('active');
+        }
+
+        function closePanel() {
+            document.getElementById('admin-panel').classList.remove('active');
+            document.getElementById('admin-form').reset();
+        }
+
+        function saveAdmin() {
+            const email = document.getElementById('adm-email').value;
+            const password = document.getElementById('adm-password').value;
+
+            if (!email || !password || password.length < 4) {
+                alert("Por favor, digite um e-mail válido e uma senha de no mínimo 4 caracteres.");
+                return;
+            }
+
+            const admins = JSON.parse(localStorage.getItem('lumie_admins')) || [];
+            if (admins.some(a => a.email === email)) {
+                alert("Este e-mail administrativo já está cadastrado.");
+                return;
+            }
+
+            admins.push({ email, password });
+            localStorage.setItem('lumie_admins', JSON.stringify(admins));
+            
+            closePanel();
+            loadAdminsTable();
+        }
+
+        function deleteAdmin(index) {
+            const admins = JSON.parse(localStorage.getItem('lumie_admins')) || [];
+            if (confirm(`Tem certeza que deseja revogar o acesso administrativo da conta "${admins[index].email}"?`)) {
+                admins.splice(index, 1);
+                localStorage.setItem('lumie_admins', JSON.stringify(admins));
+                loadAdminsTable();
+            }
+        }
+    </script>
+</body>
+</html>

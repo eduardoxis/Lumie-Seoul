@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Gerenciar Blog | Lumié Seoul</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
+    </style>
+</head>
+<body class="admin-body">
+
+    <!-- Auth check -->
+    <script src="../js/firebase.js"></script>
+    <script>
+        if (!DB.auth.getCurrentUser()) {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <div class="admin-shell">
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar">
+            <div class="admin-logo">Lumié <span>Seoul</span></div>
+            <nav class="admin-menu">
+                <a href="dashboard.html" class="admin-menu-link"><i class="fa-solid fa-chart-line"></i> <span>Dashboard</span></a>
+                <a href="produtos.html" class="admin-menu-link"><i class="fa-solid fa-spa"></i> <span>Produtos</span></a>
+                <a href="categorias.html" class="admin-menu-link"><i class="fa-solid fa-tags"></i> <span>Categorias & Marcas</span></a>
+                <a href="blog.html" class="admin-menu-link active"><i class="fa-solid fa-pen-nib"></i> <span>Blog</span></a>
+                <a href="usuarios.html" class="admin-menu-link"><i class="fa-solid fa-users-gear"></i> <span>Administradores</span></a>
+                <a href="configuracoes.html" class="admin-menu-link"><i class="fa-solid fa-sliders"></i> <span>Configurações</span></a>
+                <a href="#" id="logout-btn" class="admin-menu-link" style="margin-top: auto; color: var(--admin-color-danger);"><i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span></a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="admin-main">
+            <div class="admin-header">
+                <div>
+                    <h1 class="admin-title">Gerenciar Artigos do Blog</h1>
+                    <p style="font-size: 12px; color: #70655C; margin-top: 4px;">Publique e edite dicas de skincare e rotinas de K-Beauty no portal de artigos.</p>
+                </div>
+                <button class="admin-btn admin-btn-accent" onclick="openPanel('new')">
+                    <i class="fa-solid fa-plus"></i> Novo Artigo
+                </button>
+            </div>
+
+            <!-- Blog Table -->
+            <div class="admin-table-card">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Imagem</th>
+                            <th>Título do Artigo</th>
+                            <th>Autor</th>
+                            <th>Publicação</th>
+                            <th>Tags</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="blog-tbody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #9B8E85; padding: 30px;">Carregando artigos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- ADD/EDIT SIDE PANEL SLIDE -->
+    <div id="admin-panel" class="admin-panel-overlay">
+        <div class="admin-panel-header">
+            <h3 id="panel-title" class="serif-title" style="font-size: 22px;">Novo Artigo</h3>
+            <button onclick="closePanel()" style="font-size: 20px; color: #70655C;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div class="admin-panel-body">
+            <form id="blog-form">
+                <input type="hidden" id="b-form-id">
+                
+                <div class="admin-input-group">
+                    <label class="admin-label" for="b-form-titulo">Título do Artigo</label>
+                    <input type="text" id="b-form-titulo" class="admin-input" required placeholder="Ex: Como escolher o protetor solar ideal">
+                </div>
+
+                <div class="admin-input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div>
+                        <label class="admin-label" for="b-form-autor">Autor</label>
+                        <input type="text" id="b-form-autor" class="admin-input" required placeholder="Ex: Equipe Lumié">
+                    </div>
+                    <div>
+                        <label class="admin-label" for="b-form-tags">Tags (Separadas por vírgula)</label>
+                        <input type="text" id="b-form-tags" class="admin-input" placeholder="Ex: Pele Seca, Sol, Dicas">
+                    </div>
+                </div>
+
+                <div class="admin-input-group">
+                    <label class="admin-label" for="b-form-resumo">Resumo / Subtítulo</label>
+                    <input type="text" id="b-form-resumo" class="admin-input" required placeholder="Breve frase chamativa sobre o artigo...">
+                </div>
+
+                <div class="admin-input-group">
+                    <label class="admin-label" for="b-form-conteudo">Conteúdo do Artigo (Aceita tags HTML)</label>
+                    <textarea id="b-form-conteudo" class="admin-textarea" required style="min-height: 250px;" placeholder="<p>Texto do artigo...</p>&#10;<h3>Subtítulo elegante</h3>&#10;<p>Mais texto...</p>"></textarea>
+                </div>
+
+                <!-- Blog Cover Handler -->
+                <div class="admin-input-group" style="border: 1px dashed var(--admin-color-border); padding: 15px; border-radius: 4px; background: #FAF9F6;">
+                    <label class="admin-label">Imagem de Capa</label>
+                    <input type="file" id="b-form-file" accept="image/*" style="margin-bottom: 10px; font-size: 12px;">
+                    <span style="font-size: 10px; color: #9B8E85; display: block; margin-bottom: 5px;">Ou cole uma URL externa existente:</span>
+                    <input type="text" id="b-form-img-url" class="admin-input" style="padding: 6px; font-size: 12px;" placeholder="https://site.com/capa.jpg">
+                    
+                    <div id="b-img-preview-wrapper" style="margin-top: 15px; text-align: center; display: none;">
+                        <span class="admin-label" style="text-align: center;">Pré-visualização:</span>
+                        <img id="b-img-preview" src="" style="max-height: 120px; max-width: 100%; border: 1px solid var(--admin-color-border); border-radius: 4px; margin-top: 5px; object-fit: contain;">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="admin-panel-footer">
+            <button class="admin-btn admin-btn-secondary" onclick="closePanel()">Cancelar</button>
+            <button class="admin-btn admin-btn-accent" id="save-blog-btn">Salvar Artigo</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        let allArticles = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.DB) {
+                initBlogDashboard();
+            } else {
+                document.addEventListener('db-ready', initBlogDashboard);
+            }
+
+            // Image handler converting files to base64 locally
+            document.getElementById('b-form-file').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    document.getElementById('b-form-img-url').value = event.target.result;
+                    showPreview(event.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            document.getElementById('b-form-img-url').addEventListener('input', (e) => {
+                showPreview(e.target.value);
+            });
+
+            document.getElementById('save-blog-btn').addEventListener('click', saveArticle);
+            
+            document.getElementById('logout-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                await DB.auth.logout();
+                window.location.href = 'login.html';
+            });
+        });
+
+        async function initBlogDashboard() {
+            // Check redirect parameter
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('action') === 'new') {
+                openPanel('new');
+            }
+
+            await loadBlogTable();
+        }
+
+        async function loadBlogTable() {
+            try {
+                allArticles = await DB.blog.getAll();
+                const tbody = document.getElementById('blog-tbody');
+
+                if (allArticles.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #9B8E85;">Nenhum artigo cadastrado.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = allArticles.map(post => {
+                    const dateStr = new Date(post.publicadoEm).toLocaleDateString('pt-BR');
+                    const imgUrl = post.imagemCapaUrl || '../img/banner.jpg';
+                    return `
+                        <tr>
+                            <td><img src="${imgUrl}" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid var(--admin-color-border);"></td>
+                            <td><strong>${post.titulo}</strong></td>
+                            <td>${post.autor}</td>
+                            <td>${dateStr}</td>
+                            <td>${post.tags ? post.tags.map(t => `<span style="font-size: 9px; padding: 2px 6px; background:#FAF9F6; border:1px solid var(--admin-color-border); border-radius:99px; margin-right:4px;">#${t}</span>`).join('') : '-'}</td>
+                            <td class="admin-actions-cell">
+                                <a class="admin-action-link admin-action-edit" onclick="openPanel('edit', '${post.id}')" title="Editar"><i class="fa-regular fa-pen-to-square"></i></a>
+                                <a class="admin-action-link admin-action-delete" onclick="deleteArticle('${post.id}')" title="Remover"><i class="fa-regular fa-trash-can"></i></a>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error("Error loading blog table: ", e);
+            }
+        }
+
+        function openPanel(mode, id = '') {
+            const panel = document.getElementById('admin-panel');
+            const title = document.getElementById('panel-title');
+            
+            // Reset form
+            document.getElementById('blog-form').reset();
+            document.getElementById('b-form-id').value = '';
+            document.getElementById('b-img-preview-wrapper').style.display = 'none';
+
+            if (mode === 'new') {
+                title.innerText = 'Novo Artigo';
+            } else {
+                title.innerText = 'Editar Artigo';
+                const post = allArticles.find(a => a.id === id);
+                if (post) {
+                    document.getElementById('b-form-id').value = post.id;
+                    document.getElementById('b-form-titulo').value = post.titulo;
+                    document.getElementById('b-form-autor').value = post.autor;
+                    document.getElementById('b-form-resumo').value = post.resumo;
+                    document.getElementById('b-form-conteudo').value = post.conteudoHtml;
+                    document.getElementById('b-form-tags').value = post.tags ? post.tags.join(', ') : '';
+
+                    if (post.imagemCapaUrl) {
+                        document.getElementById('b-form-img-url').value = post.imagemCapaUrl;
+                        showPreview(post.imagemCapaUrl);
+                    }
+                }
+            }
+
+            panel.classList.add('active');
+        }
+
+        function closePanel() {
+            document.getElementById('admin-panel').classList.remove('active');
+        }
+
+        function showPreview(url) {
+            const previewWrapper = document.getElementById('b-img-preview-wrapper');
+            const previewImg = document.getElementById('b-img-preview');
+            
+            if (url) {
+                previewImg.src = url;
+                previewWrapper.style.display = 'block';
+            } else {
+                previewWrapper.style.display = 'none';
+            }
+        }
+
+        async function saveArticle() {
+            const titulo = document.getElementById('b-form-titulo').value;
+            if (!titulo) {
+                alert("Por favor, digite o título do artigo.");
+                return;
+            }
+
+            const id = document.getElementById('b-form-id').value;
+            const autor = document.getElementById('b-form-autor').value;
+            const resumo = document.getElementById('b-form-resumo').value;
+            const conteudoHtml = document.getElementById('b-form-conteudo').value;
+            const tags = document.getElementById('b-form-tags').value.split(',').map(t => t.trim()).filter(t => t !== '');
+            const imagemCapaUrl = document.getElementById('b-form-img-url').value || '../img/banner.jpg';
+
+            const articleData = {
+                titulo,
+                autor,
+                resumo,
+                conteudoHtml,
+                tags,
+                imagemCapaUrl
+            };
+
+            if (id) {
+                articleData.id = id;
+            }
+
+            try {
+                await DB.blog.save(articleData);
+                closePanel();
+                await loadBlogTable();
+            } catch (e) {
+                console.error("Save article error: ", e);
+                alert("Erro ao salvar artigo.");
+            }
+        }
+
+        async function deleteArticle(id) {
+            if (confirm("Tem certeza que deseja remover este artigo do blog?")) {
+                try {
+                    await DB.blog.delete(id);
+                    await loadBlogTable();
+                } catch (e) {
+                    console.error("Delete error: ", e);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

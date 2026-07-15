@@ -1,0 +1,481 @@
+/*
+ * Lumié Seoul - Firebase connection & Local Data Fallback Layer (CRUD wrapper)
+ * Pure Vanilla ES6+
+ *
+ * This wrapper transparently switches between Firebase (when valid credentials are set)
+ * and LocalStorage. This allows the catalog and administrative panel to function
+ * out-of-the-box in local environments before Firebase project creation.
+ */
+
+// 1. Firebase configuration credentials (Merchant updates this when ready)
+const firebaseConfig = {
+    apiKey: "YOUR_FIREBASE_API_KEY_HERE",
+    authDomain: "lumie-seoul.firebaseapp.com",
+    projectId: "lumie-seoul",
+    storageBucket: "lumie-seoul.appspot.com",
+    messagingSenderId: "000000000000",
+    appId: "1:000000000000:web:0000000000000000000000"
+};
+
+// Check if credentials are placeholders
+const isFirebaseConfigured = 
+    firebaseConfig.apiKey && 
+    !firebaseConfig.apiKey.includes("YOUR_") && 
+    !firebaseConfig.apiKey.includes("HERE");
+
+let firebaseApp = null;
+let firestoreDb = null;
+let firebaseAuth = null;
+let firebaseStorage = null;
+let dbMode = "local"; // "local" or "firebase"
+
+// Load Firebase dynamically if configured
+if (isFirebaseConfigured) {
+    try {
+        // We import Firebase modules from CDN
+        import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js").then((App) => {
+            firebaseApp = App.initializeApp(firebaseConfig);
+            
+            Promise.all([
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"),
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"),
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js")
+            ]).then(([Firestore, Auth, Storage]) => {
+                firestoreDb = Firestore.getFirestore(firebaseApp);
+                firebaseAuth = Auth.getAuth(firebaseApp);
+                firebaseStorage = Storage.getStorage(firebaseApp);
+                dbMode = "firebase";
+                console.log("Lumié Seoul: Connected to Firebase Cloud Services.");
+                
+                // Trigger event so other scripts know DB is ready
+                document.dispatchEvent(new CustomEvent("db-ready", { detail: { mode: "firebase" } }));
+            });
+        });
+    } catch (e) {
+        console.warn("Lumié Seoul: Failed to load Firebase SDKs. Falling back to local storage.", e);
+        dbMode = "local";
+    }
+} else {
+    console.log("Lumié Seoul: Firebase credentials not set. Running in LocalStorage fallback mode.");
+    // Wait for DOM load to fire ready event
+    document.addEventListener("DOMContentLoaded", () => {
+        document.dispatchEvent(new CustomEvent("db-ready", { detail: { mode: "local" } }));
+    });
+}
+
+// 2. Mock / Initial Datasets (Local Fallback storage)
+const INITIAL_PRODUCTS = [
+    {
+        id: 'glow-essence',
+        nome: 'Glow Ginseng Water Essence',
+        marca: 'Sulwhasoo',
+        categoria: 'Tônico',
+        descricaoCurta: 'Tônico facial hidratante formulado com ginseng vermelho coreano para restaurar a luminosidade natural e elasticidade da pele.',
+        descricaoCompleta: 'Esta essência aquosa luxuosa infunde a pele com o lendário Ginseng Vermelho Coreano e ervas preciosas para hidratar profundamente, melhorar a elasticidade e restaurar a luminosidade natural da barreira. Sua textura de rápida absorção prepara a pele para os tratamentos seguintes, deixando-a macia e radiante.',
+        beneficios: [
+            'Luminosidade imediata (efeito glass skin)',
+            'Hidratação profunda por 24 horas',
+            'Melhora visível da elasticidade e firmeza',
+            'Nutrição antienvelhecimento premium'
+        ],
+        ingredientes: [
+            'Panax Ginseng Root Water (82%)',
+            'Sodium Hyaluronate',
+            'Glycyrrhiza Glabra (Licorice) Root Extract',
+            'Honey Extract',
+            'Adenosine (Anti-aging)'
+        ],
+        modoUso: 'Após a limpeza da pele, despeje algumas gotas nas palmas das mãos e pressione suavemente no rosto e pescoço até a completa absorção. Use de manhã e à noite.',
+        indicacao: 'Prevenção de rugas, perda de tônus facial e pele opaca.',
+        tiposPele: ['Todos os tipos de pele', 'Pele Seca'],
+        origem: 'Coreia do Sul',
+        preco: 'R$ 389,00',
+        destacado: true,
+        novidade: false,
+        maisVendido: true,
+        imagensUrl: ['img/toner.jpg', 'img/serum.jpg'],
+        badge: 'Mais Vendido'
+    },
+    {
+        id: 'wrinkle-peptide-serum',
+        nome: 'Vanish Wrinkle Peptide Serum',
+        marca: 'COSRX',
+        categoria: 'Sérum',
+        descricaoCurta: 'Soro altamente concentrado com 6 peptídeos e ácido hialurônico para preencher linhas finas e revitalizar peles cansadas.',
+        descricaoCompleta: 'O Vanish Wrinkle Peptide Serum é um elixir antienvelhecimento ultraleve que combina um complexo avançado de 6 peptídeos ativos com ácido hialurônico fragmentado. Ele age diretamente na estimulação do colágeno, reduzindo a aparência de rugas de expressão e restaurando o viço juvenil.',
+        beneficios: [
+            'Redução visível das linhas de expressão',
+            'Aumento da síntese de colágeno natural',
+            'Suavização de texturas e poros dilatados',
+            'Efeito tensor suave imediato'
+        ],
+        ingredientes: [
+            'Peptide Complex-6 (Copper Tripeptide-1, Acetyl Hexapeptide-8)',
+            'Hydrolyzed Hyaluronic Acid',
+            'Niacinamide (Vitamina B3)',
+            'Allantoin'
+        ],
+        modoUso: 'Aplique de 3 a 4 gotas no rosto limpo e seco. Espalhe uniformemente com as pontas dos dedos em movimentos circulares ascendentes. Finalize com o hidratante.',
+        indicacao: 'Linhas finas, flacidez precoce e perda de elasticidade.',
+        tiposPele: ['Pele Madura', 'Pele Seca', 'Pele Normal'],
+        origem: 'Coreia do Sul',
+        preco: 'R$ 279,00',
+        destacado: true,
+        novidade: true,
+        maisVendido: false,
+        imagensUrl: ['img/serum.jpg', 'img/cream.jpg'],
+        badge: 'Lançamento'
+    },
+    {
+        id: 'ceramide-barrier-cream',
+        nome: 'Ceramide Barrier Cream',
+        marca: 'Innisfree',
+        categoria: 'Hidratante',
+        descricaoCurta: 'Creme hidratante calmante com ceramidas essenciais e extrato purificado de Centelha Asiática (Cica) para restaurar a barreira cutânea.',
+        descricaoCompleta: 'Um creme hidratante rico e sedoso formulado com 5 tipos de ceramidas biomiméticas e extrato de Centelha Asiática. Ideal para reestruturar peles sensibilizadas por fatores externos, acalmar coceiras e descamações, mantendo a hidratação trancada na pele.',
+        beneficios: [
+            'Reparação e fortalecimento da barreira de proteção natural',
+            'Alívio instantâneo para vermelhidão ou pele repuxada',
+            'Nutrição profunda de liberação prolongada',
+            'Fórmula dermatologicamente testada e livre de parabenos'
+        ],
+        ingredientes: [
+            'Ceramides (NP, AP, AS, NS, EOP)',
+            'Centella Asiatica Extract (Cica)',
+            'Madecassoside',
+            'Panthenol (Pro-vitamina B5)',
+            'Squalane'
+        ],
+        modoUso: 'Como último passo da rotina (ou antes do filtro solar), aplique uma pequena quantidade nas bochechas, testa e queixo, massageando suavemente até absorver.',
+        indicacao: 'Desidratação intensa, pele sensibilizada, vermelhidão ou pós-procedimentos.',
+        tiposPele: ['Pele Sensível', 'Pele Seca', 'Pele Mista'],
+        origem: 'Coreia do Sul',
+        preco: 'R$ 319,00',
+        destacado: true,
+        novidade: false,
+        maisVendido: false,
+        imagensUrl: ['img/cream.jpg', 'img/toner.jpg'],
+        badge: 'Destaque'
+    }
+];
+
+const INITIAL_BLOG = [
+    {
+        id: 'rotina-coreana-10-passos',
+        titulo: 'Rotina Coreana: O Guia Definitivo dos 10 Passos',
+        resumo: 'Entenda os princípios da rotina de beleza que revolucionou os cosméticos e aprenda a adaptá-la para o seu dia a dia.',
+        conteudoHtml: `<p>A famosa rotina coreana de 10 passos não é sobre usar todos os produtos ao mesmo tempo todos os dias, mas sim entender o que a sua pele precisa em cada momento. O foco é a prevenção, a hidratação em camadas e o tratamento delicado da barreira cutânea.</p>
+                       <h3>Os 10 Passos do K-Beauty</h3>
+                       <ol>
+                         <li><strong>Limpador à base de óleo:</strong> Para derreter a maquiagem e o filtro solar.</li>
+                         <li><strong>Limpador à base de água:</strong> Para remover suor e impurezas restantes.</li>
+                         <li><strong>Esfoliante:</strong> Remocão de células mortas (1 a 2 vezes por semana).</li>
+                         <li><strong>Tônico:</strong> Reequilibra o pH e prepara para absorção.</li>
+                         <li><strong>Essência:</strong> O coração do K-Beauty. Hidratação celular profunda.</li>
+                         <li><strong>Ampolas e Séruns:</strong> Tratamento direcionado (manchas, rugas, acne).</li>
+                         <li><strong>Máscara facial (Sheet Mask):</strong> Nutrição concentrada ocasional.</li>
+                         <li><strong>Creme para os olhos:</strong> Prevenção de linhas e olheiras.</li>
+                         <li><strong>Hidratante:</strong> Selagem de todas as camadas anteriores.</li>
+                         <li><strong>Protetor Solar (Dia) ou Máscara Noturna (Noite):</strong> Proteção ou regeneração.</li>
+                       </ol>`,
+        imagemCapaUrl: 'img/banner.jpg',
+        autor: 'Consultoria Lumié',
+        publicadoEm: '2026-07-01T10:00:00Z',
+        tags: ['K-Beauty', 'Rotina de Pele', 'Iniciantes']
+    },
+    {
+        id: 'acido-hialuronico-vs-ceramidas',
+        titulo: 'Ácido Hialurônico vs Ceramidas: Qual escolher?',
+        resumo: 'Saiba como estes dois ativos trabalham juntos para garantir hidratação profunda e barreira cutânea fortalecida.',
+        conteudoHtml: `<p>Muitas pessoas confundem o papel do Ácido Hialurônico e das Ceramidas na pele. Embora ambos sejam hidratantes excepcionais, eles funcionam de formas completamente diferentes.</p>
+                       <p>O <strong>Ácido Hialurônico</strong> atua como uma esponja, atraindo moléculas de água do ambiente e das camadas internas da pele para o seu estrato córneo. Ele é essencial para preencher rugas finas e dar viço.</p>
+                       <p>As <strong>Ceramidas</strong>, por outro lado, funcionam como o "cimento" que une os tijolos da barreira protetora da sua pele. Elas não trazem água, mas impedem que a água atraída pelo ácido hialurônico evapore.</p>
+                       <h3>Qual deles eu preciso?</h3>
+                       <p>Se a sua pele está opaca e desidratada, você precisa de Ácido Hialurônico. Se a sua pele está vermelha, descamando ou sensível, sua barreira lipídica está danificada, exigindo o uso de Ceramidas.</p>`,
+        imagemCapaUrl: 'img/cream.jpg',
+        autor: 'Dra. Kim Seoul',
+        publicadoEm: '2026-07-08T14:30:00Z',
+        tags: ['Ingredientes', 'Pele Sensível', 'Hidratação']
+    }
+];
+
+const INITIAL_CONFIG = {
+    whatsappNumero: '5511999998888',
+    whatsappMensagemPadrao: 'Olá! Gostaria de tirar algumas dúvidas sobre os produtos de skincare.',
+    seoTituloPadrao: 'Lumié Seoul | Premium Korean Skincare',
+    seoDescricaoPadrao: 'Importação direta de K-Beauty original com suporte personalizado via WhatsApp.',
+    bannerDesktopUrl: 'img/banner.jpg',
+    bannerMobileUrl: 'img/banner.jpg',
+    categorias: ['Tônico', 'Sérum', 'Hidratante', 'Protetor Solar', 'Limpeza'],
+    marcas: ['Sulwhasoo', 'COSRX', 'Innisfree', 'Skin1004', 'Laneige', 'Beauty of Joseon']
+};
+
+// Initialize localStorage databases if not exists
+if (!localStorage.getItem('lumie_products')) {
+    localStorage.setItem('lumie_products', JSON.stringify(INITIAL_PRODUCTS));
+}
+if (!localStorage.getItem('lumie_blog')) {
+    localStorage.setItem('lumie_blog', JSON.stringify(INITIAL_BLOG));
+}
+if (!localStorage.getItem('lumie_config')) {
+    localStorage.setItem('lumie_config', JSON.stringify(INITIAL_CONFIG));
+}
+if (!localStorage.getItem('lumie_admins')) {
+    // Default admin user: admin@lumie.com / admin123
+    localStorage.setItem('lumie_admins', JSON.stringify([{ email: 'admin@lumie.com', password: 'admin' }]));
+}
+
+// 3. Centralized Database Gateway (DB API Wrapper)
+const DB = {
+    // Mode checker
+    getMode: () => dbMode,
+
+    // --- PRODUCTS COLLECTION ---
+    products: {
+        getAll: async () => {
+            if (dbMode === "firebase" && firestoreDb) {
+                try {
+                    const { getDocs, collection, query, orderBy } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                    const q = query(collection(firestoreDb, "produtos"), orderBy("criadoEm", "desc"));
+                    const querySnapshot = await getDocs(q);
+                    const list = [];
+                    querySnapshot.forEach((doc) => {
+                        list.push({ id: doc.id, ...doc.data() });
+                    });
+                    return list.length ? list : JSON.parse(localStorage.getItem('lumie_products'));
+                } catch (e) {
+                    console.error("Firebase read products error. Falling back to local.", e);
+                }
+            }
+            return JSON.parse(localStorage.getItem('lumie_products')) || [];
+        },
+        
+        getById: async (id) => {
+            if (dbMode === "firebase" && firestoreDb) {
+                try {
+                    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                    const docRef = doc(firestoreDb, "produtos", id);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        return { id: docSnap.id, ...docSnap.data() };
+                    }
+                } catch (e) {
+                    console.error("Firebase doc fetch error. Falling back to local.", e);
+                }
+            }
+            const list = JSON.parse(localStorage.getItem('lumie_products')) || [];
+            return list.find(p => p.id === id) || null;
+        },
+
+        save: async (productData) => {
+            if (!productData.id) {
+                productData.id = productData.nome.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            }
+            
+            if (dbMode === "firebase" && firestoreDb) {
+                try {
+                    const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                    productData.criadoEm = productData.criadoEm || new Date().toISOString();
+                    await setDoc(doc(firestoreDb, "produtos", productData.id), productData, { merge: true });
+                    return productData.id;
+                } catch (e) {
+                    console.error("Firebase write product error. Attempting local save.", e);
+                }
+            }
+            
+            const list = JSON.parse(localStorage.getItem('lumie_products')) || [];
+            const index = list.findIndex(p => p.id === productData.id);
+            if (index > -1) {
+                list[index] = { ...list[index], ...productData };
+            } else {
+                productData.criadoEm = new Date().toISOString();
+                list.push(productData);
+            }
+            localStorage.setItem('lumie_products', JSON.stringify(list));
+            return productData.id;
+        },
+
+        delete: async (id) => {
+            if (dbMode === "firebase" && firestoreDb) {
+                try {
+                    const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                    await deleteDoc(doc(firestoreDb, "produtos", id));
+                    return true;
+                } catch (e) {
+                    console.error("Firebase delete product error.", e);
+                }
+            }
+            
+            let list = JSON.parse(localStorage.getItem('lumie_products')) || [];
+            list = list.filter(p => p.id !== id);
+            localStorage.setItem('lumie_products', JSON.stringify(list));
+            return true;
+        }
+    },
+
+    // --- BLOG COLLECTION ---
+    blog: {
+        getAll: async () => {
+            if (dbMode === "firebase" && firestoreDb) {
+                try {
+                    const { getDocs, collection, query, orderBy } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                    const q = query(collection(firestoreDb, "blog"), orderBy("publicadoEm", "desc"));
+                    const querySnapshot = await getDocs(q);
+                    const list = [];
+                    querySnapshot.forEach((doc) => {
+                        list.push({ id: doc.id, ...doc.data() });
+                    });
+                    return list.length ? list : JSON.parse(localStorage.getItem('lumie_blog'));
+                } catch (e) {
+                    console.error("Firebase read blog error. Falling back to local.", e);
+                }
+            }
+            return JSON.parse(localStorage.getItem('lumie_blog')) || [];
+        },
+        
+        getById: async (id) => {
+            if (dbMode === "firebase" && firestoreDb) {
+                try {
+                    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                    const docRef = doc(firestoreDb, "blog", id);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        return { id: docSnap.id, ...docSnap.data() };
+                    }
+                } catch (e) {
+                    console.error("Firebase article fetch error.", e);
+                }
+            }
+            const list = JSON.parse(localStorage.getItem('lumie_blog')) || [];
+            return list.find(a => a.id === id) || null;
+        },
+
+        save: async (articleData) => {
+            if (!articleData.id) {
+                articleData.id = articleData.titulo.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            }
+            
+            if (dbMode === "firebase" && firestoreDb) {
+                try {
+                    const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                    articleData.publicadoEm = articleData.publicadoEm || new Date().toISOString();
+                    await setDoc(doc(firestoreDb, "blog", articleData.id), articleData, { merge: true });
+                    return articleData.id;
+                } catch (e) {
+                    console.error("Firebase write article error.", e);
+                }
+            }
+            
+            const list = JSON.parse(localStorage.getItem('lumie_blog')) || [];
+            const index = list.findIndex(a => a.id === articleData.id);
+            if (index > -1) {
+                list[index] = { ...list[index], ...articleData };
+            } else {
+                articleData.publicadoEm = new Date().toISOString();
+                list.push(articleData);
+            }
+            localStorage.setItem('lumie_blog', JSON.stringify(list));
+            return articleData.id;
+        },
+
+        delete: async (id) => {
+            if (dbMode === "firebase" && firestoreDb) {
+                try {
+                    const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                    await deleteDoc(doc(firestoreDb, "blog", id));
+                    return true;
+                } catch (e) {
+                    console.error("Firebase delete article error.", e);
+                }
+            }
+            
+            let list = JSON.parse(localStorage.getItem('lumie_blog')) || [];
+            list = list.filter(a => a.id !== id);
+            localStorage.setItem('lumie_blog', JSON.stringify(list));
+            return true;
+        }
+    },
+
+    // --- GLOBAL CONFIG / SYSTEM ---
+    config: {
+        get: async () => {
+            if (dbMode === "firebase" && firestoreDb) {
+                try {
+                    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                    const docRef = doc(firestoreDb, "configuracoes", "geral");
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        return docSnap.data();
+                    }
+                } catch (e) {
+                    console.error("Firebase config fetch error.", e);
+                }
+            }
+            return JSON.parse(localStorage.getItem('lumie_config')) || INITIAL_CONFIG;
+        },
+
+        save: async (configData) => {
+            if (dbMode === "firebase" && firestoreDb) {
+                try {
+                    const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                    await setDoc(doc(firestoreDb, "configuracoes", "geral"), configData, { merge: true });
+                    return true;
+                } catch (e) {
+                    console.error("Firebase write config error.", e);
+                }
+            }
+            const current = JSON.parse(localStorage.getItem('lumie_config')) || INITIAL_CONFIG;
+            const updated = { ...current, ...configData };
+            localStorage.setItem('lumie_config', JSON.stringify(updated));
+            return true;
+        }
+    },
+
+    // --- AUTHENTICATION SHIM ---
+    auth: {
+        login: async (email, password) => {
+            if (dbMode === "firebase" && firebaseAuth) {
+                try {
+                    const { signInWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
+                    const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
+                    sessionStorage.setItem("lumie_user_session", JSON.stringify({ email: userCredential.user.email }));
+                    return userCredential.user;
+                } catch (e) {
+                    throw new Error("Erro de login Firebase: " + e.message);
+                }
+            }
+            
+            // Local fallback login check
+            const admins = JSON.parse(localStorage.getItem('lumie_admins')) || [];
+            const user = admins.find(a => a.email === email && a.password === password);
+            if (user) {
+                sessionStorage.setItem("lumie_user_session", JSON.stringify({ email }));
+                return { email };
+            } else {
+                throw new Error("E-mail ou senha incorretos.");
+            }
+        },
+
+        logout: async () => {
+            if (dbMode === "firebase" && firebaseAuth) {
+                try {
+                    const { signOut } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
+                    await signOut(firebaseAuth);
+                } catch (e) {
+                    console.error("Error signing out from Firebase.", e);
+                }
+            }
+            sessionStorage.removeItem("lumie_user_session");
+            return true;
+        },
+
+        getCurrentUser: () => {
+            const session = sessionStorage.getItem("lumie_user_session");
+            return session ? JSON.parse(session) : null;
+        }
+    }
+};
+
+// Make DB available globally
+window.DB = DB;
+window.isFirebaseConfigured = isFirebaseConfigured;

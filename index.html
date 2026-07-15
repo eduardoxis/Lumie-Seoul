@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title id="pageTitle">Lumié Seoul | Catálogo Premium de Skincare Coreano (K-Beauty)</title>
+
+    <!-- SEO Meta Tags -->
+    <meta id="metaDescription" name="description" content="Explore o catálogo exclusivo de Lumié Seoul. Produtos originais de skincare coreano importados diretamente para o Brasil. Atendimento personalizado e vendas via WhatsApp.">
+    <meta name="keywords" content="skincare coreano, k-beauty brasil, cosméticos coreanos, sulwhasoo, cosrx, innisfree, skin1004, catálogo coreano">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph (Facebook / WhatsApp sharing) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Lumié Seoul | Catálogo Premium de Skincare Coreano">
+    <meta property="og:description" content="Explore produtos originais importados diretamente da Coreia do Sul. Adquira suas fórmulas favoritas com atendimento personalizado via WhatsApp.">
+    <meta property="og:image" content="img/banner.jpg">
+    <meta property="og:url" content="https://lumie-seoul.vercel.app">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Lumié Seoul | Catálogo Premium de Skincare Coreano">
+    <meta name="twitter:description" content="Adquira produtos de K-Beauty originais. Peça diretamente pelo WhatsApp.">
+    <meta name="twitter:image" content="img/banner.jpg">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/spa.css">
+</head>
+<body>
+
+    <!-- 1. PAGE LOADER -->
+    <div id="page-loader" class="page-loader">
+        <h1 class="loader-logo">Lumié <span>Seoul</span></h1>
+        <div class="loader-bar"></div>
+    </div>
+
+    <!-- 2. HEADER & DESKTOP NAVIGATION -->
+    <header class="main-header">
+        <div class="container header-container">
+            <a href="#inicio" class="logo" data-page="inicio">Lumié <span>Seoul</span></a>
+
+            <nav class="desktop-nav">
+                <a href="#inicio" class="nav-link" data-page="inicio">Início</a>
+                <a href="#catalogo" class="nav-link" data-page="catalogo">Catálogo</a>
+                <a href="#sobre" class="nav-link" data-page="sobre">Sobre</a>
+                <a href="#blog" class="nav-link" data-page="blog">Blog</a>
+                <a href="#contato" class="nav-link" data-page="contato">Contato</a>
+            </nav>
+
+            <div class="header-actions">
+                <a href="#catalogo" class="icon-btn search-trigger" data-page="catalogo" aria-label="Buscar produto">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </a>
+                <a href="javascript:void(0)" class="icon-btn" onclick="contactMerchantGeneral()" aria-label="Falar no WhatsApp">
+                    <i class="fa-brands fa-whatsapp"></i>
+                </a>
+                <button class="menu-toggle" aria-label="Abrir Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 3. MOBILE SIDEBAR DRAWER -->
+    <div class="sidebar-drawer">
+        <nav class="drawer-nav">
+            <a href="#inicio" class="nav-link" data-page="inicio">Início</a>
+            <a href="#catalogo" class="nav-link" data-page="catalogo">Catálogo</a>
+            <a href="#sobre" class="nav-link" data-page="sobre">Sobre</a>
+            <a href="#blog" class="nav-link" data-page="blog">Blog</a>
+            <a href="#contato" class="nav-link" data-page="contato">Contato</a>
+        </nav>
+        <div class="drawer-footer">
+            <p style="font-size: 11px; color: var(--color-text-secondary);">Fale com nossos especialistas:</p>
+            <button class="btn btn-whatsapp btn-full" style="margin-top: var(--space-xs);" onclick="contactMerchantGeneral()">
+                <i class="fa-brands fa-whatsapp"></i> WhatsApp
+            </button>
+            <div class="drawer-socials">
+                <a href="#" class="footer-social-link"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" class="footer-social-link"><i class="fa-brands fa-pinterest"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="sidebar-overlay"></div>
+
+    <!-- ============================================================ -->
+    <!-- PÁGINA: INÍCIO                                                -->
+    <!-- ============================================================ -->
+    <section id="page-inicio" class="page">
+
+        <!-- HERO SECTION -->
+        <div class="hero-section" style="position: relative; width: 100%; height: 100vh; display: flex; align-items: center; overflow: hidden; background: #EFEAE2;">
+            <div class="hero-bg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
+                <img src="img/banner.jpg" alt="Lumié Seoul Campaign Banner" style="width: 100%; height: 100%; object-fit: cover; animation: heroReveal 2s ease forwards;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(250, 249, 246, 0.85) 30%, rgba(250, 249, 246, 0.3) 100%);"></div>
+            </div>
+
+            <div class="container" style="position: relative; z-index: 2; width: 100%;">
+                <div class="hero-content flex flex-column align-start" style="max-width: 600px;">
+                    <span class="reveal reveal-up" style="font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.25em; color: var(--color-gold); margin-bottom: var(--space-sm);">Curadoria K-Beauty Premium</span>
+                    <h1 class="serif-title reveal reveal-up delay-100" style="font-size: var(--fs-xxl); margin-bottom: var(--space-sm); color: var(--color-text-primary);">A Essência da Pele Perfeita de Seul</h1>
+                    <p class="reveal reveal-up delay-200" style="font-size: var(--fs-base); color: var(--color-text-secondary); margin-bottom: var(--space-md); line-height: 1.7;">Fórmulas originais, texturas luxuosas e resultados incomparáveis. Navegue pela nossa seleção exclusiva e compre de forma personalizada com atendimento via WhatsApp.</p>
+                    <div class="hero-buttons flex align-center reveal reveal-up delay-300" style="gap: var(--space-sm);">
+                        <a href="#catalogo" class="btn btn-primary shine-btn" data-page="catalogo">Ver Catálogo</a>
+                        <button class="btn btn-secondary" onclick="contactMerchantGeneral()"><i class="fa-brands fa-whatsapp"></i> Falar Conosco</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BENEFITS SECTION -->
+        <div id="beneficios" class="benefits-overlay-wrapper">
+            <div class="container">
+                <div class="benefits-float-card">
+                    <div class="benefit-item">
+                        <div class="benefit-icon"><i class="fa-solid fa-droplet"></i></div>
+                        <h3 class="benefit-title">Fórmulas Originais</h3>
+                        <p class="benefit-desc">Ingredientes selecionados diretamente da Coreia.</p>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon"><i class="fa-solid fa-leaf"></i></div>
+                        <h3 class="benefit-title">Texturas Luxuosas</h3>
+                        <p class="benefit-desc">Texturas leves e sofisticadas que transformam sua rotina.</p>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon"><i class="fa-solid fa-sparkles"></i></div>
+                        <h3 class="benefit-title">Resultados Incomparáveis</h3>
+                        <p class="benefit-desc">Alta performance para uma pele visivelmente mais saudável.</p>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon"><i class="fa-solid fa-headset"></i></div>
+                        <h3 class="benefit-title">Atendimento via WhatsApp</h3>
+                        <p class="benefit-desc">Atendimento personalizado para você se sentir única.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FEATURED PRODUCTS PREVIEW -->
+        <div class="catalog-section" style="padding: var(--space-xl) 0;">
+            <div class="container">
+                <div class="section-header">
+                    <span class="subtitle">Catálogo</span>
+                    <h2 class="serif-title title">Nossa Curadoria Coreana</h2>
+                    <div class="divider"></div>
+                </div>
+
+                <div class="grid products-grid" id="featured-grid" style="margin-top: var(--space-md);">
+                    <!-- Dynamic Content via JS -->
+                </div>
+
+                <div class="text-center" style="margin-top: var(--space-lg);">
+                    <a href="#catalogo" class="btn btn-primary shine-btn" data-page="catalogo">Ver Catálogo Completo</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABOUT TEASER SECTION -->
+        <div class="about-section" style="padding: var(--space-xl) 0; background-color: #FAF9F6; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
+            <div class="container">
+                <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-lg); align-items: center;">
+                    <div class="about-img reveal reveal-right" style="position: relative; border-radius: var(--radius-sm); overflow: hidden; aspect-ratio: 4/5;">
+                        <img src="img/cream.jpg" alt="Lumié Seoul Cosmetics Formulation" style="width: 100%; height: 100%; object-fit: cover;">
+                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 15px solid rgba(255,255,255,0.1); pointer-events: none;"></div>
+                    </div>
+
+                    <div class="about-content reveal reveal-left">
+                        <span style="font-size: var(--fs-xs); color: var(--color-gold); font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em;">Nossa Origem</span>
+                        <h2 class="serif-title" style="font-size: var(--fs-xl); margin: var(--space-xs) 0 var(--space-sm); color: var(--color-text-primary);">A Ciência da Beleza Coreana</h2>
+                        <p style="font-size: var(--fs-base); color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-sm);">A Lumié Seoul nasceu do fascínio pela filosofia K-Beauty: tratar a pele com delicadeza, nutrição preventiva e ativos naturais ancestrais. Trabalhamos exclusivamente com importações autenticadas e marcas reverenciadas no mercado sul-coreano.</p>
+                        <p style="font-size: var(--fs-sm); color: var(--color-text-light); line-height: 1.7; margin-bottom: var(--space-md);">Nosso modelo de vendas consultivo visa garantir que você receba o produto exato para a sua necessidade. Por isso, toda transação é efetuada no WhatsApp após uma análise de pele virtual.</p>
+                        <div class="flex" style="gap: var(--space-md);">
+                            <div>
+                                <h4 class="serif-title" style="color: var(--color-gold); font-size: var(--fs-md);">Originalidade</h4>
+                                <p style="font-size: 11px; color: var(--color-text-secondary);">Garantia em todos os lotes.</p>
+                            </div>
+                            <div>
+                                <h4 class="serif-title" style="color: var(--color-gold); font-size: var(--fs-md);">Personalização</h4>
+                                <p style="font-size: 11px; color: var(--color-text-secondary);">Rotina de pele sob medida.</p>
+                            </div>
+                        </div>
+                        <a href="#sobre" class="btn btn-secondary" data-page="sobre" style="margin-top: var(--space-md); display: inline-block;">Conheça Nossa História</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TESTIMONIALS SECTION -->
+        <div class="testimonials-section" style="padding: var(--space-xl) 0;">
+            <div class="container">
+                <div class="section-header">
+                    <span class="subtitle">Experiências</span>
+                    <h2 class="serif-title title">Opinião de Quem Ama K-Beauty</h2>
+                    <div class="divider"></div>
+                </div>
+
+                <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-md);">
+                    <div class="testimonial-card reveal reveal-up">
+                        <p class="testimonial-text">"O tônico de Ginseng mudou completamente a luminosidade da minha pele. O atendimento no WhatsApp foi maravilhoso, me explicaram passo a passo da rotina coreana."</p>
+                        <span class="testimonial-author">Juliana M.</span>
+                        <span class="testimonial-skin">Pele Mista / Sensível</span>
+                    </div>
+
+                    <div class="testimonial-card reveal reveal-up delay-100">
+                        <p class="testimonial-text">"Estava com medo de comprar por não conhecer a rotina, mas a consultoria online deles me recomendou o creme de ceramidas. Minha pele nunca esteve tão hidratada e macia."</p>
+                        <span class="testimonial-author">Mariana S.</span>
+                        <span class="testimonial-skin">Pele Seca / Rosácea</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ SECTION -->
+        <div id="faq" class="faq-section" style="padding: var(--space-xl) 0; background-color: #FAF9F6; border-top: 1px solid var(--color-border);">
+            <div class="container" style="max-width: 800px;">
+                <div class="section-header">
+                    <span class="subtitle">Dúvidas Frequentes</span>
+                    <h2 class="serif-title title">FAQ Lumié Seoul</h2>
+                    <div class="divider"></div>
+                </div>
+
+                <div class="faq-accordion reveal reveal-fade" style="display: flex; flex-direction: column; gap: var(--space-sm);">
+                    <details style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm); cursor: pointer; transition: var(--transition-fast);">
+                        <summary style="font-family: var(--font-serif); font-size: var(--fs-md); font-weight: 500; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                            Como faço para comprar?
+                            <i class="fa-solid fa-chevron-down" style="font-size: 12px; color: var(--color-gold);"></i>
+                        </summary>
+                        <p style="font-size: var(--fs-sm); color: var(--color-text-secondary); margin-top: var(--space-xs); line-height: 1.6; cursor: default;">
+                            Nossa loja não possui checkout automático. Você navega pelo catálogo, clica em "Falar WhatsApp" no produto desejado e uma mensagem automática será montada no seu celular. Nossa consultora K-Beauty fechará o pedido diretamente por lá.
+                        </p>
+                    </details>
+
+                    <details style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm); cursor: pointer; transition: var(--transition-fast);">
+                        <summary style="font-family: var(--font-serif); font-size: var(--fs-md); font-weight: 500; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                            Os produtos são originais?
+                            <i class="fa-solid fa-chevron-down" style="font-size: 12px; color: var(--color-gold);"></i>
+                        </summary>
+                        <p style="font-size: var(--fs-sm); color: var(--color-text-secondary); margin-top: var(--space-xs); line-height: 1.6; cursor: default;">
+                            Sim, garantimos 100% de originalidade. Todos os nossos produtos são importados lacrados da Coreia do Sul e passam por rigorosa auditoria interna de lotes antes do envio ao cliente.
+                        </p>
+                    </details>
+
+                    <details style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm); cursor: pointer; transition: var(--transition-fast);">
+                        <summary style="font-family: var(--font-serif); font-size: var(--fs-md); font-weight: 500; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                            Quais são as formas de envio e pagamento?
+                            <i class="fa-solid fa-chevron-down" style="font-size: 12px; color: var(--color-gold);"></i>
+                        </summary>
+                        <p style="font-size: var(--fs-sm); color: var(--color-text-secondary); margin-top: var(--space-xs); line-height: 1.6; cursor: default;">
+                            Realizamos envios via Correios (PAC ou SEDEX) para todo o Brasil. Aceitamos pagamento via PIX, cartões de crédito parcelados em link de pagamento seguro e boleto bancário (tudo gerenciado durante a conversa no WhatsApp).
+                        </p>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- PÁGINA: CATÁLOGO                                              -->
+    <!-- ============================================================ -->
+    <section id="page-catalogo" class="page" hidden>
+        <main style="padding-top: 120px; min-height: 80vh;">
+            <section class="catalog-section">
+                <div class="container">
+                    <div class="section-header">
+                        <span class="subtitle">Coleção K-Beauty</span>
+                        <h1 class="serif-title title">Fórmulas Exclusivas</h1>
+                        <p style="font-size: var(--fs-sm); color: var(--color-text-secondary); max-width: 500px; margin: 8px auto 0;">Encontre as rotinas certas para o seu tipo de pele. Todo o suporte e conclusão do pedido são feitos pelo WhatsApp.</p>
+                        <div class="divider"></div>
+                    </div>
+
+                    <!-- Filters Control Center -->
+                    <div class="filters-section reveal reveal-fade">
+                        <div class="flex justify-between align-center flex-wrap" style="gap: var(--space-sm);">
+                            <div class="search-bar-wrapper">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" class="search-input" placeholder="Buscar por produto, marca ou ingrediente...">
+                            </div>
+
+                            <div class="select-filters flex align-center flex-wrap" style="gap: var(--space-xs);">
+                                <div class="select-wrapper">
+                                    <select id="filter-brand" class="filter-select">
+                                        <option value="todos">Marca: Todas</option>
+                                    </select>
+                                </div>
+
+                                <div class="select-wrapper">
+                                    <select id="filter-skin" class="filter-select">
+                                        <option value="todos">Tipo de Pele: Todos</option>
+                                        <option value="seca">Pele Seca</option>
+                                        <option value="oleosa">Pele Oleosa</option>
+                                        <option value="sensivel">Pele Sensível</option>
+                                        <option value="madura">Pele Madura</option>
+                                    </select>
+                                </div>
+
+                                <div class="select-wrapper">
+                                    <select id="sort-order" class="filter-select">
+                                        <option value="destaque">Ordenar por: Destaque</option>
+                                        <option value="preco-cres">Preço: Menor para Maior</option>
+                                        <option value="preco-decres">Preço: Maior para Menor</option>
+                                        <option value="nome-az">Nome: A - Z</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="category-scroll" style="margin-top: var(--space-sm);">
+                            <!-- Categorias dinâmicas por JS -->
+                        </div>
+                    </div>
+
+                    <!-- Products Grid -->
+                    <div class="grid products-grid" style="margin-top: var(--space-md);">
+                        <!-- Dynamic rendering -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- PÁGINA: PRODUTO (DETALHE)                                     -->
+    <!-- ============================================================ -->
+    <section id="page-produto" class="page" hidden>
+        <main style="padding-top: 120px; padding-bottom: var(--space-xl);">
+            <div class="container">
+                <!-- Breadcrumbs -->
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-light); margin-bottom: var(--space-sm);">
+                    <a href="#inicio" data-page="inicio" style="color: inherit;">Início</a> &nbsp;/&nbsp;
+                    <a href="#catalogo" data-page="catalogo" style="color: inherit;">Catálogo</a> &nbsp;/&nbsp;
+                    <span id="p-title-breadcrumb" style="color: var(--color-gold);">Carregando...</span>
+                </div>
+
+                <div class="product-page-grid">
+                    <!-- Gallery Section -->
+                    <div>
+                        <div class="product-gallery-main">
+                            <img id="p-main-img" src="" alt="Produto">
+                        </div>
+                        <div id="p-thumbs" class="product-gallery-thumbs"></div>
+                    </div>
+
+                    <!-- Info Section -->
+                    <div class="flex flex-column" style="justify-content: flex-start;">
+                        <span id="p-brand" style="font-size: var(--fs-xs); font-weight: 700; color: var(--color-gold); text-transform: uppercase; letter-spacing: 0.25em; margin-bottom: var(--space-xs);"></span>
+                        <h1 id="p-title" class="serif-title" style="font-size: var(--fs-xl); line-height: 1.2; margin-bottom: var(--space-xs);"></h1>
+
+                        <p id="p-desc-short" style="font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: 1.6; margin-bottom: var(--space-sm);"></p>
+
+                        <div id="p-price" style="font-size: var(--fs-lg); font-weight: 600; color: var(--color-text-primary); margin-bottom: var(--space-md); padding-bottom: var(--space-sm); border-bottom: 1px solid var(--color-border);"></div>
+
+                        <!-- Tabs detail -->
+                        <div>
+                            <div class="flex" style="border-bottom: 1px solid var(--color-border);">
+                                <button class="product-tab-btn active" data-tab="desc">Descrição</button>
+                                <button class="product-tab-btn" data-tab="ben">Benefícios</button>
+                                <button class="product-tab-btn" data-tab="ing">Ingredientes</button>
+                            </div>
+                            <div id="tab-content-desc" class="product-tab-panel active"></div>
+                            <div id="tab-content-ben" class="product-tab-panel"></div>
+                            <div id="tab-content-ing" class="product-tab-panel"></div>
+                        </div>
+
+                        <!-- Specs sheet -->
+                        <table class="spec-table">
+                            <tr>
+                                <td>Origem</td>
+                                <td id="p-origem"></td>
+                            </tr>
+                            <tr>
+                                <td>Categoria</td>
+                                <td id="p-categoria"></td>
+                            </tr>
+                            <tr>
+                                <td>Indicação</td>
+                                <td id="p-ind"></td>
+                            </tr>
+                            <tr>
+                                <td>Tipos de Pele</td>
+                                <td id="p-peles"></td>
+                            </tr>
+                        </table>
+
+                        <!-- WhatsApp CTA -->
+                        <div style="margin-top: var(--space-md);">
+                            <button id="p-cta-btn" class="btn btn-whatsapp btn-full shine-btn" style="padding: 1rem 2rem;">
+                                <i class="fa-brands fa-whatsapp"></i> Comprar via WhatsApp
+                            </button>
+                            <p style="font-size: 10px; color: var(--color-text-light); text-align: center; margin-top: 8px;">Consulte sobre frete e rotinas de pele integradas via chat.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Related products -->
+                <section id="related-section" style="margin-top: var(--space-xl);">
+                    <div class="section-header">
+                        <span class="subtitle">Complemento</span>
+                        <h2 class="serif-title title">Produtos Relacionados</h2>
+                        <div class="divider"></div>
+                    </div>
+                    <div id="related-grid" class="grid products-grid">
+                        <!-- Related cards -->
+                    </div>
+                </section>
+            </div>
+        </main>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- PÁGINA: SOBRE                                                 -->
+    <!-- ============================================================ -->
+    <section id="page-sobre" class="page" hidden>
+        <main style="padding-top: 120px; padding-bottom: var(--space-xl);">
+            <!-- Hero Teaser -->
+            <section class="about-hero" style="padding: var(--space-lg) 0; background-color: #F3ECE6; border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-xl);">
+                <div class="container text-center">
+                    <span style="font-size: var(--fs-xs); font-weight: 700; color: var(--color-gold); text-transform: uppercase; letter-spacing: 0.25em;">Nossa Filosofia</span>
+                    <h1 class="serif-title" style="font-size: var(--fs-xxl); margin-top: var(--space-xs); color: var(--color-text-primary);">A Beleza do Ritual Lento</h1>
+                    <p style="font-size: var(--fs-base); color: var(--color-text-secondary); max-width: 600px; margin: 1rem auto 0; line-height: 1.7;">Acreditamos que o autocuidado não é um luxo opcional, mas um ritual diário de respeito à sua própria pele.</p>
+                </div>
+            </section>
+
+            <!-- Details Grid -->
+            <section>
+                <div class="container">
+                    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-lg); align-items: center;">
+                        <div class="reveal reveal-right" style="position: relative; aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden;">
+                            <img src="img/serum.jpg" alt="Korean Skincare Campaign" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+
+                        <div class="reveal reveal-left">
+                            <h2 class="serif-title" style="font-size: var(--fs-xl); margin-bottom: var(--space-sm); color: var(--color-text-primary);">Como Nasceu a Lumié Seoul</h2>
+                            <p style="font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-sm);">Fundada por entusiastas do K-Beauty no Brasil, a Lumié Seoul surgiu após observarmos a grande quantidade de produtos falsificados ou superfaturados no mercado nacional. Nosso objetivo é democratizar o acesso às marcas coreanas mais prestigiadas, mantendo um canal direto e seguro de importação.</p>
+                            <p style="font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-sm);">Sabemos que a rotina coreana pode parecer complexa a princípio. Por este motivo, não operamos com um carrinho de compras impessoal. Preferimos o contato personalizado, onde você pode conversar com nossas consultoras antes de realizar seu investimento.</p>
+                        </div>
+                    </div>
+
+                    <!-- Mission Vision Values -->
+                    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-md); margin-top: var(--space-xl);">
+                        <div class="benefit-card reveal reveal-up" style="background-color: var(--color-bg-card); padding: var(--space-md); border-radius: var(--radius-sm); border: 1px solid var(--color-border);">
+                            <i class="fa-solid fa-gem" style="color: var(--color-gold); font-size: 1.5rem; margin-bottom: var(--space-sm);"></i>
+                            <h3 class="serif-title" style="margin-bottom: var(--space-xs);">Missão</h3>
+                            <p style="font-size: var(--fs-xs); color: var(--color-text-secondary); line-height: 1.6;">Conectar a alta tecnologia cosmética sul-coreana aos cuidados diários das brasileiras de forma acessível e consultiva.</p>
+                        </div>
+
+                        <div class="benefit-card reveal reveal-up delay-100" style="background-color: var(--color-bg-card); padding: var(--space-md); border-radius: var(--radius-sm); border: 1px solid var(--color-border);">
+                            <i class="fa-solid fa-eye" style="color: var(--color-gold); font-size: 1.5rem; margin-bottom: var(--space-sm);"></i>
+                            <h3 class="serif-title" style="margin-bottom: var(--space-xs);">Visão</h3>
+                            <p style="font-size: var(--fs-xs); color: var(--color-text-secondary); line-height: 1.6;">Tornar-se a referência nacional em curadoria e comercialização consultiva de rotinas de K-Beauty premium no Brasil.</p>
+                        </div>
+
+                        <div class="benefit-card reveal reveal-up delay-200" style="background-color: var(--color-bg-card); padding: var(--space-md); border-radius: var(--radius-sm); border: 1px solid var(--color-border);">
+                            <i class="fa-solid fa-heart" style="color: var(--color-gold); font-size: 1.5rem; margin-bottom: var(--space-sm);"></i>
+                            <h3 class="serif-title" style="margin-bottom: var(--space-xs);">Valores</h3>
+                            <p style="font-size: var(--fs-xs); color: var(--color-text-secondary); line-height: 1.6;">Transparência absoluta, garantia de originalidade, respeito às necessidades individuais de pele e excelência em suporte humano.</p>
+                        </div>
+                    </div>
+
+                    <!-- Logistics / Origin Callout -->
+                    <div class="reveal reveal-fade" style="margin-top: var(--space-xl); padding: var(--space-md); border-radius: var(--radius-md); background: #FAF9F6; border: 1px solid var(--color-border); text-align: center;">
+                        <h3 class="serif-title" style="font-size: var(--fs-lg); color: var(--color-gold); margin-bottom: var(--space-xs);">Garantia Lumié de Autenticidade</h3>
+                        <p style="font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: 1.7; max-width: 700px; margin: 0 auto;">Todos os nossos lotes importados acompanham certificados de origem e códigos de autenticação dos fabricantes, disponíveis para consulta por nossos clientes. Apenas compramos de canais oficiais e homologados.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- PÁGINA: BLOG                                                  -->
+    <!-- ============================================================ -->
+    <section id="page-blog" class="page" hidden>
+        <main style="padding-top: 120px; padding-bottom: var(--space-xl); min-height: 80vh;">
+
+            <!-- SUBSEÇÃO: LISTAGEM DE ARTIGOS -->
+            <section id="blog-roll-section">
+                <div class="container">
+                    <div class="section-header">
+                        <span class="subtitle">Segredos de Pele</span>
+                        <h1 class="serif-title title">Dicas & Rotinas K-Beauty</h1>
+                        <p style="font-size: var(--fs-sm); color: var(--color-text-secondary); max-width: 500px; margin: 8px auto 0;">Fique por dentro das últimas tendências, análises de ativos químicos e rotinas completas de Seul.</p>
+                        <div class="divider"></div>
+                    </div>
+
+                    <div id="blog-grid" class="grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-md);">
+                        <!-- dynamic list loaded via blog.js -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- SUBSEÇÃO: LEITURA DE ARTIGO -->
+            <section id="blog-single-section" style="display: none;">
+                <div class="container">
+                    <!-- Back Button -->
+                    <a href="#blog" data-page="blog" style="font-size: var(--fs-xs); text-transform: uppercase; font-weight: 600; letter-spacing: 0.1em; color: var(--color-gold); display: inline-flex; align-items: center; gap: 8px; margin-bottom: var(--space-md);">
+                        <i class="fa-solid fa-arrow-left"></i> Voltar para Artigos
+                    </a>
+
+                    <div class="blog-container">
+                        <!-- Main Article Body -->
+                        <article>
+                            <div style="aspect-ratio: 16/9; overflow: hidden; border-radius: var(--radius-sm); margin-bottom: var(--space-md); border: 1px solid var(--color-border);">
+                                <img id="post-capa" src="" alt="Capa" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+
+                            <div id="post-tags" style="display: flex; gap: 8px; margin-bottom: var(--space-xs);"></div>
+
+                            <h1 id="post-title" class="serif-title" style="font-size: var(--fs-xl); line-height: 1.2; margin-bottom: var(--space-xs); color: var(--color-text-primary);"></h1>
+                            <div id="post-meta" style="font-size: 11px; color: var(--color-text-light); margin-bottom: var(--space-md); padding-bottom: var(--space-xs); border-bottom: 1px solid var(--color-border);"></div>
+
+                            <div id="post-body" class="single-post-body"></div>
+
+                            <!-- CTA box inside article -->
+                            <div style="margin-top: var(--space-lg); padding: var(--space-md); border-radius: var(--radius-sm); border: 1px solid var(--color-gold); background: var(--color-gold-light); display: flex; flex-direction: column; align-items: center; text-align: center;">
+                                <h4 class="serif-title" style="font-size: var(--fs-md); color: var(--color-text-primary); margin-bottom: var(--space-xs);">Ficou com dúvidas sobre qual produto usar?</h4>
+                                <p style="font-size: var(--fs-xs); color: var(--color-text-secondary); max-width: 500px; margin-bottom: var(--space-sm);">Nosso time de consultoras pode montar uma rotina personalizada com as fórmulas de K-Beauty explicadas nesse artigo.</p>
+                                <button class="btn btn-whatsapp" onclick="contactMerchantGeneral()"><i class="fa-brands fa-whatsapp"></i> Falar com Consultora</button>
+                            </div>
+                        </article>
+
+                        <!-- Sidebar (Recent Posts) -->
+                        <aside id="blog-sidebar" style="display: flex; flex-direction: column; gap: var(--space-md);">
+                            <h4 class="serif-title" style="font-size: var(--fs-md); border-bottom: 1px solid var(--color-border); padding-bottom: 6px; color: var(--color-gold);">Últimos Artigos</h4>
+                            <div id="recent-posts-list" style="display: flex; flex-direction: column; gap: var(--space-sm);"></div>
+                        </aside>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- PÁGINA: CONTATO                                               -->
+    <!-- ============================================================ -->
+    <section id="page-contato" class="page" hidden>
+        <main style="padding-top: 120px; padding-bottom: var(--space-xl);">
+            <div class="container">
+
+                <div class="section-header">
+                    <span class="subtitle">Atendimento</span>
+                    <h1 class="serif-title title">Canais de Contato</h1>
+                    <p style="font-size: var(--fs-sm); color: var(--color-text-secondary); max-width: 500px; margin: 8px auto 0;">Fale diretamente com nossa equipe de especialistas em rotina de beleza coreana.</p>
+                    <div class="divider"></div>
+                </div>
+
+                <!-- Main Contact Grid -->
+                <div class="grid" style="grid-template-columns: 1fr 1.2fr; gap: var(--space-lg); align-items: start;">
+                    <!-- Contact info cards -->
+                    <div class="flex flex-column" style="gap: var(--space-sm);">
+
+                        <div class="reveal reveal-right" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm); display: flex; align-items: flex-start; gap: var(--space-sm);">
+                            <i class="fa-brands fa-whatsapp" style="font-size: 2rem; color: var(--color-success);"></i>
+                            <div>
+                                <h3 class="serif-title" style="font-size: var(--fs-md); margin-bottom: 4px;">WhatsApp Principal</h3>
+                                <p style="font-size: var(--fs-xs); color: var(--color-text-secondary); line-height: 1.5; margin-bottom: var(--space-xs);">Para consultas de rotina de pele, dúvidas sobre produtos e finalização de pedidos.</p>
+                                <span style="font-weight: 600; color: var(--color-text-primary); font-size: var(--fs-sm); display: block; margin-bottom: 8px;">+55 (11) 99999-8888</span>
+                                <button class="btn btn-whatsapp" style="padding: 0.5rem 1.2rem; font-size: 10px;" onclick="contactMerchantGeneral()">Iniciar Conversa</button>
+                            </div>
+                        </div>
+
+                        <div class="reveal reveal-right delay-100" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm); display: flex; align-items: flex-start; gap: var(--space-sm);">
+                            <i class="fa-solid fa-clock" style="font-size: 2rem; color: var(--color-gold);"></i>
+                            <div>
+                                <h3 class="serif-title" style="font-size: var(--fs-md); margin-bottom: 4px;">Horários de Atendimento</h3>
+                                <p style="font-size: var(--fs-xs); color: var(--color-text-secondary); line-height: 1.6;">
+                                    Segunda a Sexta: 09h às 18h<br>
+                                    Sábado: 09h às 13h<br>
+                                    *Pedidos feitos fora do horário serão atendidos no próximo dia útil.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="reveal reveal-right delay-200" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm); display: flex; align-items: flex-start; gap: var(--space-sm);">
+                            <i class="fa-solid fa-envelope" style="font-size: 2rem; color: var(--color-text-light);"></i>
+                            <div>
+                                <h3 class="serif-title" style="font-size: var(--fs-md); margin-bottom: 4px;">E-mail & Redes Sociais</h3>
+                                <p style="font-size: var(--fs-xs); color: var(--color-text-secondary); line-height: 1.6; margin-bottom: var(--space-xs);">
+                                    E-mail: contato@lumieseoul.com<br>
+                                    Instagram: @lumie.seoul
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Map and address -->
+                    <div class="reveal reveal-left" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm);">
+                        <h3 class="serif-title" style="font-size: var(--fs-lg); margin-bottom: var(--space-xs); color: var(--color-text-primary);">Escritório Lumié</h3>
+                        <p style="font-size: var(--fs-xs); color: var(--color-text-secondary); margin-bottom: var(--space-sm);">Apesar de nossas vendas serem exclusivas online via WhatsApp com entrega nacional via Correios, possuímos um centro administrativo em São Paulo para suporte e controle fiscal.</p>
+
+                        <div style="width: 100%; height: 250px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--color-border); background-color: var(--color-bg-base); position: relative;">
+                            <div style="position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #FAF9F6; gap: 8px;">
+                                <i class="fa-solid fa-map-location-dot" style="font-size: 3rem; color: var(--color-gold);"></i>
+                                <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary);">Av. Paulista, 1000 - São Paulo, SP</span>
+                                <span style="font-size: 9px; color: var(--color-text-light);">Centro Administrativo Lumié</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Section -->
+                <section style="margin-top: var(--space-xl);">
+                    <div class="section-header">
+                        <span class="subtitle">Suporte</span>
+                        <h2 class="serif-title title">Dúvidas Frequentes</h2>
+                        <div class="divider"></div>
+                    </div>
+
+                    <div class="faq-accordion reveal reveal-fade" style="display: flex; flex-direction: column; gap: var(--space-sm); max-width: 800px; margin: 0 auto;">
+                        <details style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm); cursor: pointer; transition: var(--transition-fast);">
+                            <summary style="font-family: var(--font-serif); font-size: var(--fs-md); font-weight: 500; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                                Como funciona a análise de pele virtual?
+                                <i class="fa-solid fa-chevron-down" style="font-size: 12px; color: var(--color-gold);"></i>
+                            </summary>
+                            <p style="font-size: var(--fs-sm); color: var(--color-text-secondary); margin-top: var(--space-xs); line-height: 1.6; cursor: default;">
+                                Quando você clica para comprar ou tirar dúvidas no WhatsApp, nossa especialista K-Beauty fará algumas perguntas rápidas sobre seu tipo de pele (oleosidade, sensibilidade, acne) e seus objetivos. A partir disso, validamos se o produto escolhido é o ideal ou se existem alternativas mais eficazes para a sua rotina.
+                            </p>
+                        </details>
+
+                        <details style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm); cursor: pointer; transition: var(--transition-fast);">
+                            <summary style="font-family: var(--font-serif); font-size: var(--fs-md); font-weight: 500; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                                Posso parcelar minhas compras?
+                                <i class="fa-solid fa-chevron-down" style="font-size: 12px; color: var(--color-gold);"></i>
+                            </summary>
+                            <p style="font-size: var(--fs-sm); color: var(--color-text-secondary); margin-top: var(--space-xs); line-height: 1.6; cursor: default;">
+                                Sim. Durante a conversa no WhatsApp, geramos um link de pagamento criptografado e seguro (via Mercado Pago ou Pagar.me). Nele, você pode parcelar suas compras em até 6x sem juros no cartão de crédito.
+                            </p>
+                        </details>
+
+                        <details style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm); cursor: pointer; transition: var(--transition-fast);">
+                            <summary style="font-family: var(--font-serif); font-size: var(--fs-md); font-weight: 500; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                                Qual o prazo de entrega?
+                                <i class="fa-solid fa-chevron-down" style="font-size: 12px; color: var(--color-gold);"></i>
+                            </summary>
+                            <p style="font-size: var(--fs-sm); color: var(--color-text-secondary); margin-top: var(--space-xs); line-height: 1.6; cursor: default;">
+                                Nosso centro de distribuição fica em São Paulo. O prazo de postagem nos Correios é de até 24 horas úteis após a confirmação do pagamento. O prazo final depende da sua localidade, sendo em média 3 a 5 dias úteis para capitais das regiões Sul/Sudeste via SEDEX.
+                            </p>
+                        </details>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- FOOTER (compartilhado por todas as páginas)                  -->
+    <!-- ============================================================ -->
+    <footer class="main-footer">
+        <div class="container footer-grid grid">
+            <div class="footer-brand">
+                <a href="#inicio" class="logo" data-page="inicio">Lumié <span>Seoul</span></a>
+                <p class="footer-desc" style="max-width: 350px; margin-top: var(--space-xs);">Sua conexão direta com os melhores laboratórios cosméticos da Coreia do Sul. Produtos de luxo, curadoria especializada.</p>
+            </div>
+
+            <div>
+                <h3 class="footer-title">Menu</h3>
+                <ul class="footer-links">
+                    <li><a href="#inicio" class="footer-link" data-page="inicio">Início</a></li>
+                    <li><a href="#catalogo" class="footer-link" data-page="catalogo">Catálogo</a></li>
+                    <li><a href="#sobre" class="footer-link" data-page="sobre">Sobre Nós</a></li>
+                    <li><a href="#blog" class="footer-link" data-page="blog">Blog</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="footer-title">Categorias</h3>
+                <ul class="footer-links">
+                    <li><a href="javascript:void(0)" class="footer-link" data-category-link="Tônico">Tônicos</a></li>
+                    <li><a href="javascript:void(0)" class="footer-link" data-category-link="Sérum">Séruns</a></li>
+                    <li><a href="javascript:void(0)" class="footer-link" data-category-link="Hidratante">Hidratantes</a></li>
+                    <li><a href="javascript:void(0)" class="footer-link" data-category-link="Protetor Solar">Protetor Solar</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="footer-title">Suporte</h3>
+                <ul class="footer-links">
+                    <li><a href="#contato" class="footer-link" data-page="contato">Fale Conosco</a></li>
+                    <li><a href="#inicio" class="footer-link" data-page="inicio" data-scroll-to="faq">FAQ</a></li>
+                    <li><a href="admin/login.html" class="footer-link">Painel Admin</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="footer-title">Contato</h3>
+                <div class="footer-contact-item">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span>São Paulo, SP - Brasil</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fa-solid fa-envelope"></i>
+                    <span>contato@lumieseoul.com</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <span>+55 (11) 99999-8888</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="container footer-bottom">
+            <p>&copy; 2026 Lumié Seoul. Todos os direitos reservados. Catálogo Institucional.</p>
+            <div class="footer-socials">
+                <a href="#" class="footer-social-link"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" class="footer-social-link"><i class="fa-brands fa-pinterest"></i></a>
+                <a href="#" class="footer-social-link"><i class="fa-brands fa-tiktok"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR -->
+    <nav class="bottom-nav">
+        <a href="#inicio" class="bottom-nav-link" data-page="inicio">
+            <i class="fa-solid fa-house"></i>
+            <span>Início</span>
+        </a>
+        <a href="#catalogo" class="bottom-nav-link" data-page="catalogo">
+            <i class="fa-solid fa-compass"></i>
+            <span>Catálogo</span>
+        </a>
+        <a href="#catalogo" class="bottom-nav-link search-trigger" data-page="catalogo">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>Buscar</span>
+        </a>
+        <a href="javascript:void(0)" class="bottom-nav-link" onclick="contactMerchantGeneral()">
+            <i class="fa-brands fa-whatsapp"></i>
+            <span>WhatsApp</span>
+        </a>
+        <a href="javascript:void(0)" class="bottom-nav-link" onclick="document.querySelector('.menu-toggle').click();">
+            <i class="fa-solid fa-bars"></i>
+            <span>Mais</span>
+        </a>
+    </nav>
+
+    <!-- Scripts -->
+    <script src="js/firebase.js"></script>
+    <script src="js/spa-router.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/whatsapp.js"></script>
+    <script src="js/catalogo.js"></script>
+    <script src="js/produto.js"></script>
+    <script src="js/blog.js"></script>
+    <script src="js/animations.js"></script>
+</body>
+</html>

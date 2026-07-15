@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Painel de Controle | Lumié Seoul</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
+    </style>
+</head>
+<body class="admin-body">
+
+    <!-- Auth check script (runs before body render to avoid flickering) -->
+    <script src="../js/firebase.js"></script>
+    <script>
+        if (!DB.auth.getCurrentUser()) {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <div class="admin-shell">
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar">
+            <div class="admin-logo">Lumié <span>Seoul</span></div>
+            <nav class="admin-menu">
+                <a href="dashboard.html" class="admin-menu-link active"><i class="fa-solid fa-chart-line"></i> <span>Dashboard</span></a>
+                <a href="produtos.html" class="admin-menu-link"><i class="fa-solid fa-spa"></i> <span>Produtos</span></a>
+                <a href="categorias.html" class="admin-menu-link"><i class="fa-solid fa-tags"></i> <span>Categorias & Marcas</span></a>
+                <a href="blog.html" class="admin-menu-link"><i class="fa-solid fa-pen-nib"></i> <span>Blog</span></a>
+                <a href="usuarios.html" class="admin-menu-link"><i class="fa-solid fa-users-gear"></i> <span>Administradores</span></a>
+                <a href="configuracoes.html" class="admin-menu-link"><i class="fa-solid fa-sliders"></i> <span>Configurações</span></a>
+                <a href="#" id="logout-btn" class="admin-menu-link" style="margin-top: auto; color: var(--admin-color-danger);"><i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span></a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="admin-main">
+            <div class="admin-header">
+                <div>
+                    <h1 class="admin-title">Bem-vindo ao Painel</h1>
+                    <p style="font-size: 12px; color: #70655C; margin-top: 4px;">Gerenciamento de produtos, blog e configurações da Lumié Seoul.</p>
+                </div>
+                <div id="db-status-badge" style="font-size: 11px; padding: 6px 12px; border-radius: 4px; font-weight: 600;">
+                    Carregando Banco...
+                </div>
+            </div>
+
+            <!-- Stats grid -->
+            <div class="admin-stats-grid">
+                <div class="admin-stat-card">
+                    <div>
+                        <div style="font-size: 11px; text-transform: uppercase; color: #9B8E85; font-weight: 600; letter-spacing: 0.05em;">Produtos Cadastrados</div>
+                        <div id="stat-products-count" class="admin-stat-num">0</div>
+                    </div>
+                    <i class="fa-solid fa-spa"></i>
+                </div>
+
+                <div class="admin-stat-card">
+                    <div>
+                        <div style="font-size: 11px; text-transform: uppercase; color: #9B8E85; font-weight: 600; letter-spacing: 0.05em;">Artigos do Blog</div>
+                        <div id="stat-articles-count" class="admin-stat-num">0</div>
+                    </div>
+                    <i class="fa-solid fa-newspaper"></i>
+                </div>
+
+                <div class="admin-stat-card">
+                    <div>
+                        <div style="font-size: 11px; text-transform: uppercase; color: #9B8E85; font-weight: 600; letter-spacing: 0.05em;">Categorias Ativas</div>
+                        <div id="stat-cats-count" class="admin-stat-num">0</div>
+                    </div>
+                    <i class="fa-solid fa-tags"></i>
+                </div>
+            </div>
+
+            <!-- Quick shortcuts and lists -->
+            <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 30px; display: grid;">
+                
+                <!-- Recent Products -->
+                <div>
+                    <div class="flex justify-between align-center" style="margin-bottom: var(--space-sm); display: flex;">
+                        <h3 class="serif-title" style="font-size: 20px;">Produtos Recentes</h3>
+                        <a href="produtos.html" class="admin-btn admin-btn-secondary" style="font-size: 10px; padding: 6px 12px;">Ver Todos</a>
+                    </div>
+                    
+                    <div class="admin-table-card">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Marca</th>
+                                    <th>Categoria</th>
+                                    <th>Preço</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-products-tbody">
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: #9B8E85;">Carregando produtos...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Shortcuts column -->
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <h3 class="serif-title" style="font-size: 20px;">Ações Rápidas</h3>
+                    
+                    <a href="produtos.html?action=new" class="admin-btn admin-btn-accent" style="width: 100%; text-align: center; justify-content: center; padding: 15px;">
+                        <i class="fa-solid fa-plus"></i> Cadastrar Produto
+                    </a>
+                    
+                    <a href="blog.html?action=new" class="admin-btn admin-btn-secondary" style="width: 100%; text-align: center; justify-content: center; padding: 15px; border-color: var(--admin-color-accent); color: var(--admin-color-accent);">
+                        <i class="fa-solid fa-pen-nib"></i> Criar Artigo Blog
+                    </a>
+
+                    <a href="configuracoes.html" class="admin-btn admin-btn-secondary" style="width: 100%; text-align: center; justify-content: center; padding: 15px;">
+                        <i class="fa-solid fa-sliders"></i> Ajustes do WhatsApp
+                    </a>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.DB) {
+                loadDashboardData();
+            } else {
+                document.addEventListener('db-ready', loadDashboardData);
+            }
+            
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                await DB.auth.logout();
+                window.location.href = 'login.html';
+            });
+        });
+
+        async function loadDashboardData() {
+            // DB mode badge
+            const badge = document.getElementById('db-status-badge');
+            if (DB.getMode() === 'firebase') {
+                badge.innerText = 'Firebase Conectado';
+                badge.style.backgroundColor = '#EBF6EE';
+                badge.style.color = '#607255';
+            } else {
+                badge.innerText = 'Modo Local (LocalStorage)';
+                badge.style.backgroundColor = '#F4EFEA';
+                badge.style.color = '#AE8C68';
+            }
+
+            try {
+                // Fetch datasets
+                const products = await DB.products.getAll();
+                const blog = await DB.blog.getAll();
+                const config = await DB.config.get();
+
+                // Populate counts
+                document.getElementById('stat-products-count').innerText = products.length;
+                document.getElementById('stat-articles-count').innerText = blog.length;
+                document.getElementById('stat-cats-count').innerText = config.categorias ? config.categorias.length : 0;
+
+                // Populate recent products table
+                const recentTbody = document.getElementById('recent-products-tbody');
+                const recentList = products.slice(0, 5);
+
+                if (recentList.length === 0) {
+                    recentTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #9B8E85;">Nenhum produto cadastrado.</td></tr>`;
+                    return;
+                }
+
+                recentTbody.innerHTML = recentList.map(p => `
+                    <tr>
+                        <td><strong>${p.nome}</strong></td>
+                        <td>${p.marca}</td>
+                        <td>${p.categoria}</td>
+                        <td>${p.preco}</td>
+                    </tr>
+                `).join('');
+
+            } catch (e) {
+                console.error("Dashboard database fetch error: ", e);
+            }
+        }
+    </script>
+</body>
+</html>

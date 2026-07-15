@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Configurações do Catálogo | Lumié Seoul</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
+    </style>
+</head>
+<body class="admin-body">
+
+    <!-- Auth check -->
+    <script src="../js/firebase.js"></script>
+    <script>
+        if (!DB.auth.getCurrentUser()) {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <div class="admin-shell">
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar">
+            <div class="admin-logo">Lumié <span>Seoul</span></div>
+            <nav class="admin-menu">
+                <a href="dashboard.html" class="admin-menu-link"><i class="fa-solid fa-chart-line"></i> <span>Dashboard</span></a>
+                <a href="produtos.html" class="admin-menu-link"><i class="fa-solid fa-spa"></i> <span>Produtos</span></a>
+                <a href="categorias.html" class="admin-menu-link"><i class="fa-solid fa-tags"></i> <span>Categorias & Marcas</span></a>
+                <a href="blog.html" class="admin-menu-link"><i class="fa-solid fa-pen-nib"></i> <span>Blog</span></a>
+                <a href="usuarios.html" class="admin-menu-link"><i class="fa-solid fa-users-gear"></i> <span>Administradores</span></a>
+                <a href="configuracoes.html" class="admin-menu-link active"><i class="fa-solid fa-sliders"></i> <span>Configurações</span></a>
+                <a href="#" id="logout-btn" class="admin-menu-link" style="margin-top: auto; color: var(--admin-color-danger);"><i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span></a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="admin-main" style="max-width: 800px;">
+            <div class="admin-header">
+                <div>
+                    <h1 class="admin-title">Configurações do Catálogo</h1>
+                    <p style="font-size: 12px; color: #70655C; margin-top: 4px;">Gerencie o canal do WhatsApp para vendas, parâmetros de SEO corporativo e banners da Home.</p>
+                </div>
+            </div>
+
+            <!-- Settings Form Card -->
+            <div style="background: #FFFFFF; border: 1px solid var(--admin-color-border); border-radius: 6px; padding: 30px;">
+                <form id="config-form">
+                    
+                    <h3 class="serif-title" style="font-size: 20px; color: var(--admin-color-accent); margin-bottom: 20px; border-bottom: 1px solid var(--admin-color-border); padding-bottom: 5px;">Atendimento WhatsApp</h3>
+                    
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="cfg-whatsapp">Número de Telefone (Código do País + DDD + Número)</label>
+                        <input type="text" id="cfg-whatsapp" class="admin-input" required placeholder="5511999998888">
+                        <span style="font-size: 10px; color: #9B8E85; margin-top: 4px; display: block;">Digite apenas números, começando com 55 (Brasil). Não inclua parênteses, traços ou espaços.</span>
+                    </div>
+
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="cfg-msg">Mensagem Padrão (Inquérito Geral)</label>
+                        <input type="text" id="cfg-msg" class="admin-input" required placeholder="Olá! Gostaria de tirar algumas dúvidas sobre os produtos.">
+                    </div>
+
+                    <h3 class="serif-title" style="font-size: 20px; color: var(--admin-color-accent); margin-top: 40px; margin-bottom: 20px; border-bottom: 1px solid var(--admin-color-border); padding-bottom: 5px;">Configurações de SEO</h3>
+                    
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="cfg-seo-title">Título Padrão (SEO Title)</label>
+                        <input type="text" id="cfg-seo-title" class="admin-input" required placeholder="Lumié Seoul | Premium Korean Skincare">
+                    </div>
+
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="cfg-seo-desc">Descrição Padrão (Meta Description)</label>
+                        <textarea id="cfg-seo-desc" class="admin-textarea" required placeholder="Importação de K-Beauty original com suporte personalizado via WhatsApp..."></textarea>
+                    </div>
+
+                    <h3 class="serif-title" style="font-size: 20px; color: var(--admin-color-accent); margin-top: 40px; margin-bottom: 20px; border-bottom: 1px solid var(--admin-color-border); padding-bottom: 5px;">Banners Promocionais</h3>
+
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="cfg-banner-desktop">URL do Banner Principal</label>
+                        <input type="text" id="cfg-banner-desktop" class="admin-input" required placeholder="img/banner.jpg">
+                        
+                        <div style="margin-top: 15px; border: 1px dashed var(--admin-color-border); padding: 15px; border-radius: 4px; background: #FAF9F6; text-align: center;">
+                            <span class="admin-label" style="text-align: center; margin-bottom: 8px;">Upload de Novo Banner</span>
+                            <input type="file" id="cfg-banner-file" accept="image/*" style="font-size: 11px;">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; margin-top: 30px; border-top: 1px solid var(--admin-color-border); padding-top: 20px;">
+                        <button type="submit" class="admin-btn admin-btn-accent" style="padding: 12px 30px;">Salvar Configurações</button>
+                    </div>
+
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        let config = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.DB) {
+                loadConfigForm();
+            } else {
+                document.addEventListener('db-ready', loadConfigForm);
+            }
+
+            // Banner upload helper
+            document.getElementById('cfg-banner-file').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    document.getElementById('cfg-banner-desktop').value = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            document.getElementById('config-form').addEventListener('submit', saveConfigForm);
+            
+            document.getElementById('logout-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                await DB.auth.logout();
+                window.location.href = 'login.html';
+            });
+        });
+
+        async function loadConfigForm() {
+            try {
+                config = await DB.config.get();
+
+                // Populate values
+                document.getElementById('cfg-whatsapp').value = config.whatsappNumero || '5511999998888';
+                document.getElementById('cfg-msg').value = config.whatsappMensagemPadrao || '';
+                document.getElementById('cfg-seo-title').value = config.seoTituloPadrao || '';
+                document.getElementById('cfg-seo-desc').value = config.seoDescricaoPadrao || '';
+                document.getElementById('cfg-banner-desktop').value = config.bannerDesktopUrl || 'img/banner.jpg';
+            } catch (e) {
+                console.error("Error loading config form: ", e);
+            }
+        }
+
+        async function saveConfigForm(e) {
+            e.preventDefault();
+
+            const whatsappNumero = document.getElementById('cfg-whatsapp').value.trim();
+            const whatsappMensagemPadrao = document.getElementById('cfg-msg').value;
+            const seoTituloPadrao = document.getElementById('cfg-seo-title').value;
+            const seoDescricaoPadrao = document.getElementById('cfg-seo-desc').value;
+            const bannerDesktopUrl = document.getElementById('cfg-banner-desktop').value;
+
+            // Simple validation on whatsapp number to prevent characters
+            if (/[^0-9]/.test(whatsappNumero)) {
+                alert("O número de WhatsApp deve conter apenas dígitos (números). Sem espaços ou caracteres especiais.");
+                return;
+            }
+
+            const updatedConfig = {
+                ...config,
+                whatsappNumero,
+                whatsappMensagemPadrao,
+                seoTituloPadrao,
+                seoDescricaoPadrao,
+                bannerDesktopUrl,
+                bannerMobileUrl: bannerDesktopUrl // Match both desktop and mobile in default
+            };
+
+            try {
+                await DB.config.save(updatedConfig);
+                alert("Configurações atualizadas com sucesso!");
+                
+                // Update configuration reference dynamically in the window configuration if it was cached
+                if (window.WHATSAPP_CONFIG) {
+                    window.WHATSAPP_CONFIG.phone = whatsappNumero;
+                    window.WHATSAPP_CONFIG.defaultMessage = whatsappMensagemPadrao;
+                }
+            } catch (err) {
+                console.error("Error updating config form: ", err);
+                alert("Falha ao salvar as configurações.");
+            }
+        }
+    </script>
+</body>
+</html>
