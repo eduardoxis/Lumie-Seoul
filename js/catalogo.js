@@ -115,7 +115,7 @@ function cardProdutoHtml(product) {
                 </div>
                 <div class="product-card-actions">
                     <button class="btn btn-secondary" onclick="navegar('produto', {id: '${product.id}'})">Ver Detalhes</button>
-                    <button class="btn btn-whatsapp" onclick="contactMerchantForProduct('${product.nome}', '${product.marca}')">
+                    <button class="btn btn-whatsapp" onclick="contactMerchantForProduct('${product.nome}', '${product.marca}', '${product.preco}', '${product.id}')">
                         <i class="fab fa-whatsapp"></i> Falar WhatsApp
                     </button>
                 </div>
