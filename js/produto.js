@@ -88,7 +88,7 @@ function renderProductDetails() {
 
     const ctaBtn = document.getElementById("p-cta-btn");
     if (ctaBtn) {
-        ctaBtn.onclick = () => contactMerchantForProduct(currentProduct.nome, currentProduct.marca);
+        ctaBtn.onclick = () => contactMerchantForProduct(currentProduct.nome, currentProduct.marca, currentProduct.preco, currentProduct.id);
     }
 }
 
@@ -126,7 +126,7 @@ async function renderRelatedProducts() {
                     </div>
                     <div class="product-card-actions">
                         <button class="btn btn-secondary" onclick="navegar('produto', {id: '${product.id}'})">Ver Detalhes</button>
-                        <button class="btn btn-whatsapp" onclick="contactMerchantForProduct('${product.nome}', '${product.marca}')">
+                        <button class="btn btn-whatsapp" onclick="contactMerchantForProduct('${product.nome}', '${product.marca}', '${product.preco}', '${product.id}')">
                             <i class="fab fa-whatsapp"></i> WhatsApp
                         </button>
                     </div>
