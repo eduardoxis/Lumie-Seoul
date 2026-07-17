@@ -780,6 +780,7 @@
                     <a href="javascript:void(0)" class="ap-menu-link" data-tab="blog"><i class="fa-solid fa-pen-nib"></i> <span>Blog</span></a>
                     <a href="javascript:void(0)" class="ap-menu-link" data-tab="administradores"><i class="fa-solid fa-users-gear"></i> <span>Administradores</span></a>
                     <a href="javascript:void(0)" class="ap-menu-link" data-tab="configuracoes"><i class="fa-solid fa-sliders"></i> <span>Configurações</span></a>
+                    <a href="javascript:void(0)" class="ap-menu-link" data-tab="historico"><i class="fa-solid fa-clock-rotate-left"></i> <span>Histórico</span></a>
 
                     <div class="ap-menu-divider">
                         <a href="javascript:void(0)" id="ap-panel-close" class="ap-menu-link"><i class="fa-solid fa-xmark"></i> <span>Fechar Painel</span></a>
@@ -856,6 +857,22 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- GRÁFICOS (canvas puro, sem bibliotecas externas) -->
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 30px; display: grid; margin-top: 30px;">
+                        <div>
+                            <h3 class="serif-title" style="font-size: 20px; margin-bottom: 1rem;">Produtos por Categoria</h3>
+                            <div class="admin-table-card" style="padding: 16px;">
+                                <canvas id="ap-chart-categorias"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="serif-title" style="font-size: 20px; margin-bottom: 1rem;">Artigos do Blog por Mês</h3>
+                            <div class="admin-table-card" style="padding: 16px;">
+                                <canvas id="ap-chart-blog-mensal"></canvas>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- TAB: PRODUTOS -->
@@ -870,10 +887,10 @@
                     <div class="admin-table-card">
                         <table class="admin-table">
                             <thead>
-                                <tr><th>Imagem</th><th>Nome</th><th>Marca</th><th>Categoria</th><th>Preço</th><th>Selos (Badge)</th><th>Ações</th></tr>
+                                <tr><th></th><th>Imagem</th><th>Nome</th><th>Marca</th><th>Categoria</th><th>Preço</th><th>Selos (Badge)</th><th>Ações</th></tr>
                             </thead>
                             <tbody id="ap-products-tbody">
-                                <tr><td colspan="7" style="text-align: center; color: #9B8E85; padding: 30px;">Carregando produtos...</td></tr>
+                                <tr><td colspan="8" style="text-align: center; color: #9B8E85; padding: 30px;">Carregando produtos...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -931,10 +948,10 @@
                     <div class="admin-table-card">
                         <table class="admin-table">
                             <thead>
-                                <tr><th>Imagem</th><th>Título do Artigo</th><th>Autor</th><th>Publicação</th><th>Tags</th><th>Ações</th></tr>
+                                <tr><th></th><th>Imagem</th><th>Título do Artigo</th><th>Autor</th><th>Publicação</th><th>Tags</th><th>Ações</th></tr>
                             </thead>
                             <tbody id="ap-blog-tbody">
-                                <tr><td colspan="6" style="text-align: center; color: #9B8E85; padding: 30px;">Carregando artigos...</td></tr>
+                                <tr><td colspan="7" style="text-align: center; color: #9B8E85; padding: 30px;">Carregando artigos...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1014,6 +1031,26 @@
                                 <button type="submit" class="admin-btn admin-btn-accent" style="padding: 12px 30px;">Salvar Configurações</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+
+                <!-- TAB: HISTÓRICO (Log de Auditoria) -->
+                <div class="ap-tab-content" data-tab-content="historico">
+                    <div class="admin-header">
+                        <div>
+                            <h1 class="admin-title">Histórico de Ações</h1>
+                            <p style="font-size: 12px; color: #70655C; margin-top: 4px;">Registro de quem editou, criou ou removeu conteúdo no painel, e quando.</p>
+                        </div>
+                    </div>
+                    <div class="admin-table-card">
+                        <table class="admin-table">
+                            <thead>
+                                <tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Entidade</th><th>Detalhes</th></tr>
+                            </thead>
+                            <tbody id="ap-historico-tbody">
+                                <tr><td colspan="5" style="text-align: center; color: #9B8E85; padding: 30px;">Carregando histórico...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -1107,13 +1144,16 @@
                     </div>
 
                     <div class="admin-input-group" style="border: 1px dashed var(--admin-color-border); padding: 15px; border-radius: 4px; background: #FAF9F6;">
-                        <label class="admin-label">Imagem do Produto</label>
-                        <input type="file" id="ap-p-form-file" accept="image/*" style="margin-bottom: 10px; font-size: 12px;">
-                        <span style="font-size: 10px; color: #9B8E85; display: block; margin-bottom: 5px;">Ou cole uma URL externa existente:</span>
-                        <input type="text" id="ap-p-form-img-url" class="admin-input" style="padding: 6px; font-size: 12px;" placeholder="https://site.com/imagem.jpg">
-                        <div id="ap-p-img-preview-wrapper" style="margin-top: 15px; text-align: center; display: none;">
-                            <span class="admin-label" style="text-align: center;">Pré-visualização:</span>
-                            <img id="ap-p-img-preview" src="" style="max-height: 120px; max-width: 100%; border: 1px solid var(--admin-color-border); border-radius: 4px; margin-top: 5px; object-fit: contain;">
+                        <label class="admin-label">Galeria de Imagens do Produto</label>
+                        <span style="font-size: 10px; color: #9B8E85; display: block; margin-bottom: 10px;">A primeira imagem da lista é usada como capa no catálogo. Arraste as miniaturas para reordenar.</span>
+
+                        <div id="ap-p-gallery-list" class="ap-gallery-list"></div>
+
+                        <input type="file" id="ap-p-form-file" accept="image/*" multiple style="margin-top: 12px; font-size: 12px;">
+
+                        <div style="display: flex; gap: 8px; margin-top: 10px;">
+                            <input type="text" id="ap-p-form-img-url" class="admin-input" style="padding: 6px; font-size: 12px;" placeholder="https://site.com/imagem.jpg">
+                            <button type="button" id="ap-p-add-img-url-btn" class="admin-btn admin-btn-secondary" style="font-size: 11px; padding: 6px 14px; white-space: nowrap;">Adicionar</button>
                         </div>
                     </div>
                 </form>
