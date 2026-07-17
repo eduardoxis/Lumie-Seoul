@@ -336,7 +336,7 @@ async function loadDashboardTab() {
             const key = p.categoria || 'Sem categoria';
             catCounts[key] = (catCounts[key] || 0) + 1;
         });
-        drawBarChart(document.getElementById('ap-chart-categorias'), Object.keys(catCounts), Object.values(catCounts), '#C5A880');
+        drawDonutChart(document.getElementById('ap-chart-categorias'), Object.keys(catCounts), Object.values(catCounts));
 
         // ---- Gráfico: artigos do blog por mês ----
         const monthMap = new Map();
@@ -351,7 +351,7 @@ async function loadDashboardTab() {
             });
         const monthLabels = [...monthMap.values()].map(v => v.label);
         const monthValues = [...monthMap.values()].map(v => v.count);
-        drawBarChart(document.getElementById('ap-chart-blog-mensal'), monthLabels, monthValues, '#A34E36');
+        drawBarChart(document.getElementById('ap-chart-blog-mensal'), monthLabels, monthValues, '#22C58B');
     } catch (e) {
         console.error("Dashboard database fetch error: ", e);
     }
@@ -364,7 +364,7 @@ async function loadDashboardTab() {
  * @param {number[]} values
  * @param {string} color
  */
-function drawBarChart(canvas, labels, values, color = '#C5A880') {
+function drawBarChart(canvas, labels, values, color = '#22C58B') {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
@@ -386,43 +386,153 @@ function drawBarChart(canvas, labels, values, color = '#C5A880') {
         return;
     }
 
-    const paddingLeft = 26;
-    const paddingBottom = 32;
-    const paddingTop = 20;
+    const paddingLeft = 30;
+    const paddingBottom = 30;
+    const paddingTop = 24;
     const chartHeight = cssHeight - paddingBottom - paddingTop;
     const chartWidth = cssWidth - paddingLeft - 12;
     const maxVal = Math.max(1, ...values);
-    const barGap = 14;
-    const barWidth = Math.max(10, (chartWidth / labels.length) - barGap);
+    const barGap = 18;
+    const barWidth = Math.max(10, Math.min(46, (chartWidth / labels.length) - barGap));
+    const radius = Math.min(6, barWidth / 2);
 
-    // Eixos
-    ctx.strokeStyle = '#EAE3DB';
+    // Linhas de grade horizontais (estilo dashboard moderno)
+    ctx.strokeStyle = '#F0F0F0';
     ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(paddingLeft, paddingTop);
-    ctx.lineTo(paddingLeft, paddingTop + chartHeight);
-    ctx.lineTo(paddingLeft + chartWidth, paddingTop + chartHeight);
-    ctx.stroke();
+    const gridLines = 4;
+    for (let g = 0; g <= gridLines; g++) {
+        const gy = paddingTop + (chartHeight / gridLines) * g;
+        ctx.beginPath();
+        ctx.moveTo(paddingLeft, gy);
+        ctx.lineTo(paddingLeft + chartWidth, gy);
+        ctx.stroke();
+    }
+
+    const totalBarsWidth = labels.length * (barWidth + barGap);
+    const startX = paddingLeft + Math.max(0, (chartWidth - totalBarsWidth) / 2);
 
     labels.forEach((label, i) => {
         const val = values[i];
         const barHeight = maxVal ? (val / maxVal) * chartHeight : 0;
-        const x = paddingLeft + i * (barWidth + barGap) + barGap / 2;
+        const x = startX + i * (barWidth + barGap) + barGap / 2;
         const y = paddingTop + chartHeight - barHeight;
 
+        // Barra com topo arredondado
         ctx.fillStyle = color;
-        ctx.fillRect(x, y, barWidth, barHeight);
+        ctx.beginPath();
+        ctx.moveTo(x, y + radius);
+        ctx.arcTo(x, y, x + radius, y, radius);
+        ctx.arcTo(x + barWidth, y, x + barWidth, y + radius, radius);
+        ctx.lineTo(x + barWidth, paddingTop + chartHeight);
+        ctx.lineTo(x, paddingTop + chartHeight);
+        ctx.closePath();
+        ctx.fill();
 
         ctx.fillStyle = '#2C2621';
         ctx.font = '600 11px Inter, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(String(val), x + barWidth / 2, y - 6);
+        ctx.fillText(String(val), x + barWidth / 2, y - 8);
 
-        ctx.fillStyle = '#70655C';
+        ctx.fillStyle = '#9B8E85';
         ctx.font = '10px Inter, sans-serif';
-        // Trunca rótulos longos para não sobrepor
         const shortLabel = label.length > 12 ? label.slice(0, 11) + '…' : label;
-        ctx.fillText(shortLabel, x + barWidth / 2, paddingTop + chartHeight + 16);
+        ctx.fillText(shortLabel, x + barWidth / 2, paddingTop + chartHeight + 18);
+    });
+}
+
+/**
+ * Desenha um gráfico de rosca (donut) colorido em um <canvas>, sem bibliotecas externas,
+ * com legenda lateral — mesmo estilo dos dashboards de referência.
+ * @param {HTMLCanvasElement} canvas
+ * @param {string[]} labels
+ * @param {number[]} values
+ */
+const DONUT_COLORS = ['#3B82F6', '#F43F5E', '#FACC15', '#22C58B', '#8B5CF6', '#F97316', '#0EA5E9', '#EC4899'];
+
+function drawDonutChart(canvas, labels, values) {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const cssWidth = canvas.parentElement.clientWidth || 400;
+    const cssHeight = 220;
+
+    canvas.style.width = cssWidth + 'px';
+    canvas.style.height = cssHeight + 'px';
+    canvas.width = cssWidth * dpr;
+    canvas.height = cssHeight * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+    if (!labels.length) {
+        ctx.fillStyle = '#9B8E85';
+        ctx.font = '12px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Sem dados suficientes ainda.', cssWidth / 2, cssHeight / 2);
+        return;
+    }
+
+    const total = values.reduce((a, b) => a + b, 0) || 1;
+    const isNarrow = cssWidth < 380;
+    const donutSize = isNarrow ? cssHeight * 0.75 : cssHeight;
+    const cx = donutSize / 2 + 4;
+    const cy = cssHeight / 2;
+    const outerR = Math.min(donutSize, cssHeight) / 2 - 10;
+    const innerR = outerR * 0.62;
+
+    let startAngle = -Math.PI / 2;
+    labels.forEach((label, i) => {
+        const val = values[i];
+        const sliceAngle = (val / total) * Math.PI * 2;
+        const endAngle = startAngle + sliceAngle;
+        const color = DONUT_COLORS[i % DONUT_COLORS.length];
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, outerR, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+
+        startAngle = endAngle;
+    });
+
+    // Furo central
+    ctx.beginPath();
+    ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fill();
+
+    // Total no centro
+    ctx.fillStyle = '#2C2621';
+    ctx.font = '700 18px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(total), cx, cy - 6);
+    ctx.fillStyle = '#9B8E85';
+    ctx.font = '10px Inter, sans-serif';
+    ctx.fillText('Total', cx, cy + 12);
+    ctx.textBaseline = 'alphabetic';
+
+    // Legenda lateral
+    const legendX = donutSize + 20;
+    let legendY = cy - (labels.length * 20) / 2 + 8;
+    labels.forEach((label, i) => {
+        const color = DONUT_COLORS[i % DONUT_COLORS.length];
+        const val = values[i];
+        const pct = Math.round((val / total) * 100);
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(legendX, legendY, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#2C2621';
+        ctx.font = '600 11px Inter, sans-serif';
+        ctx.textAlign = 'left';
+        const shortLabel = label.length > 16 ? label.slice(0, 15) + '…' : label;
+        ctx.fillText(`${shortLabel} (${pct}%)`, legendX + 12, legendY + 4);
+
+        legendY += 20;
     });
 }
 
