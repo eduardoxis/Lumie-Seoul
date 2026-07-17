@@ -105,6 +105,37 @@
     transform: translateY(-2px);
 }
 
+.btn-entrar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--color-gold);
+    color: #fff;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.65rem 1.4rem;
+    border-radius: 4px;
+    transition: var(--transition-fast);
+    margin-left: 0.25rem;
+}
+
+.btn-entrar i {
+    font-size: 0.85rem;
+}
+
+.btn-entrar:hover {
+    background-color: var(--color-gold-hover);
+    transform: translateY(-2px);
+}
+
+@media (max-width: 900px) {
+    .btn-entrar {
+        display: none;
+    }
+}
+
 /* Hamburger Menu Button */
 .menu-toggle {
     display: none;
