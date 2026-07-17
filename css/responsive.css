@@ -138,6 +138,37 @@
         gap: var(--space-md);
     }
 
+    /* Catalog filters - same overflow-safe logic used in the hero:
+       force wrap and 100% max-width so no row can push past the viewport */
+    .filters-section .flex.justify-between {
+        flex-wrap: wrap !important;
+    }
+
+    .search-bar-wrapper {
+        max-width: 100% !important;
+        width: 100%;
+    }
+
+    .select-filters {
+        width: 100%;
+        max-width: 100% !important;
+        flex-wrap: wrap !important;
+    }
+
+    .select-wrapper {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .filter-select {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
     .footer-brand {
         grid-column: span 1;
     }
