@@ -1,0 +1,481 @@
+/*
+ * Lumié Seoul - Administrative Console (embedded modal version)
+ * Pure Vanilla CSS3 — substitui o antigo /admin (páginas separadas).
+ * Todo o painel agora vive dentro do index.html como um modal
+ * controlado por js/admin-panel.js.
+ */
+
+:root {
+    --admin-sidebar-width: 250px;
+    --admin-color-dark: #201A15;
+    --admin-color-border: #EAE3DB;
+    --admin-color-accent: #C5A880;
+    --admin-color-danger: #A34E36;
+}
+
+/* ==========================================
+   Generic full-screen overlay (login & panel)
+   ========================================== */
+.ap-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background-color: rgba(44, 38, 33, 0.55);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--transition-smooth, all 0.4s ease);
+    padding: var(--space-md, 2rem);
+    font-family: 'Inter', sans-serif;
+    color: #2C2621;
+}
+
+.ap-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ==========================================
+   Login card
+   ========================================== */
+.ap-login-card {
+    background: #FFFFFF;
+    border: 1px solid var(--admin-color-border);
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 20px 50px rgba(32, 26, 21, 0.12);
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    transform: translateY(30px);
+    transition: var(--transition-smooth, all 0.4s ease);
+}
+
+.ap-overlay.active .ap-login-card,
+.ap-overlay.active .ap-shell {
+    transform: translateY(0);
+}
+
+.ap-login-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 300;
+    margin-bottom: 8px;
+}
+
+.ap-login-logo span {
+    color: var(--admin-color-accent);
+}
+
+.ap-login-sub {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #9B8E85;
+    margin-bottom: 30px;
+}
+
+.ap-login-error {
+    background: #FAF0ED;
+    border: 1px solid #E8D7D0;
+    color: #A34E36;
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.ap-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    background: #FAF9F6;
+    border: 1px solid var(--admin-color-border);
+    color: #2C2621;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ap-close-btn:hover {
+    background-color: var(--admin-color-accent);
+    color: #FFFFFF;
+    border-color: var(--admin-color-accent);
+}
+
+/* Reused admin form controls */
+.admin-input-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.admin-label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    color: #70655C;
+    margin-bottom: 8px;
+}
+
+.admin-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--admin-color-border);
+    background: #FAF9F6;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.admin-input:focus {
+    border-color: var(--admin-color-accent);
+    background: #FFFFFF;
+}
+
+.admin-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--admin-color-border);
+    background: #FAF9F6;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    resize: vertical;
+    min-height: 100px;
+}
+
+.admin-textarea:focus {
+    border-color: var(--admin-color-accent);
+    background: #FFFFFF;
+}
+
+.admin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+}
+
+.admin-btn-accent {
+    background-color: var(--admin-color-accent);
+    color: #FFFFFF;
+}
+
+.admin-btn-accent:hover {
+    background-color: #B4966E;
+}
+
+.admin-btn-secondary {
+    background-color: #FAF9F6;
+    border: 1px solid var(--admin-color-border);
+    color: #2C2621;
+}
+
+.admin-btn-secondary:hover {
+    background-color: var(--admin-color-border);
+}
+
+/* ==========================================
+   Admin panel shell (sidebar + main content)
+   ========================================== */
+.ap-shell {
+    background-color: #FDFCFB;
+    width: 100%;
+    max-width: 1200px;
+    height: 90vh;
+    max-height: 900px;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    box-shadow: 0 20px 60px rgba(32, 26, 21, 0.18);
+    transform: translateY(30px);
+    transition: var(--transition-smooth, all 0.4s ease);
+}
+
+.ap-sidebar {
+    width: var(--admin-sidebar-width);
+    flex-shrink: 0;
+    background-color: var(--admin-color-dark);
+    color: #FAF9F6;
+    padding: 26px 18px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.ap-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 300;
+    margin-bottom: 30px;
+    text-align: center;
+    border-bottom: 1px solid rgba(250, 249, 246, 0.1);
+    padding-bottom: 15px;
+}
+
+.ap-logo span {
+    color: var(--admin-color-accent);
+}
+
+.ap-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-grow: 1;
+}
+
+.ap-menu-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    color: #9B8E85;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 4px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.ap-menu-link i {
+    font-size: 15px;
+    width: 18px;
+}
+
+.ap-menu-link:hover,
+.ap-menu-link.active {
+    color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.ap-menu-link.active {
+    border-left: 3px solid var(--admin-color-accent);
+}
+
+.ap-menu-divider {
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid rgba(250, 249, 246, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ap-main {
+    flex-grow: 1;
+    padding: 34px;
+    overflow-y: auto;
+    background-color: #FDFCFB;
+}
+
+.ap-tab-content {
+    display: none;
+}
+
+.ap-tab-content.active {
+    display: block;
+    animation: apFadeIn 0.25s ease;
+}
+
+@keyframes apFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 26px;
+    border-bottom: 1px solid var(--admin-color-border);
+    padding-bottom: 18px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.admin-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 400;
+}
+
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.admin-stat-card {
+    background: #FFFFFF;
+    border: 1px solid var(--admin-color-border);
+    padding: 22px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-stat-card i {
+    font-size: 2.2rem;
+    color: var(--admin-color-accent);
+    opacity: 0.7;
+}
+
+.admin-stat-num {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    margin-top: 6px;
+}
+
+.admin-table-card {
+    background: #FFFFFF;
+    border: 1px solid var(--admin-color-border);
+    border-radius: 6px;
+    overflow: hidden;
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 13px;
+}
+
+.admin-table th {
+    background-color: #FAF9F6;
+    padding: 14px 18px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--admin-color-border);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: #70655C;
+    white-space: nowrap;
+}
+
+.admin-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--admin-color-border);
+}
+
+.admin-table tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-actions-cell {
+    display: flex;
+    gap: 10px;
+}
+
+.admin-action-link {
+    font-size: 17px;
+    cursor: pointer;
+    transition: color 0.1s;
+}
+
+.admin-action-edit { color: var(--admin-color-accent); }
+.admin-action-delete { color: var(--admin-color-danger); }
+
+/* Side form panel that slides over the admin modal (product/blog/user forms) */
+.admin-panel-overlay {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 550px;
+    max-width: 100%;
+    height: 100vh;
+    background: #FFFFFF;
+    box-shadow: -5px 0 25px rgba(32, 26, 21, 0.15);
+    z-index: 600;
+    transition: right 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-panel-overlay.active {
+    right: 0;
+}
+
+.admin-panel-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--admin-color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-panel-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.admin-panel-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--admin-color-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+@media (max-width: 900px) {
+    .ap-shell {
+        height: 100vh;
+        max-height: none;
+        border-radius: 0;
+    }
+
+    .ap-overlay {
+        padding: 0;
+    }
+
+    .ap-sidebar {
+        width: 60px;
+        padding: 18px 8px;
+    }
+
+    .ap-logo {
+        font-size: 13px;
+        margin-bottom: 20px;
+    }
+
+    .ap-logo span {
+        display: none;
+    }
+
+    .ap-menu-link span {
+        display: none;
+    }
+
+    .ap-main {
+        padding: 18px;
+    }
+}
