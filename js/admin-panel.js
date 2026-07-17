@@ -12,6 +12,7 @@
 let apConfig = {};
 let apProducts = [];
 let apArticles = [];
+let apCurrentProductImages = []; // galeria do produto sendo editado no formulário
 
 document.addEventListener('DOMContentLoaded', () => {
     if (window.DB) {
@@ -92,16 +93,12 @@ function bindStaticAdminEvents() {
     document.getElementById('ap-product-panel-cancel')?.addEventListener('click', closeProductPanel);
     document.getElementById('ap-save-product-btn')?.addEventListener('click', saveProduct);
     document.getElementById('ap-p-form-file')?.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            document.getElementById('ap-p-form-img-url').value = event.target.result;
-            showProductPreview(event.target.result);
-        };
-        reader.readAsDataURL(file);
+        if (e.target.files.length) {
+            addProductImagesFromFiles(e.target.files);
+            e.target.value = '';
+        }
     });
-    document.getElementById('ap-p-form-img-url')?.addEventListener('input', (e) => showProductPreview(e.target.value));
+    document.getElementById('ap-p-add-img-url-btn')?.addEventListener('click', addProductImageFromUrl);
 
     // ---- Categorias ----
     document.getElementById('ap-add-category-btn')?.addEventListener('click', addCategory);
@@ -209,7 +206,85 @@ function switchAdminTab(tab) {
         case 'blog': loadBlogTab(); break;
         case 'administradores': loadAdminsTab(); break;
         case 'configuracoes': loadConfigTab(); break;
+        case 'historico': loadHistoricoTab(); break;
     }
+}
+
+/* ============================================================
+   3.1 AUDITORIA (Histórico de Ações)
+   ============================================================ */
+async function logAudit(acao, entidade, entidadeId = '', detalhes = '') {
+    try {
+        await DB.historico.add({ acao, entidade, entidadeId, detalhes });
+    } catch (e) {
+        console.error('Erro ao registrar histórico de auditoria: ', e);
+    }
+}
+
+async function loadHistoricoTab() {
+    const tbody = document.getElementById('ap-historico-tbody');
+    if (!tbody) return;
+
+    try {
+        const entries = await DB.historico.getAll();
+
+        if (entries.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #9B8E85;">Nenhuma ação registrada ainda.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = entries.map(entry => {
+            const dateStr = new Date(entry.data).toLocaleString('pt-BR');
+            return `
+                <tr>
+                    <td style="white-space: nowrap;">${dateStr}</td>
+                    <td>${entry.usuario}</td>
+                    <td><span style="font-size: 11px; background: #FAF9F6; border: 1px solid var(--admin-color-border); padding: 2px 8px; border-radius: 99px; font-weight: 600;">${entry.acao}</span></td>
+                    <td>${entry.entidade}</td>
+                    <td>${entry.detalhes || '-'}</td>
+                </tr>
+            `;
+        }).join('');
+    } catch (e) {
+        console.error("Error loading audit history: ", e);
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #9B8E85;">Erro ao carregar histórico.</td></tr>`;
+    }
+}
+
+/* ============================================================
+   3.2 DRAG & DROP GENÉRICO (reordenar produtos/artigos)
+   ============================================================ */
+function enableRowDragDrop(tbody, getRowId, onDropReorder) {
+    let dragSrcEl = null;
+
+    tbody.querySelectorAll('tr[draggable="true"]').forEach(row => {
+        row.addEventListener('dragstart', () => {
+            dragSrcEl = row;
+            row.classList.add('ap-row-dragging');
+        });
+
+        row.addEventListener('dragend', () => {
+            row.classList.remove('ap-row-dragging');
+        });
+
+        row.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (!dragSrcEl || dragSrcEl === row) return;
+            const bounding = row.getBoundingClientRect();
+            const offset = e.clientY - bounding.top;
+            if (offset > bounding.height / 2) {
+                row.parentNode.insertBefore(dragSrcEl, row.nextSibling);
+            } else {
+                row.parentNode.insertBefore(dragSrcEl, row);
+            }
+        });
+
+        row.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const newOrder = Array.from(tbody.querySelectorAll('tr')).map(getRowId);
+            onDropReorder(newOrder);
+        });
+    });
 }
 
 /* ============================================================
@@ -254,9 +329,101 @@ async function loadDashboardTab() {
                 <td>${p.preco}</td>
             </tr>
         `).join('');
+
+        // ---- Gráfico: produtos por categoria ----
+        const catCounts = {};
+        products.forEach(p => {
+            const key = p.categoria || 'Sem categoria';
+            catCounts[key] = (catCounts[key] || 0) + 1;
+        });
+        drawBarChart(document.getElementById('ap-chart-categorias'), Object.keys(catCounts), Object.values(catCounts), '#C5A880');
+
+        // ---- Gráfico: artigos do blog por mês ----
+        const monthMap = new Map();
+        [...blog]
+            .sort((a, b) => new Date(a.publicadoEm) - new Date(b.publicadoEm))
+            .forEach(a => {
+                const d = new Date(a.publicadoEm);
+                const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                const label = d.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }).replace('.', '');
+                if (!monthMap.has(key)) monthMap.set(key, { label, count: 0 });
+                monthMap.get(key).count++;
+            });
+        const monthLabels = [...monthMap.values()].map(v => v.label);
+        const monthValues = [...monthMap.values()].map(v => v.count);
+        drawBarChart(document.getElementById('ap-chart-blog-mensal'), monthLabels, monthValues, '#A34E36');
     } catch (e) {
         console.error("Dashboard database fetch error: ", e);
     }
+}
+
+/**
+ * Desenha um gráfico de barras simples em um <canvas>, sem nenhuma biblioteca externa.
+ * @param {HTMLCanvasElement} canvas
+ * @param {string[]} labels
+ * @param {number[]} values
+ * @param {string} color
+ */
+function drawBarChart(canvas, labels, values, color = '#C5A880') {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const cssWidth = canvas.parentElement.clientWidth || 400;
+    const cssHeight = 220;
+
+    canvas.style.width = cssWidth + 'px';
+    canvas.style.height = cssHeight + 'px';
+    canvas.width = cssWidth * dpr;
+    canvas.height = cssHeight * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+    if (!labels.length) {
+        ctx.fillStyle = '#9B8E85';
+        ctx.font = '12px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Sem dados suficientes ainda.', cssWidth / 2, cssHeight / 2);
+        return;
+    }
+
+    const paddingLeft = 26;
+    const paddingBottom = 32;
+    const paddingTop = 20;
+    const chartHeight = cssHeight - paddingBottom - paddingTop;
+    const chartWidth = cssWidth - paddingLeft - 12;
+    const maxVal = Math.max(1, ...values);
+    const barGap = 14;
+    const barWidth = Math.max(10, (chartWidth / labels.length) - barGap);
+
+    // Eixos
+    ctx.strokeStyle = '#EAE3DB';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(paddingLeft, paddingTop);
+    ctx.lineTo(paddingLeft, paddingTop + chartHeight);
+    ctx.lineTo(paddingLeft + chartWidth, paddingTop + chartHeight);
+    ctx.stroke();
+
+    labels.forEach((label, i) => {
+        const val = values[i];
+        const barHeight = maxVal ? (val / maxVal) * chartHeight : 0;
+        const x = paddingLeft + i * (barWidth + barGap) + barGap / 2;
+        const y = paddingTop + chartHeight - barHeight;
+
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, barWidth, barHeight);
+
+        ctx.fillStyle = '#2C2621';
+        ctx.font = '600 11px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(String(val), x + barWidth / 2, y - 6);
+
+        ctx.fillStyle = '#70655C';
+        ctx.font = '10px Inter, sans-serif';
+        // Trunca rótulos longos para não sobrepor
+        const shortLabel = label.length > 12 ? label.slice(0, 11) + '…' : label;
+        ctx.fillText(shortLabel, x + barWidth / 2, paddingTop + chartHeight + 16);
+    });
 }
 
 /* ============================================================
@@ -275,14 +442,15 @@ async function loadProductsTab() {
         const tbody = document.getElementById('ap-products-tbody');
 
         if (apProducts.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #9B8E85;">Nenhum produto cadastrado.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #9B8E85;">Nenhum produto cadastrado.</td></tr>`;
             return;
         }
 
         tbody.innerHTML = apProducts.map(p => {
             const imgUrl = p.imagensUrl && p.imagensUrl[0] ? p.imagensUrl[0] : 'img/cream.jpg';
             return `
-                <tr>
+                <tr draggable="true" data-row-id="${p.id}">
+                    <td class="ap-drag-handle" title="Arraste para reordenar"><i class="fa-solid fa-grip-vertical"></i></td>
                     <td><img src="${imgUrl}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px; border: 1px solid var(--admin-color-border);"></td>
                     <td><strong>${p.nome}</strong></td>
                     <td>${p.marca}</td>
@@ -303,8 +471,20 @@ async function loadProductsTab() {
         tbody.querySelectorAll('[data-delete-product]').forEach(el => {
             el.addEventListener('click', () => deleteProduct(el.dataset.deleteProduct));
         });
+
+        enableRowDragDrop(tbody, row => row.dataset.rowId, reorderProducts);
     } catch (e) {
         console.error("Error loading products list: ", e);
+    }
+}
+
+async function reorderProducts(newOrderIds) {
+    try {
+        await DB.products.reorder(newOrderIds);
+        apProducts = newOrderIds.map(id => apProducts.find(p => p.id === id)).filter(Boolean);
+        await logAudit('Reordenou', 'Produtos', '', 'Nova ordem de exibição aplicada no catálogo.');
+    } catch (e) {
+        console.error("Error reordering products: ", e);
     }
 }
 
@@ -314,7 +494,7 @@ function openProductPanel(mode, id = '') {
 
     document.getElementById('ap-product-form').reset();
     document.getElementById('ap-p-form-id').value = '';
-    document.getElementById('ap-p-img-preview-wrapper').style.display = 'none';
+    apCurrentProductImages = [];
 
     if (mode === 'new') {
         title.innerText = 'Novo Produto';
@@ -341,13 +521,11 @@ function openProductPanel(mode, id = '') {
                 opt.selected = product.tiposPele && product.tiposPele.includes(opt.value);
             });
 
-            if (product.imagensUrl && product.imagensUrl[0]) {
-                document.getElementById('ap-p-form-img-url').value = product.imagensUrl[0];
-                showProductPreview(product.imagensUrl[0]);
-            }
+            apCurrentProductImages = product.imagensUrl ? [...product.imagensUrl] : [];
         }
     }
 
+    renderProductGallery();
     panel.classList.add('active');
 }
 
@@ -355,15 +533,72 @@ function closeProductPanel() {
     document.getElementById('ap-product-panel').classList.remove('active');
 }
 
-function showProductPreview(url) {
-    const wrapper = document.getElementById('ap-p-img-preview-wrapper');
-    const img = document.getElementById('ap-p-img-preview');
-    if (url) {
-        img.src = url;
-        wrapper.style.display = 'block';
-    } else {
-        wrapper.style.display = 'none';
+/**
+ * Renderiza a galeria de imagens do produto dentro do painel lateral.
+ * Cada miniatura pode ser removida (x) ou arrastada para reordenar.
+ */
+function renderProductGallery() {
+    const list = document.getElementById('ap-p-gallery-list');
+    if (!list) return;
+
+    if (apCurrentProductImages.length === 0) {
+        list.innerHTML = `<p style="font-size: 11px; color: #9B8E85; grid-column: 1 / -1;">Nenhuma imagem adicionada ainda.</p>`;
+        return;
     }
+
+    list.innerHTML = apCurrentProductImages.map((url, index) => `
+        <div class="ap-gallery-item" draggable="true" data-gallery-index="${index}">
+            <img src="${url}" alt="Imagem ${index + 1}">
+            ${index === 0 ? '<span class="ap-gallery-main-badge">Principal</span>' : ''}
+            <button type="button" class="ap-gallery-remove-btn" data-remove-gallery-index="${index}" title="Remover imagem"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    `).join('');
+
+    list.querySelectorAll('[data-remove-gallery-index]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            apCurrentProductImages.splice(parseInt(btn.dataset.removeGalleryIndex, 10), 1);
+            renderProductGallery();
+        });
+    });
+
+    // Drag and drop para reordenar as miniaturas (a primeira vira a imagem principal)
+    let dragSrcIndex = null;
+    list.querySelectorAll('.ap-gallery-item').forEach(item => {
+        item.addEventListener('dragstart', () => {
+            dragSrcIndex = parseInt(item.dataset.galleryIndex, 10);
+            item.classList.add('ap-row-dragging');
+        });
+        item.addEventListener('dragend', () => item.classList.remove('ap-row-dragging'));
+        item.addEventListener('dragover', (e) => e.preventDefault());
+        item.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const targetIndex = parseInt(item.dataset.galleryIndex, 10);
+            if (dragSrcIndex === null || dragSrcIndex === targetIndex) return;
+            const [moved] = apCurrentProductImages.splice(dragSrcIndex, 1);
+            apCurrentProductImages.splice(targetIndex, 0, moved);
+            renderProductGallery();
+        });
+    });
+}
+
+function addProductImageFromUrl() {
+    const input = document.getElementById('ap-p-form-img-url');
+    const url = input.value.trim();
+    if (!url) return;
+    apCurrentProductImages.push(url);
+    input.value = '';
+    renderProductGallery();
+}
+
+function addProductImagesFromFiles(fileList) {
+    Array.from(fileList).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            apCurrentProductImages.push(event.target.result);
+            renderProductGallery();
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
 async function saveProduct() {
@@ -390,19 +625,18 @@ async function saveProduct() {
     const skinSelect = document.getElementById('ap-p-form-peles');
     const tiposPele = Array.from(skinSelect.selectedOptions).map(opt => opt.value);
 
-    const imgUrl = document.getElementById('ap-p-form-img-url').value || 'img/cream.jpg';
-
     const productData = {
         nome, marca, categoria, preco, origem, badge,
         descricaoCurta, descricaoCompleta, modoUso, indicacao,
         beneficios, ingredientes, tiposPele,
-        imagensUrl: [imgUrl]
+        imagensUrl: apCurrentProductImages.length ? [...apCurrentProductImages] : ['img/cream.jpg']
     };
 
     if (id) productData.id = id;
 
     try {
-        await DB.products.save(productData);
+        const savedId = await DB.products.save(productData);
+        await logAudit(id ? 'Editou' : 'Criou', 'Produto', savedId, nome);
         closeProductPanel();
         await loadProductsTab();
     } catch (e) {
@@ -412,9 +646,11 @@ async function saveProduct() {
 }
 
 async function deleteProduct(id) {
+    const product = apProducts.find(p => p.id === id);
     if (confirm("Tem certeza que deseja remover este produto do catálogo?")) {
         try {
             await DB.products.delete(id);
+            await logAudit('Removeu', 'Produto', id, product ? product.nome : '');
             await loadProductsTab();
         } catch (e) {
             console.error("Delete error: ", e);
@@ -493,6 +729,7 @@ async function addCategory() {
 
     apConfig.categorias.push(name.trim());
     await saveConfigSilently();
+    await logAudit('Criou', 'Categoria', '', name.trim());
     renderCategoriesTable();
 }
 
@@ -508,21 +745,26 @@ async function addBrand() {
 
     apConfig.marcas.push(name.trim());
     await saveConfigSilently();
+    await logAudit('Criou', 'Marca', '', name.trim());
     renderBrandsTable();
 }
 
 async function deleteCategory(index) {
-    if (confirm(`Tem certeza que deseja remover a categoria "${apConfig.categorias[index]}"?`)) {
+    const nome = apConfig.categorias[index];
+    if (confirm(`Tem certeza que deseja remover a categoria "${nome}"?`)) {
         apConfig.categorias.splice(index, 1);
         await saveConfigSilently();
+        await logAudit('Removeu', 'Categoria', '', nome);
         renderCategoriesTable();
     }
 }
 
 async function deleteBrand(index) {
-    if (confirm(`Tem certeza que deseja remover a marca "${apConfig.marcas[index]}"?`)) {
+    const nome = apConfig.marcas[index];
+    if (confirm(`Tem certeza que deseja remover a marca "${nome}"?`)) {
         apConfig.marcas.splice(index, 1);
         await saveConfigSilently();
+        await logAudit('Removeu', 'Marca', '', nome);
         renderBrandsTable();
     }
 }
@@ -553,7 +795,8 @@ async function loadBlogTab() {
             const dateStr = new Date(post.publicadoEm).toLocaleDateString('pt-BR');
             const imgUrl = post.imagemCapaUrl || 'img/banner.jpg';
             return `
-                <tr>
+                <tr draggable="true" data-row-id="${post.id}">
+                    <td class="ap-drag-handle" title="Arraste para reordenar"><i class="fa-solid fa-grip-vertical"></i></td>
                     <td><img src="${imgUrl}" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid var(--admin-color-border);"></td>
                     <td><strong>${post.titulo}</strong></td>
                     <td>${post.autor}</td>
@@ -573,8 +816,20 @@ async function loadBlogTab() {
         tbody.querySelectorAll('[data-delete-article]').forEach(el => {
             el.addEventListener('click', () => deleteArticle(el.dataset.deleteArticle));
         });
+
+        enableRowDragDrop(tbody, row => row.dataset.rowId, reorderArticles);
     } catch (e) {
         console.error("Error loading blog table: ", e);
+    }
+}
+
+async function reorderArticles(newOrderIds) {
+    try {
+        await DB.blog.reorder(newOrderIds);
+        apArticles = newOrderIds.map(id => apArticles.find(a => a.id === id)).filter(Boolean);
+        await logAudit('Reordenou', 'Artigos', '', 'Nova ordem de exibição aplicada no blog.');
+    } catch (e) {
+        console.error("Error reordering articles: ", e);
     }
 }
 
@@ -642,7 +897,8 @@ async function saveArticle() {
     if (id) articleData.id = id;
 
     try {
-        await DB.blog.save(articleData);
+        const savedId = await DB.blog.save(articleData);
+        await logAudit(id ? 'Editou' : 'Criou', 'Artigo', savedId, titulo);
         closeBlogPanel();
         await loadBlogTab();
     } catch (e) {
@@ -652,9 +908,11 @@ async function saveArticle() {
 }
 
 async function deleteArticle(id) {
+    const article = apArticles.find(a => a.id === id);
     if (confirm("Tem certeza que deseja remover este artigo do blog?")) {
         try {
             await DB.blog.delete(id);
+            await logAudit('Removeu', 'Artigo', id, article ? article.titulo : '');
             await loadBlogTab();
         } catch (e) {
             console.error("Delete error: ", e);
@@ -718,6 +976,7 @@ function saveAdminUser() {
 
     admins.push({ email, password });
     localStorage.setItem('lumie_admins', JSON.stringify(admins));
+    logAudit('Criou', 'Administrador', '', email);
 
     closeAdminUserPanel();
     loadAdminsTab();
@@ -725,9 +984,11 @@ function saveAdminUser() {
 
 function deleteAdminUser(index) {
     const admins = JSON.parse(localStorage.getItem('lumie_admins')) || [];
-    if (confirm(`Tem certeza que deseja revogar o acesso administrativo da conta "${admins[index].email}"?`)) {
+    const email = admins[index]?.email;
+    if (confirm(`Tem certeza que deseja revogar o acesso administrativo da conta "${email}"?`)) {
         admins.splice(index, 1);
         localStorage.setItem('lumie_admins', JSON.stringify(admins));
+        logAudit('Removeu', 'Administrador', '', email);
         loadAdminsTab();
     }
 }
@@ -776,6 +1037,7 @@ async function saveConfigForm(e) {
     try {
         await DB.config.save(updatedConfig);
         apConfig = updatedConfig;
+        await logAudit('Editou', 'Configurações', '', 'Atualizou WhatsApp, SEO e/ou banner.');
         alert("Configurações atualizadas com sucesso!");
 
         if (window.WHATSAPP_CONFIG) {
