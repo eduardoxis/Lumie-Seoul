@@ -138,7 +138,7 @@
 
 /* Hamburger Menu Button */
 .menu-toggle {
-    display: none;
+    display: none !important;
     flex-direction: column;
     gap: 6px;
     z-index: 110;
@@ -441,14 +441,9 @@
 
 .category-scroll {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--space-xs);
-    overflow-x: auto;
     padding-bottom: 8px;
-    scrollbar-width: none; /* Firefox */
-}
-
-.category-scroll::-webkit-scrollbar {
-    display: none; /* Safari & Chrome */
 }
 
 .category-pill {
