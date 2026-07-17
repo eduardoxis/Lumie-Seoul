@@ -479,3 +479,92 @@
         padding: 18px;
     }
 }
+
+/* ==========================================
+   Drag & drop reordering (produtos / artigos)
+   ========================================== */
+.admin-table tr[draggable="true"] {
+    cursor: grab;
+}
+
+.admin-table tr.ap-row-dragging {
+    opacity: 0.4;
+    background-color: #FAF9F6;
+}
+
+.ap-drag-handle {
+    width: 30px;
+    color: #C9BFB5;
+    text-align: center;
+    cursor: grab;
+}
+
+.ap-drag-handle:hover {
+    color: var(--admin-color-accent);
+}
+
+/* ==========================================
+   Product image gallery manager
+   ========================================== */
+.ap-gallery-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
+}
+
+.ap-gallery-item {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--admin-color-border);
+    cursor: grab;
+    background: #FFFFFF;
+}
+
+.ap-gallery-item.ap-row-dragging {
+    opacity: 0.4;
+}
+
+.ap-gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+}
+
+.ap-gallery-main-badge {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: rgba(32, 26, 21, 0.75);
+    color: #FFFFFF;
+    padding: 2px 6px;
+    border-radius: 99px;
+}
+
+.ap-gallery-remove-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    border: none;
+    background: rgba(32, 26, 21, 0.75);
+    color: #FFFFFF;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.ap-gallery-remove-btn:hover {
+    background-color: var(--admin-color-danger);
+}
