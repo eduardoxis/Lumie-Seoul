@@ -32,6 +32,7 @@
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/spa.css">
+    <link rel="stylesheet" href="css/admin-panel.css">
 </head>
 <body>
 
@@ -52,6 +53,7 @@
                 <a href="#sobre" class="nav-link" data-page="sobre">Sobre</a>
                 <a href="#blog" class="nav-link" data-page="blog">Blog</a>
                 <a href="#contato" class="nav-link" data-page="contato">Contato</a>
+                <a href="javascript:void(0)" class="nav-link js-auth-nav-btn"><i class="fa-solid fa-right-to-bracket"></i> <span>Entrar</span></a>
             </nav>
 
             <div class="header-actions">
@@ -78,6 +80,7 @@
             <a href="#sobre" class="nav-link" data-page="sobre">Sobre</a>
             <a href="#blog" class="nav-link" data-page="blog">Blog</a>
             <a href="#contato" class="nav-link" data-page="contato">Contato</a>
+            <a href="javascript:void(0)" class="nav-link js-auth-nav-btn"><i class="fa-solid fa-right-to-bracket"></i> <span>Entrar</span></a>
         </nav>
         <div class="drawer-footer">
             <p style="font-size: 11px; color: var(--color-text-secondary);">Fale com nossos especialistas:</p>
@@ -691,7 +694,6 @@
                 <ul class="footer-links">
                     <li><a href="#contato" class="footer-link" data-page="contato">Fale Conosco</a></li>
                     <li><a href="#inicio" class="footer-link" data-page="inicio" data-scroll-to="faq">FAQ</a></li>
-                    <li><a href="admin/login.html" class="footer-link">Painel Admin</a></li>
                 </ul>
             </div>
 
@@ -746,6 +748,471 @@
         </a>
     </nav>
 
+    <!-- ============================================================ -->
+    <!-- LOGIN ADMINISTRATIVO (Modal)                                  -->
+    <!-- ============================================================ -->
+    <div id="ap-login-overlay" class="ap-overlay">
+        <div class="ap-login-card">
+            <button id="ap-login-close" class="ap-close-btn" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+            <h1 class="ap-login-logo">Lumié <span>Seoul</span></h1>
+            <p class="ap-login-sub">Console Administrativo</p>
+
+            <div id="ap-login-error" class="ap-login-error" style="display: none;"></div>
+
+            <form id="ap-login-form">
+                <div class="admin-input-group">
+                    <label class="admin-label" for="ap-login-email">E-mail</label>
+                    <input type="email" id="ap-login-email" class="admin-input" placeholder="seu-email@dominio.com" required>
+                </div>
+
+                <div class="admin-input-group">
+                    <label class="admin-label" for="ap-login-password">Senha</label>
+                    <input type="password" id="ap-login-password" class="admin-input" placeholder="Digite sua senha" required>
+                </div>
+
+                <button type="submit" class="admin-btn admin-btn-accent" style="width: 100%; justify-content: center; padding: 14px;">Entrar no Painel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PAINEL ADMINISTRATIVO (Modal com abas gerenciadas via JS)     -->
+    <!-- ============================================================ -->
+    <div id="ap-panel-overlay" class="ap-overlay">
+        <div class="ap-shell">
+            <!-- SIDEBAR -->
+            <aside class="ap-sidebar">
+                <div class="ap-logo">Lumié <span>Seoul</span></div>
+                <nav class="ap-menu">
+                    <a href="javascript:void(0)" class="ap-menu-link active" data-tab="dashboard"><i class="fa-solid fa-chart-line"></i> <span>Dashboard</span></a>
+                    <a href="javascript:void(0)" class="ap-menu-link" data-tab="produtos"><i class="fa-solid fa-spa"></i> <span>Produtos</span></a>
+                    <a href="javascript:void(0)" class="ap-menu-link" data-tab="categorias"><i class="fa-solid fa-tags"></i> <span>Categorias & Marcas</span></a>
+                    <a href="javascript:void(0)" class="ap-menu-link" data-tab="blog"><i class="fa-solid fa-pen-nib"></i> <span>Blog</span></a>
+                    <a href="javascript:void(0)" class="ap-menu-link" data-tab="administradores"><i class="fa-solid fa-users-gear"></i> <span>Administradores</span></a>
+                    <a href="javascript:void(0)" class="ap-menu-link" data-tab="configuracoes"><i class="fa-solid fa-sliders"></i> <span>Configurações</span></a>
+
+                    <div class="ap-menu-divider">
+                        <a href="javascript:void(0)" id="ap-panel-close" class="ap-menu-link"><i class="fa-solid fa-xmark"></i> <span>Fechar Painel</span></a>
+                        <a href="javascript:void(0)" id="ap-logout-btn" class="ap-menu-link" style="color: var(--admin-color-danger);"><i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span></a>
+                    </div>
+                </nav>
+            </aside>
+
+            <!-- MAIN CONTENT -->
+            <main class="ap-main">
+
+                <!-- TAB: DASHBOARD -->
+                <div class="ap-tab-content active" data-tab-content="dashboard">
+                    <div class="admin-header">
+                        <div>
+                            <h1 class="admin-title">Bem-vindo ao Painel</h1>
+                            <p style="font-size: 12px; color: #70655C; margin-top: 4px;">Gerenciamento de produtos, blog e configurações da Lumié Seoul.</p>
+                        </div>
+                        <div id="ap-db-status-badge" style="font-size: 11px; padding: 6px 12px; border-radius: 4px; font-weight: 600;">Carregando Banco...</div>
+                    </div>
+
+                    <div class="admin-stats-grid">
+                        <div class="admin-stat-card">
+                            <div>
+                                <div style="font-size: 11px; text-transform: uppercase; color: #9B8E85; font-weight: 600; letter-spacing: 0.05em;">Produtos Cadastrados</div>
+                                <div id="ap-stat-products-count" class="admin-stat-num">0</div>
+                            </div>
+                            <i class="fa-solid fa-spa"></i>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div>
+                                <div style="font-size: 11px; text-transform: uppercase; color: #9B8E85; font-weight: 600; letter-spacing: 0.05em;">Artigos do Blog</div>
+                                <div id="ap-stat-articles-count" class="admin-stat-num">0</div>
+                            </div>
+                            <i class="fa-solid fa-newspaper"></i>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div>
+                                <div style="font-size: 11px; text-transform: uppercase; color: #9B8E85; font-weight: 600; letter-spacing: 0.05em;">Categorias Ativas</div>
+                                <div id="ap-stat-cats-count" class="admin-stat-num">0</div>
+                            </div>
+                            <i class="fa-solid fa-tags"></i>
+                        </div>
+                    </div>
+
+                    <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 30px; display: grid;">
+                        <div>
+                            <div class="flex justify-between align-center" style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                                <h3 class="serif-title" style="font-size: 20px;">Produtos Recentes</h3>
+                                <button class="admin-btn admin-btn-secondary" style="font-size: 10px; padding: 6px 12px;" onclick="switchAdminTab('produtos')">Ver Todos</button>
+                            </div>
+                            <div class="admin-table-card">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr><th>Nome</th><th>Marca</th><th>Categoria</th><th>Preço</th></tr>
+                                    </thead>
+                                    <tbody id="ap-recent-products-tbody">
+                                        <tr><td colspan="4" style="text-align: center; color: #9B8E85;">Carregando produtos...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <h3 class="serif-title" style="font-size: 20px;">Ações Rápidas</h3>
+                            <button class="admin-btn admin-btn-accent" style="width: 100%; justify-content: center; padding: 15px;" onclick="switchAdminTab('produtos'); setTimeout(() => openProductPanel('new'), 50);">
+                                <i class="fa-solid fa-plus"></i> Cadastrar Produto
+                            </button>
+                            <button class="admin-btn admin-btn-secondary" style="width: 100%; justify-content: center; padding: 15px; border-color: var(--admin-color-accent); color: var(--admin-color-accent);" onclick="switchAdminTab('blog'); setTimeout(() => openBlogPanel('new'), 50);">
+                                <i class="fa-solid fa-pen-nib"></i> Criar Artigo Blog
+                            </button>
+                            <button class="admin-btn admin-btn-secondary" style="width: 100%; justify-content: center; padding: 15px;" onclick="switchAdminTab('configuracoes')">
+                                <i class="fa-solid fa-sliders"></i> Ajustes do WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: PRODUTOS -->
+                <div class="ap-tab-content" data-tab-content="produtos">
+                    <div class="admin-header">
+                        <div>
+                            <h1 class="admin-title">Gerenciar Produtos</h1>
+                            <p style="font-size: 12px; color: #70655C; margin-top: 4px;">Adicione, edite ou remova produtos do seu catálogo virtual.</p>
+                        </div>
+                        <button id="ap-new-product-btn" class="admin-btn admin-btn-accent"><i class="fa-solid fa-plus"></i> Novo Produto</button>
+                    </div>
+                    <div class="admin-table-card">
+                        <table class="admin-table">
+                            <thead>
+                                <tr><th>Imagem</th><th>Nome</th><th>Marca</th><th>Categoria</th><th>Preço</th><th>Selos (Badge)</th><th>Ações</th></tr>
+                            </thead>
+                            <tbody id="ap-products-tbody">
+                                <tr><td colspan="7" style="text-align: center; color: #9B8E85; padding: 30px;">Carregando produtos...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB: CATEGORIAS -->
+                <div class="ap-tab-content" data-tab-content="categorias">
+                    <div class="admin-header">
+                        <div>
+                            <h1 class="admin-title">Categorias e Marcas</h1>
+                            <p style="font-size: 12px; color: #70655C; margin-top: 4px;">Gerencie as categorias e marcas que classificam seus produtos.</p>
+                        </div>
+                    </div>
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 30px; display: grid;">
+                        <div>
+                            <div class="flex justify-between align-center" style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                                <h3 class="serif-title" style="font-size: 20px;">Categorias</h3>
+                                <button id="ap-add-category-btn" class="admin-btn admin-btn-accent" style="font-size: 10px; padding: 6px 12px;"><i class="fa-solid fa-plus"></i> Adicionar</button>
+                            </div>
+                            <div class="admin-table-card">
+                                <table class="admin-table">
+                                    <thead><tr><th>Nome da Categoria</th><th style="width: 100px;">Ações</th></tr></thead>
+                                    <tbody id="ap-categories-tbody">
+                                        <tr><td colspan="2" style="text-align: center; color: #9B8E85;">Carregando categorias...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between align-center" style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                                <h3 class="serif-title" style="font-size: 20px;">Marcas</h3>
+                                <button id="ap-add-brand-btn" class="admin-btn admin-btn-accent" style="font-size: 10px; padding: 6px 12px;"><i class="fa-solid fa-plus"></i> Adicionar</button>
+                            </div>
+                            <div class="admin-table-card">
+                                <table class="admin-table">
+                                    <thead><tr><th>Nome da Marca</th><th style="width: 100px;">Ações</th></tr></thead>
+                                    <tbody id="ap-brands-tbody">
+                                        <tr><td colspan="2" style="text-align: center; color: #9B8E85;">Carregando marcas...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: BLOG -->
+                <div class="ap-tab-content" data-tab-content="blog">
+                    <div class="admin-header">
+                        <div>
+                            <h1 class="admin-title">Gerenciar Artigos do Blog</h1>
+                            <p style="font-size: 12px; color: #70655C; margin-top: 4px;">Publique e edite dicas de skincare e rotinas de K-Beauty no portal de artigos.</p>
+                        </div>
+                        <button id="ap-new-article-btn" class="admin-btn admin-btn-accent"><i class="fa-solid fa-plus"></i> Novo Artigo</button>
+                    </div>
+                    <div class="admin-table-card">
+                        <table class="admin-table">
+                            <thead>
+                                <tr><th>Imagem</th><th>Título do Artigo</th><th>Autor</th><th>Publicação</th><th>Tags</th><th>Ações</th></tr>
+                            </thead>
+                            <tbody id="ap-blog-tbody">
+                                <tr><td colspan="6" style="text-align: center; color: #9B8E85; padding: 30px;">Carregando artigos...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB: ADMINISTRADORES -->
+                <div class="ap-tab-content" data-tab-content="administradores">
+                    <div class="admin-header">
+                        <div>
+                            <h1 class="admin-title">Administradores Autorizados</h1>
+                            <p style="font-size: 12px; color: #70655C; margin-top: 4px;">Gerencie as contas que possuem acesso ao painel de controle do catálogo.</p>
+                        </div>
+                        <button id="ap-new-admin-btn" class="admin-btn admin-btn-accent"><i class="fa-solid fa-user-plus"></i> Novo Administrador</button>
+                    </div>
+
+                    <div id="ap-fb-auth-warning" style="display: none; background: #FAF9F6; border: 1px solid var(--admin-color-border); padding: 15px; border-radius: 4px; margin-bottom: 20px; font-size: 12px; line-height: 1.6;">
+                        <h4 style="color: var(--admin-color-accent); font-family: 'Cormorant Garamond', serif; font-size: 16px; margin-bottom: 4px;">Nota sobre Autenticação Firebase</h4>
+                        Como o Firebase Authentication está conectado, novos administradores devem ser adicionados diretamente pelo Console do Firebase (aba Authentication) para segurança dos dados corporativos. A lista abaixo exibe apenas as contas registradas no ambiente local de fallback.
+                    </div>
+
+                    <div class="admin-table-card">
+                        <table class="admin-table">
+                            <thead><tr><th>E-mail</th><th>Status de Acesso</th><th style="width: 100px;">Ações</th></tr></thead>
+                            <tbody id="ap-admins-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB: CONFIGURAÇÕES -->
+                <div class="ap-tab-content" data-tab-content="configuracoes">
+                    <div class="admin-header">
+                        <div>
+                            <h1 class="admin-title">Configurações do Catálogo</h1>
+                            <p style="font-size: 12px; color: #70655C; margin-top: 4px;">Gerencie o canal do WhatsApp para vendas, parâmetros de SEO corporativo e banners da Home.</p>
+                        </div>
+                    </div>
+
+                    <div style="background: #FFFFFF; border: 1px solid var(--admin-color-border); border-radius: 6px; padding: 30px; max-width: 800px;">
+                        <form id="ap-config-form">
+                            <h3 class="serif-title" style="font-size: 20px; color: var(--admin-color-accent); margin-bottom: 20px; border-bottom: 1px solid var(--admin-color-border); padding-bottom: 5px;">Atendimento WhatsApp</h3>
+
+                            <div class="admin-input-group">
+                                <label class="admin-label" for="ap-cfg-whatsapp">Número de Telefone (Código do País + DDD + Número)</label>
+                                <input type="text" id="ap-cfg-whatsapp" class="admin-input" required placeholder="5511999998888">
+                                <span style="font-size: 10px; color: #9B8E85; margin-top: 4px; display: block;">Digite apenas números, começando com 55 (Brasil). Não inclua parênteses, traços ou espaços.</span>
+                            </div>
+
+                            <div class="admin-input-group">
+                                <label class="admin-label" for="ap-cfg-msg">Mensagem Padrão (Inquérito Geral)</label>
+                                <input type="text" id="ap-cfg-msg" class="admin-input" required placeholder="Olá! Gostaria de tirar algumas dúvidas sobre os produtos.">
+                            </div>
+
+                            <h3 class="serif-title" style="font-size: 20px; color: var(--admin-color-accent); margin-top: 40px; margin-bottom: 20px; border-bottom: 1px solid var(--admin-color-border); padding-bottom: 5px;">Configurações de SEO</h3>
+
+                            <div class="admin-input-group">
+                                <label class="admin-label" for="ap-cfg-seo-title">Título Padrão (SEO Title)</label>
+                                <input type="text" id="ap-cfg-seo-title" class="admin-input" required placeholder="Lumié Seoul | Premium Korean Skincare">
+                            </div>
+
+                            <div class="admin-input-group">
+                                <label class="admin-label" for="ap-cfg-seo-desc">Descrição Padrão (Meta Description)</label>
+                                <textarea id="ap-cfg-seo-desc" class="admin-textarea" required placeholder="Importação de K-Beauty original com suporte personalizado via WhatsApp..."></textarea>
+                            </div>
+
+                            <h3 class="serif-title" style="font-size: 20px; color: var(--admin-color-accent); margin-top: 40px; margin-bottom: 20px; border-bottom: 1px solid var(--admin-color-border); padding-bottom: 5px;">Banners Promocionais</h3>
+
+                            <div class="admin-input-group">
+                                <label class="admin-label" for="ap-cfg-banner-desktop">URL do Banner Principal</label>
+                                <input type="text" id="ap-cfg-banner-desktop" class="admin-input" required placeholder="img/banner.jpg">
+                                <div style="margin-top: 15px; border: 1px dashed var(--admin-color-border); padding: 15px; border-radius: 4px; background: #FAF9F6; text-align: center;">
+                                    <span class="admin-label" style="text-align: center; margin-bottom: 8px;">Upload de Novo Banner</span>
+                                    <input type="file" id="ap-cfg-banner-file" accept="image/*" style="font-size: 11px;">
+                                </div>
+                            </div>
+
+                            <div style="display: flex; justify-content: flex-end; margin-top: 30px; border-top: 1px solid var(--admin-color-border); padding-top: 20px;">
+                                <button type="submit" class="admin-btn admin-btn-accent" style="padding: 12px 30px;">Salvar Configurações</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+
+        <!-- SIDE PANEL: FORMULÁRIO DE PRODUTO -->
+        <div id="ap-product-panel" class="admin-panel-overlay">
+            <div class="admin-panel-header">
+                <h3 id="ap-product-panel-title" class="serif-title" style="font-size: 22px;">Novo Produto</h3>
+                <button id="ap-product-panel-close" style="font-size: 20px; color: #70655C;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="admin-panel-body">
+                <form id="ap-product-form">
+                    <input type="hidden" id="ap-p-form-id">
+
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-p-form-nome">Nome do Produto</label>
+                        <input type="text" id="ap-p-form-nome" class="admin-input" required placeholder="Ex: Hydrating Water Essence">
+                    </div>
+
+                    <div class="admin-input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label class="admin-label" for="ap-p-form-marca">Marca</label>
+                            <select id="ap-p-form-marca" class="admin-input" required></select>
+                        </div>
+                        <div>
+                            <label class="admin-label" for="ap-p-form-categoria">Categoria</label>
+                            <select id="ap-p-form-categoria" class="admin-input" required></select>
+                        </div>
+                    </div>
+
+                    <div class="admin-input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label class="admin-label" for="ap-p-form-preco">Preço (Ex: R$ 249,00)</label>
+                            <input type="text" id="ap-p-form-preco" class="admin-input" required placeholder="R$ 0,00">
+                        </div>
+                        <div>
+                            <label class="admin-label" for="ap-p-form-origem">Origem</label>
+                            <input type="text" id="ap-p-form-origem" class="admin-input" required value="Coreia do Sul">
+                        </div>
+                    </div>
+
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-p-form-badge">Selo / Destaque (Badge)</label>
+                        <input type="text" id="ap-p-form-badge" class="admin-input" placeholder="Ex: Mais Vendido, Lançamento, Vegano">
+                    </div>
+
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-p-form-desc-curta">Descrição Curta (Exibido no Card)</label>
+                        <input type="text" id="ap-p-form-desc-curta" class="admin-input" required placeholder="Pequena descrição de uma linha...">
+                    </div>
+
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-p-form-desc-completa">Descrição Completa</label>
+                        <textarea id="ap-p-form-desc-completa" class="admin-textarea" required placeholder="Detalhes completos sobre a fórmula..."></textarea>
+                    </div>
+
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-p-form-beneficios">Benefícios (Um por linha)</label>
+                        <textarea id="ap-p-form-beneficios" class="admin-textarea" placeholder="Benefício 1&#10;Benefício 2&#10;Benefício 3"></textarea>
+                    </div>
+
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-p-form-ingredientes">Ingredientes (Separados por vírgula)</label>
+                        <textarea id="ap-p-form-ingredientes" class="admin-textarea" placeholder="Glicerina, Extrato de Mel, Adenosina..."></textarea>
+                    </div>
+
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-p-form-modo">Modo de Uso</label>
+                        <textarea id="ap-p-form-modo" class="admin-textarea" placeholder="Instruções passo a passo de como aplicar..."></textarea>
+                    </div>
+
+                    <div class="admin-input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label class="admin-label" for="ap-p-form-ind">Indicação</label>
+                            <input type="text" id="ap-p-form-ind" class="admin-input" placeholder="Ex: Pele opaca, Rugas, Acne">
+                        </div>
+                        <div>
+                            <label class="admin-label">Tipos de Pele (Segure Ctrl para múltiplos)</label>
+                            <select id="ap-p-form-peles" class="admin-input" multiple style="height: 90px; padding: 5px;">
+                                <option value="Todos os tipos de pele">Todos os tipos</option>
+                                <option value="Pele Seca">Pele Seca</option>
+                                <option value="Pele Oleosa">Pele Oleosa</option>
+                                <option value="Pele Sensível">Pele Sensível</option>
+                                <option value="Pele Madura">Pele Madura</option>
+                                <option value="Pele Acneica">Pele Acneica</option>
+                                <option value="Pele Mista">Pele Mista</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="admin-input-group" style="border: 1px dashed var(--admin-color-border); padding: 15px; border-radius: 4px; background: #FAF9F6;">
+                        <label class="admin-label">Imagem do Produto</label>
+                        <input type="file" id="ap-p-form-file" accept="image/*" style="margin-bottom: 10px; font-size: 12px;">
+                        <span style="font-size: 10px; color: #9B8E85; display: block; margin-bottom: 5px;">Ou cole uma URL externa existente:</span>
+                        <input type="text" id="ap-p-form-img-url" class="admin-input" style="padding: 6px; font-size: 12px;" placeholder="https://site.com/imagem.jpg">
+                        <div id="ap-p-img-preview-wrapper" style="margin-top: 15px; text-align: center; display: none;">
+                            <span class="admin-label" style="text-align: center;">Pré-visualização:</span>
+                            <img id="ap-p-img-preview" src="" style="max-height: 120px; max-width: 100%; border: 1px solid var(--admin-color-border); border-radius: 4px; margin-top: 5px; object-fit: contain;">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="admin-panel-footer">
+                <button id="ap-product-panel-cancel" class="admin-btn admin-btn-secondary">Cancelar</button>
+                <button id="ap-save-product-btn" class="admin-btn admin-btn-accent">Salvar Produto</button>
+            </div>
+        </div>
+
+        <!-- SIDE PANEL: FORMULÁRIO DE ARTIGO -->
+        <div id="ap-blog-panel" class="admin-panel-overlay">
+            <div class="admin-panel-header">
+                <h3 id="ap-blog-panel-title" class="serif-title" style="font-size: 22px;">Novo Artigo</h3>
+                <button id="ap-blog-panel-close" style="font-size: 20px; color: #70655C;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="admin-panel-body">
+                <form id="ap-blog-form">
+                    <input type="hidden" id="ap-b-form-id">
+
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-b-form-titulo">Título do Artigo</label>
+                        <input type="text" id="ap-b-form-titulo" class="admin-input" required placeholder="Ex: Como escolher o protetor solar ideal">
+                    </div>
+
+                    <div class="admin-input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label class="admin-label" for="ap-b-form-autor">Autor</label>
+                            <input type="text" id="ap-b-form-autor" class="admin-input" required placeholder="Ex: Equipe Lumié">
+                        </div>
+                        <div>
+                            <label class="admin-label" for="ap-b-form-tags">Tags (Separadas por vírgula)</label>
+                            <input type="text" id="ap-b-form-tags" class="admin-input" placeholder="Ex: Pele Seca, Sol, Dicas">
+                        </div>
+                    </div>
+
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-b-form-resumo">Resumo / Subtítulo</label>
+                        <input type="text" id="ap-b-form-resumo" class="admin-input" required placeholder="Breve frase chamativa sobre o artigo...">
+                    </div>
+
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-b-form-conteudo">Conteúdo do Artigo (Aceita tags HTML)</label>
+                        <textarea id="ap-b-form-conteudo" class="admin-textarea" required style="min-height: 250px;" placeholder="<p>Texto do artigo...</p>&#10;<h3>Subtítulo elegante</h3>&#10;<p>Mais texto...</p>"></textarea>
+                    </div>
+
+                    <div class="admin-input-group" style="border: 1px dashed var(--admin-color-border); padding: 15px; border-radius: 4px; background: #FAF9F6;">
+                        <label class="admin-label">Imagem de Capa</label>
+                        <input type="file" id="ap-b-form-file" accept="image/*" style="margin-bottom: 10px; font-size: 12px;">
+                        <span style="font-size: 10px; color: #9B8E85; display: block; margin-bottom: 5px;">Ou cole uma URL externa existente:</span>
+                        <input type="text" id="ap-b-form-img-url" class="admin-input" style="padding: 6px; font-size: 12px;" placeholder="https://site.com/capa.jpg">
+                        <div id="ap-b-img-preview-wrapper" style="margin-top: 15px; text-align: center; display: none;">
+                            <span class="admin-label" style="text-align: center;">Pré-visualização:</span>
+                            <img id="ap-b-img-preview" src="" style="max-height: 120px; max-width: 100%; border: 1px solid var(--admin-color-border); border-radius: 4px; margin-top: 5px; object-fit: contain;">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="admin-panel-footer">
+                <button id="ap-blog-panel-cancel" class="admin-btn admin-btn-secondary">Cancelar</button>
+                <button id="ap-save-blog-btn" class="admin-btn admin-btn-accent">Salvar Artigo</button>
+            </div>
+        </div>
+
+        <!-- SIDE PANEL: NOVO ADMINISTRADOR -->
+        <div id="ap-admin-user-panel" class="admin-panel-overlay" style="height: auto; top: 15%; border-radius: 8px; max-width: 450px; margin: 0 auto;">
+            <div class="admin-panel-header">
+                <h3 class="serif-title" style="font-size: 20px;">Cadastrar Administrador</h3>
+                <button id="ap-admin-user-panel-close" style="font-size: 20px; color: #70655C;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="admin-panel-body">
+                <form id="ap-admin-user-form">
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-adm-email">E-mail de Acesso</label>
+                        <input type="email" id="ap-adm-email" class="admin-input" required placeholder="admin2@lumie.com">
+                    </div>
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-adm-password">Senha Provisória</label>
+                        <input type="password" id="ap-adm-password" class="admin-input" required placeholder="Min 6 caracteres">
+                    </div>
+                </form>
+            </div>
+            <div class="admin-panel-footer">
+                <button id="ap-admin-user-panel-cancel" class="admin-btn admin-btn-secondary">Cancelar</button>
+                <button id="ap-save-admin-user-btn" class="admin-btn admin-btn-accent">Criar Usuário</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="js/firebase.js"></script>
     <script src="js/spa-router.js"></script>
@@ -755,5 +1222,6 @@
     <script src="js/produto.js"></script>
     <script src="js/blog.js"></script>
     <script src="js/animations.js"></script>
+    <script src="js/admin-panel.js"></script>
 </body>
 </html>
