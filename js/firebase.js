@@ -225,6 +225,16 @@ if (!localStorage.getItem('lumie_admins')) {
     localStorage.setItem('lumie_admins', JSON.stringify([{ email: 'admin@lumie.com', password: 'admin' }]));
 }
 
+// Helper: sorts a list by its "ordem" field (manual drag-and-drop order),
+// falling back to a high number so un-ordered items go to the end.
+function sortByOrdem(list) {
+    return [...list].sort((a, b) => {
+        const oa = typeof a.ordem === 'number' ? a.ordem : 9999;
+        const ob = typeof b.ordem === 'number' ? b.ordem : 9999;
+        return oa - ob;
+    });
+}
+
 // 3. Centralized Database Gateway (DB API Wrapper)
 const DB = {
     // Mode checker
@@ -242,12 +252,12 @@ const DB = {
                     querySnapshot.forEach((doc) => {
                         list.push({ id: doc.id, ...doc.data() });
                     });
-                    return list.length ? list : JSON.parse(localStorage.getItem('lumie_products'));
+                    return list.length ? sortByOrdem(list) : sortByOrdem(JSON.parse(localStorage.getItem('lumie_products')));
                 } catch (e) {
                     console.error("Firebase read products error. Falling back to local.", e);
                 }
             }
-            return JSON.parse(localStorage.getItem('lumie_products')) || [];
+            return sortByOrdem(JSON.parse(localStorage.getItem('lumie_products')) || []);
         },
         
         getById: async (id) => {
@@ -271,6 +281,12 @@ const DB = {
             if (!productData.id) {
                 productData.id = productData.nome.toLowerCase().replace(/[^a-z0-9]+/g, '-');
             }
+
+            if (typeof productData.ordem !== 'number') {
+                const existingList = JSON.parse(localStorage.getItem('lumie_products')) || [];
+                const existingItem = existingList.find(p => p.id === productData.id);
+                productData.ordem = existingItem && typeof existingItem.ordem === 'number' ? existingItem.ordem : existingList.length;
+            }
             
             if (dbMode === "firebase" && firestoreDb) {
                 try {
@@ -293,6 +309,27 @@ const DB = {
             }
             localStorage.setItem('lumie_products', JSON.stringify(list));
             return productData.id;
+        },
+
+        // Persists a new manual display order for products (drag-and-drop in admin panel).
+        reorder: async (orderedIds) => {
+            if (dbMode === "firebase" && firestoreDb) {
+                try {
+                    const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                    await Promise.all(orderedIds.map((id, index) => updateDoc(doc(firestoreDb, "produtos", id), { ordem: index })));
+                    return true;
+                } catch (e) {
+                    console.error("Firebase reorder products error.", e);
+                }
+            }
+
+            const list = JSON.parse(localStorage.getItem('lumie_products')) || [];
+            orderedIds.forEach((id, index) => {
+                const item = list.find(p => p.id === id);
+                if (item) item.ordem = index;
+            });
+            localStorage.setItem('lumie_products', JSON.stringify(list));
+            return true;
         },
 
         delete: async (id) => {
@@ -325,12 +362,12 @@ const DB = {
                     querySnapshot.forEach((doc) => {
                         list.push({ id: doc.id, ...doc.data() });
                     });
-                    return list.length ? list : JSON.parse(localStorage.getItem('lumie_blog'));
+                    return list.length ? sortByOrdem(list) : sortByOrdem(JSON.parse(localStorage.getItem('lumie_blog')));
                 } catch (e) {
                     console.error("Firebase read blog error. Falling back to local.", e);
                 }
             }
-            return JSON.parse(localStorage.getItem('lumie_blog')) || [];
+            return sortByOrdem(JSON.parse(localStorage.getItem('lumie_blog')) || []);
         },
         
         getById: async (id) => {
@@ -354,6 +391,12 @@ const DB = {
             if (!articleData.id) {
                 articleData.id = articleData.titulo.toLowerCase().replace(/[^a-z0-9]+/g, '-');
             }
+
+            if (typeof articleData.ordem !== 'number') {
+                const existingList = JSON.parse(localStorage.getItem('lumie_blog')) || [];
+                const existingItem = existingList.find(a => a.id === articleData.id);
+                articleData.ordem = existingItem && typeof existingItem.ordem === 'number' ? existingItem.ordem : existingList.length;
+            }
             
             if (dbMode === "firebase" && firestoreDb) {
                 try {
@@ -376,6 +419,27 @@ const DB = {
             }
             localStorage.setItem('lumie_blog', JSON.stringify(list));
             return articleData.id;
+        },
+
+        // Persists a new manual display order for blog articles (drag-and-drop in admin panel).
+        reorder: async (orderedIds) => {
+            if (dbMode === "firebase" && firestoreDb) {
+                try {
+                    const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                    await Promise.all(orderedIds.map((id, index) => updateDoc(doc(firestoreDb, "blog", id), { ordem: index })));
+                    return true;
+                } catch (e) {
+                    console.error("Firebase reorder blog error.", e);
+                }
+            }
+
+            const list = JSON.parse(localStorage.getItem('lumie_blog')) || [];
+            orderedIds.forEach((id, index) => {
+                const item = list.find(a => a.id === id);
+                if (item) item.ordem = index;
+            });
+            localStorage.setItem('lumie_blog', JSON.stringify(list));
+            return true;
         },
 
         delete: async (id) => {
@@ -428,6 +492,52 @@ const DB = {
             const updated = { ...current, ...configData };
             localStorage.setItem('lumie_config', JSON.stringify(updated));
             return true;
+        }
+    },
+
+    // --- AUDIT LOG (Histórico de Ações do Painel) ---
+    historico: {
+        add: async (entry) => {
+            const currentUser = DB.auth.getCurrentUser();
+            const record = {
+                acao: entry.acao,
+                entidade: entry.entidade,
+                entidadeId: entry.entidadeId || '',
+                detalhes: entry.detalhes || '',
+                usuario: (currentUser && currentUser.email) || 'sistema',
+                data: new Date().toISOString()
+            };
+
+            if (dbMode === "firebase" && firestoreDb) {
+                try {
+                    const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                    await addDoc(collection(firestoreDb, "historico"), record);
+                    return true;
+                } catch (e) {
+                    console.error("Firebase historico write error. Falling back to local.", e);
+                }
+            }
+
+            const list = JSON.parse(localStorage.getItem('lumie_historico')) || [];
+            list.unshift(record);
+            localStorage.setItem('lumie_historico', JSON.stringify(list.slice(0, 300)));
+            return true;
+        },
+
+        getAll: async () => {
+            if (dbMode === "firebase" && firestoreDb) {
+                try {
+                    const { getDocs, collection, query, orderBy, limit } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                    const q = query(collection(firestoreDb, "historico"), orderBy("data", "desc"), limit(200));
+                    const querySnapshot = await getDocs(q);
+                    const list = [];
+                    querySnapshot.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
+                    if (list.length) return list;
+                } catch (e) {
+                    console.error("Firebase historico read error. Falling back to local.", e);
+                }
+            }
+            return JSON.parse(localStorage.getItem('lumie_historico')) || [];
         }
     },
 
