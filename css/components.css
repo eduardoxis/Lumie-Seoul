@@ -50,6 +50,17 @@
     color: var(--color-gold);
 }
 
+.logo-img-wrap {
+    display: flex;
+    align-items: center;
+}
+
+.logo-img {
+    height: 48px;
+    width: auto;
+    display: block;
+}
+
 .desktop-nav {
     display: flex;
     gap: var(--space-md);
@@ -763,9 +774,9 @@
     background: rgba(255, 255, 255, 0.94);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border-radius: 16px;
+    border-radius: 20px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
-    padding: var(--space-md) var(--space-lg);
+    padding: var(--space-lg) var(--space-lg);
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: var(--space-md);
