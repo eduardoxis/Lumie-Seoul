@@ -74,22 +74,22 @@
 
     <!-- 3. MOBILE SIDEBAR DRAWER -->
     <div class="sidebar-drawer">
+        <div class="drawer-header">
+            <button class="drawer-close" aria-label="Fechar Menu"><i class="fa-solid fa-xmark"></i></button>
+        </div>
         <nav class="drawer-nav">
-            <a href="#inicio" class="nav-link" data-page="inicio">Início</a>
-            <a href="#catalogo" class="nav-link" data-page="catalogo">Catálogo</a>
-            <a href="#sobre" class="nav-link" data-page="sobre">Sobre</a>
-            <a href="#blog" class="nav-link" data-page="blog">Blog</a>
-            <a href="#contato" class="nav-link" data-page="contato">Contato</a>
-            <a href="javascript:void(0)" class="nav-link js-auth-nav-btn"><i class="fa-solid fa-right-to-bracket"></i> <span>Entrar</span></a>
+            <a href="#inicio" class="nav-link active" data-page="inicio"><i class="fa-solid fa-house"></i><span>Início</span></a>
+            <a href="#sobre" class="nav-link" data-page="sobre"><i class="fa-solid fa-user"></i><span>Sobre</span></a>
+            <a href="#catalogo" class="nav-link" data-page="catalogo"><i class="fa-solid fa-bag-shopping"></i><span>Catálogo</span></a>
+            <a href="#blog" class="nav-link" data-page="blog"><i class="fa-solid fa-file-lines"></i><span>Blog</span></a>
+            <a href="#contato" class="nav-link" data-page="contato"><i class="fa-solid fa-phone"></i><span>Contato</span></a>
+            <a href="javascript:void(0)" class="nav-link js-auth-nav-btn"><i class="fa-solid fa-right-to-bracket"></i><span>Entrar</span></a>
         </nav>
         <div class="drawer-footer">
             <p style="font-size: 11px; color: var(--color-text-secondary);">Fale com nossos especialistas:</p>
             <button class="btn btn-whatsapp btn-full" style="margin-top: var(--space-xs);" onclick="contactMerchantGeneral()">
                 <i class="fa-brands fa-whatsapp"></i> WhatsApp
             </button>
-            <div class="drawer-socials">
-                <a href="#" class="footer-social-link"><i class="fa-brands fa-instagram"></i></a>
-            </div>
         </div>
     </div>
     <div class="sidebar-overlay"></div>
