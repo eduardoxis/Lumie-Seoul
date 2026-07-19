@@ -210,8 +210,8 @@
         display: none;
     }
     .sidebar-drawer {
-        width: 100%;
-        max-width: 100%;
+        width: 300px;
+        max-width: 85vw;
         right: -100%;
     }
 
