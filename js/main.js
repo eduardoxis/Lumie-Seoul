@@ -32,6 +32,7 @@ function initMobileMenu() {
     const menuToggle = document.querySelector('.menu-toggle');
     const sidebarDrawer = document.querySelector('.sidebar-drawer');
     const overlay = document.querySelector('.sidebar-overlay');
+    const drawerClose = document.querySelector('.drawer-close');
 
     if (!menuToggle || !sidebarDrawer) return;
 
@@ -43,6 +44,10 @@ function initMobileMenu() {
     };
 
     menuToggle.addEventListener('click', toggleMenu);
+
+    drawerClose?.addEventListener('click', () => {
+        if (sidebarDrawer.classList.contains('active')) toggleMenu();
+    });
 
     // Fecha o menu ao clicar em qualquer link do drawer (a navegação real
     // já é tratada pelo spa-router.js via delegação de [data-page])
