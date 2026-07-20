@@ -1034,10 +1034,20 @@ async function deleteArticle(id) {
    8. ADMINISTRADORES
    ============================================================ */
 function loadAdminsTab() {
+    const isFirebaseMode = DB.getMode() === 'firebase';
     const warning = document.getElementById('ap-fb-auth-warning');
-    if (warning) warning.style.display = DB.getMode() === 'firebase' ? 'block' : 'none';
+    if (warning) warning.style.display = isFirebaseMode ? 'block' : 'none';
+
+    const newAdminBtn = document.getElementById('ap-new-admin-btn');
+    if (newAdminBtn) newAdminBtn.style.display = isFirebaseMode ? 'none' : 'inline-flex';
 
     const tbody = document.getElementById('ap-admins-tbody');
+
+    if (isFirebaseMode) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #9B8E85;">Gerencie as contas administrativas pelo Console do Firebase (aba Authentication).</td></tr>`;
+        return;
+    }
+
     const admins = JSON.parse(localStorage.getItem('lumie_admins')) || [];
 
     if (admins.length === 0) {
