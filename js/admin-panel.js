@@ -317,7 +317,7 @@ async function loadDashboardTab() {
         const recentList = products.slice(0, 5);
 
         if (recentList.length === 0) {
-            recentTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #9B8E85;">Nenhum produto cadastrado.</td></tr>`;
+            recentTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #9B8E85;">Nenhum produto cadastrado.</td></tr>`;
             return;
         }
 
@@ -326,7 +326,6 @@ async function loadDashboardTab() {
                 <td><strong>${p.nome}</strong></td>
                 <td>${p.marca}</td>
                 <td>${p.categoria}</td>
-                <td>${p.preco}</td>
             </tr>
         `).join('');
 
@@ -565,7 +564,6 @@ async function loadProductsTab() {
                     <td><strong>${p.nome}</strong></td>
                     <td>${p.marca}</td>
                     <td>${p.categoria}</td>
-                    <td>${p.preco}</td>
                     <td>${p.badge ? `<span style="font-size: 10px; background: #FAF9F6; border: 1px solid var(--admin-color-border); padding: 2px 6px; border-radius: 99px;">${p.badge}</span>` : '-'}</td>
                     <td class="admin-actions-cell">
                         <a class="admin-action-link admin-action-edit" data-edit-product="${p.id}" title="Editar"><i class="fa-regular fa-pen-to-square"></i></a>
@@ -616,7 +614,6 @@ function openProductPanel(mode, id = '') {
             document.getElementById('ap-p-form-nome').value = product.nome;
             document.getElementById('ap-p-form-marca').value = product.marca;
             document.getElementById('ap-p-form-categoria').value = product.categoria;
-            document.getElementById('ap-p-form-preco').value = product.preco;
             document.getElementById('ap-p-form-origem').value = product.origem || 'Coreia do Sul';
             document.getElementById('ap-p-form-badge').value = product.badge || '';
             document.getElementById('ap-p-form-desc-curta').value = product.descricaoCurta;
@@ -721,7 +718,6 @@ async function saveProduct() {
     const id = document.getElementById('ap-p-form-id').value;
     const marca = document.getElementById('ap-p-form-marca').value;
     const categoria = document.getElementById('ap-p-form-categoria').value;
-    const preco = document.getElementById('ap-p-form-preco').value;
     const origem = document.getElementById('ap-p-form-origem').value;
     const badge = document.getElementById('ap-p-form-badge').value;
     const descricaoCurta = document.getElementById('ap-p-form-desc-curta').value;
@@ -736,7 +732,7 @@ async function saveProduct() {
     const tiposPele = Array.from(skinSelect.selectedOptions).map(opt => opt.value);
 
     const productData = {
-        nome, marca, categoria, preco, origem, badge,
+        nome, marca, categoria, origem, badge,
         descricaoCurta, descricaoCompleta, modoUso, indicacao,
         beneficios, ingredientes, tiposPele,
         imagensUrl: apCurrentProductImages.length ? [...apCurrentProductImages] : ['img/cream.jpg']
@@ -1033,18 +1029,43 @@ async function deleteArticle(id) {
 /* ============================================================
    8. ADMINISTRADORES
    ============================================================ */
-function loadAdminsTab() {
+async function loadAdminsTab() {
     const isFirebaseMode = DB.getMode() === 'firebase';
     const warning = document.getElementById('ap-fb-auth-warning');
-    if (warning) warning.style.display = isFirebaseMode ? 'block' : 'none';
+    if (warning) warning.style.display = 'none';
 
     const newAdminBtn = document.getElementById('ap-new-admin-btn');
-    if (newAdminBtn) newAdminBtn.style.display = isFirebaseMode ? 'none' : 'inline-flex';
+    if (newAdminBtn) newAdminBtn.style.display = 'inline-flex';
 
     const tbody = document.getElementById('ap-admins-tbody');
 
     if (isFirebaseMode) {
-        tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #9B8E85;">Gerencie as contas administrativas pelo Console do Firebase (aba Authentication).</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #9B8E85;">Carregando administradores...</td></tr>`;
+        try {
+            const admins = await DB.auth.listAdmins();
+            const currentEmail = DB.auth.getCurrentUser()?.email;
+
+            if (admins.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #9B8E85;">Nenhum administrador cadastrado ainda.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = admins.map(adm => `
+                <tr>
+                    <td><strong>${adm.email}</strong></td>
+                    <td><span style="font-size: 11px; background: #EBF6EE; color: #607255; padding: 2px 8px; border-radius: 99px; font-weight:600;">Ativo</span></td>
+                    <td class="admin-actions-cell">
+                        ${adm.email === currentEmail ? '-' : `<a class="admin-action-link admin-action-delete" data-delete-admin="${adm.uid}" data-delete-admin-email="${adm.email}" title="Remover"><i class="fa-regular fa-trash-can"></i></a>`}
+                    </td>
+                </tr>
+            `).join('');
+
+            tbody.querySelectorAll('[data-delete-admin]').forEach(el => {
+                el.addEventListener('click', () => deleteAdminUser(el.dataset.deleteAdmin, el.dataset.deleteAdminEmail));
+            });
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #C0392B;">Erro ao carregar administradores: ${e.message}</td></tr>`;
+        }
         return;
     }
 
@@ -1060,13 +1081,13 @@ function loadAdminsTab() {
             <td><strong>${adm.email}</strong></td>
             <td><span style="font-size: 11px; background: #EBF6EE; color: #607255; padding: 2px 8px; border-radius: 99px; font-weight:600;">Ativo</span></td>
             <td class="admin-actions-cell">
-                ${adm.email === 'admin@lumie.com' ? '-' : `<a class="admin-action-link admin-action-delete" data-delete-admin="${index}" title="Remover"><i class="fa-regular fa-trash-can"></i></a>`}
+                <a class="admin-action-link admin-action-delete" data-delete-admin-local="${index}" title="Remover"><i class="fa-regular fa-trash-can"></i></a>
             </td>
         </tr>
     `).join('');
 
-    tbody.querySelectorAll('[data-delete-admin]').forEach(el => {
-        el.addEventListener('click', () => deleteAdminUser(parseInt(el.dataset.deleteAdmin, 10)));
+    tbody.querySelectorAll('[data-delete-admin-local]').forEach(el => {
+        el.addEventListener('click', () => deleteAdminUserLocal(parseInt(el.dataset.deleteAdminLocal, 10)));
     });
 }
 
@@ -1079,30 +1100,52 @@ function closeAdminUserPanel() {
     document.getElementById('ap-admin-user-panel').classList.remove('active');
 }
 
-function saveAdminUser() {
-    const email = document.getElementById('ap-adm-email').value;
+async function saveAdminUser() {
+    const email = document.getElementById('ap-adm-email').value.trim();
     const password = document.getElementById('ap-adm-password').value;
 
-    if (!email || !password || password.length < 4) {
-        alert("Por favor, digite um e-mail válido e uma senha de no mínimo 4 caracteres.");
+    if (!email || !password || password.length < 6) {
+        alert("Por favor, digite um e-mail válido e uma senha de no mínimo 6 caracteres.");
         return;
     }
 
-    const admins = JSON.parse(localStorage.getItem('lumie_admins')) || [];
-    if (admins.some(a => a.email === email)) {
-        alert("Este e-mail administrativo já está cadastrado.");
-        return;
+    const saveBtn = document.getElementById('ap-save-admin-user-btn');
+    const originalText = saveBtn ? saveBtn.innerHTML : '';
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = 'Criando...'; }
+
+    try {
+        if (DB.getMode() === 'firebase') {
+            await DB.auth.createAdmin(email, password);
+        } else {
+            const admins = JSON.parse(localStorage.getItem('lumie_admins')) || [];
+            if (admins.some(a => a.email === email)) {
+                throw new Error("Este e-mail administrativo já está cadastrado.");
+            }
+            admins.push({ email, password });
+            localStorage.setItem('lumie_admins', JSON.stringify(admins));
+        }
+        logAudit('Criou', 'Administrador', '', email);
+        closeAdminUserPanel();
+        loadAdminsTab();
+    } catch (e) {
+        alert(e.message);
+    } finally {
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = originalText; }
     }
-
-    admins.push({ email, password });
-    localStorage.setItem('lumie_admins', JSON.stringify(admins));
-    logAudit('Criou', 'Administrador', '', email);
-
-    closeAdminUserPanel();
-    loadAdminsTab();
 }
 
-function deleteAdminUser(index) {
+async function deleteAdminUser(uid, email) {
+    if (!confirm(`Remover o acesso administrativo de "${email}"?\n\nAtenção: isso só remove o registro da lista. A conta de login continua existindo no Firebase até você excluí-la manualmente em Authentication → Users no Console do Firebase.`)) return;
+    try {
+        await DB.auth.removeAdminRecord(uid);
+        logAudit('Removeu', 'Administrador', '', email);
+        loadAdminsTab();
+    } catch (e) {
+        alert("Erro ao remover: " + e.message);
+    }
+}
+
+function deleteAdminUserLocal(index) {
     const admins = JSON.parse(localStorage.getItem('lumie_admins')) || [];
     const email = admins[index]?.email;
     if (confirm(`Tem certeza que deseja revogar o acesso administrativo da conta "${email}"?`)) {
