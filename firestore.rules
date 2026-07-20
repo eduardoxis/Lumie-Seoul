@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // PRODUTOS: qualquer visitante pode ler (catálogo público).
+    // Só usuários autenticados (admin logado) podem criar/editar/excluir.
+    match /produtos/{produtoId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // BLOG: mesma lógica — leitura pública, escrita só autenticado.
+    match /blog/{postId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // HISTÓRICO: log interno de alterações do painel admin.
+    // Só quem está logado pode ler ou gravar.
+    match /historico/{registroId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+
+    // Bloqueia por padrão qualquer outra coleção não prevista acima.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
