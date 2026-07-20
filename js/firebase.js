@@ -9,12 +9,13 @@
 
 // 1. Firebase configuration credentials (Merchant updates this when ready)
 const firebaseConfig = {
-    apiKey: "YOUR_FIREBASE_API_KEY_HERE",
+    apiKey: "AIzaSyDV_mi3G1Dafpxd03aKi47oS_Gn-b5B1t8",
     authDomain: "lumie-seoul.firebaseapp.com",
     projectId: "lumie-seoul",
-    storageBucket: "lumie-seoul.appspot.com",
-    messagingSenderId: "000000000000",
-    appId: "1:000000000000:web:0000000000000000000000"
+    storageBucket: "lumie-seoul.firebasestorage.app",
+    messagingSenderId: "293903812406",
+    appId: "1:293903812406:web:c7650b377aaa22325f1597",
+    measurementId: "G-0W8MF29JBB"
 };
 
 // Check if credentials are placeholders
