@@ -42,7 +42,6 @@ function renderProductDetails() {
 
     document.getElementById("p-brand").innerText = currentProduct.marca;
     document.getElementById("p-title").innerText = currentProduct.nome;
-    document.getElementById("p-price").innerText = currentProduct.preco;
     document.getElementById("p-desc-short").innerText = currentProduct.descricaoCurta;
 
     document.getElementById("p-origem").innerText = currentProduct.origem || "Coreia do Sul";
@@ -88,7 +87,7 @@ function renderProductDetails() {
 
     const ctaBtn = document.getElementById("p-cta-btn");
     if (ctaBtn) {
-        ctaBtn.onclick = () => contactMerchantForProduct(currentProduct.nome, currentProduct.marca, currentProduct.preco, currentProduct.id);
+        ctaBtn.onclick = () => contactMerchantForProduct(currentProduct.nome, currentProduct.marca, currentProduct.id);
     }
 }
 
@@ -121,12 +120,9 @@ async function renderRelatedProducts() {
                     <span class="product-brand">${product.marca}</span>
                     <h3 class="product-title" onclick="navegar('produto', {id: '${product.id}'})" style="cursor: pointer;">${product.nome}</h3>
                     <p class="product-meta">${product.descricaoCurta}</p>
-                    <div class="product-card-bottom">
-                        <span class="product-price">${product.preco}</span>
-                    </div>
                     <div class="product-card-actions">
                         <button class="btn btn-secondary" onclick="navegar('produto', {id: '${product.id}'})">Ver Detalhes</button>
-                        <button class="btn btn-whatsapp" onclick="contactMerchantForProduct('${product.nome}', '${product.marca}', '${product.preco}', '${product.id}')">
+                        <button class="btn btn-whatsapp" onclick="contactMerchantForProduct('${product.nome}', '${product.marca}', '${product.id}')">
                             <i class="fab fa-whatsapp"></i> WhatsApp
                         </button>
                     </div>
