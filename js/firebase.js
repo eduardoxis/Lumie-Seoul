@@ -90,7 +90,6 @@ const INITIAL_PRODUCTS = [
         indicacao: 'Prevenção de rugas, perda de tônus facial e pele opaca.',
         tiposPele: ['Todos os tipos de pele', 'Pele Seca'],
         origem: 'Coreia do Sul',
-        preco: 'R$ 389,00',
         destacado: true,
         novidade: false,
         maisVendido: true,
@@ -120,7 +119,6 @@ const INITIAL_PRODUCTS = [
         indicacao: 'Linhas finas, flacidez precoce e perda de elasticidade.',
         tiposPele: ['Pele Madura', 'Pele Seca', 'Pele Normal'],
         origem: 'Coreia do Sul',
-        preco: 'R$ 279,00',
         destacado: true,
         novidade: true,
         maisVendido: false,
@@ -151,7 +149,6 @@ const INITIAL_PRODUCTS = [
         indicacao: 'Desidratação intensa, pele sensibilizada, vermelhidão ou pós-procedimentos.',
         tiposPele: ['Pele Sensível', 'Pele Seca', 'Pele Mista'],
         origem: 'Coreia do Sul',
-        preco: 'R$ 319,00',
         destacado: true,
         novidade: false,
         maisVendido: false,
@@ -211,19 +208,22 @@ const INITIAL_CONFIG = {
     marcas: ['Sulwhasoo', 'COSRX', 'Innisfree', 'Skin1004', 'Laneige', 'Beauty of Joseon']
 };
 
-// Initialize localStorage databases if not exists
-if (!localStorage.getItem('lumie_products')) {
-    localStorage.setItem('lumie_products', JSON.stringify(INITIAL_PRODUCTS));
-}
-if (!localStorage.getItem('lumie_blog')) {
-    localStorage.setItem('lumie_blog', JSON.stringify(INITIAL_BLOG));
-}
-if (!localStorage.getItem('lumie_config')) {
-    localStorage.setItem('lumie_config', JSON.stringify(INITIAL_CONFIG));
-}
-if (!localStorage.getItem('lumie_admins')) {
-    // Default admin user: admin@lumie.com / admin123
-    localStorage.setItem('lumie_admins', JSON.stringify([{ email: 'admin@lumie.com', password: 'admin' }]));
+// Initialize local fallback databases only when Firebase isn't configured.
+// (When Firebase is active, all reads/writes go straight to Firestore/Auth.)
+if (!isFirebaseConfigured) {
+    if (!localStorage.getItem('lumie_products')) {
+        localStorage.setItem('lumie_products', JSON.stringify(INITIAL_PRODUCTS));
+    }
+    if (!localStorage.getItem('lumie_blog')) {
+        localStorage.setItem('lumie_blog', JSON.stringify(INITIAL_BLOG));
+    }
+    if (!localStorage.getItem('lumie_config')) {
+        localStorage.setItem('lumie_config', JSON.stringify(INITIAL_CONFIG));
+    }
+    if (!localStorage.getItem('lumie_admins')) {
+        // Local-only dev fallback admin, used exclusively when no Firebase project is connected.
+        localStorage.setItem('lumie_admins', JSON.stringify([{ email: 'admin@local.dev', password: 'trocar-esta-senha' }]));
+    }
 }
 
 // Helper: sorts a list by its "ordem" field (manual drag-and-drop order),
@@ -253,12 +253,32 @@ const DB = {
                     querySnapshot.forEach((doc) => {
                         list.push({ id: doc.id, ...doc.data() });
                     });
-                    return list.length ? sortByOrdem(list) : sortByOrdem(JSON.parse(localStorage.getItem('lumie_products')));
+                    return sortByOrdem(list);
                 } catch (e) {
                     console.error("Firebase read products error. Falling back to local.", e);
                 }
             }
             return sortByOrdem(JSON.parse(localStorage.getItem('lumie_products')) || []);
+        },
+
+        // Escuta mudanças em tempo real na coleção "produtos".
+        // Retorna uma função "unsubscribe" para parar de escutar quando não for mais preciso.
+        listen: (callback) => {
+            if (dbMode === "firebase" && firestoreDb) {
+                let unsub = () => {};
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js").then(({ collection, query, orderBy, onSnapshot }) => {
+                    const q = query(collection(firestoreDb, "produtos"), orderBy("criadoEm", "desc"));
+                    unsub = onSnapshot(q, (snapshot) => {
+                        const list = [];
+                        snapshot.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
+                        callback(sortByOrdem(list));
+                    }, (e) => console.error("Firebase products listener error.", e));
+                });
+                return () => unsub();
+            }
+            // Modo local: sem tempo real nativo, só entrega o snapshot atual uma vez.
+            DB.products.getAll().then(callback);
+            return () => {};
         },
         
         getById: async (id) => {
@@ -363,12 +383,29 @@ const DB = {
                     querySnapshot.forEach((doc) => {
                         list.push({ id: doc.id, ...doc.data() });
                     });
-                    return list.length ? sortByOrdem(list) : sortByOrdem(JSON.parse(localStorage.getItem('lumie_blog')));
+                    return sortByOrdem(list);
                 } catch (e) {
                     console.error("Firebase read blog error. Falling back to local.", e);
                 }
             }
             return sortByOrdem(JSON.parse(localStorage.getItem('lumie_blog')) || []);
+        },
+
+        listen: (callback) => {
+            if (dbMode === "firebase" && firestoreDb) {
+                let unsub = () => {};
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js").then(({ collection, query, orderBy, onSnapshot }) => {
+                    const q = query(collection(firestoreDb, "blog"), orderBy("publicadoEm", "desc"));
+                    unsub = onSnapshot(q, (snapshot) => {
+                        const list = [];
+                        snapshot.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
+                        callback(sortByOrdem(list));
+                    }, (e) => console.error("Firebase blog listener error.", e));
+                });
+                return () => unsub();
+            }
+            DB.blog.getAll().then(callback);
+            return () => {};
         },
         
         getById: async (id) => {
@@ -479,6 +516,21 @@ const DB = {
             return JSON.parse(localStorage.getItem('lumie_config')) || INITIAL_CONFIG;
         },
 
+        listen: (callback) => {
+            if (dbMode === "firebase" && firestoreDb) {
+                let unsub = () => {};
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js").then(({ doc, onSnapshot }) => {
+                    const docRef = doc(firestoreDb, "configuracoes", "geral");
+                    unsub = onSnapshot(docRef, (docSnap) => {
+                        callback(docSnap.exists() ? docSnap.data() : INITIAL_CONFIG);
+                    }, (e) => console.error("Firebase config listener error.", e));
+                });
+                return () => unsub();
+            }
+            DB.config.get().then(callback);
+            return () => {};
+        },
+
         save: async (configData) => {
             if (dbMode === "firebase" && firestoreDb) {
                 try {
@@ -583,6 +635,65 @@ const DB = {
         getCurrentUser: () => {
             const session = sessionStorage.getItem("lumie_user_session");
             return session ? JSON.parse(session) : null;
+        },
+
+        // Cria um novo administrador SEM derrubar a sessão do admin atual.
+        // Truque: abre uma instância secundária e isolada do Firebase App só
+        // para esse cadastro, e a descarta logo em seguida.
+        createAdmin: async (email, password) => {
+            if (dbMode !== "firebase" || !firebaseApp) {
+                throw new Error("Cadastro de administradores só está disponível em modo Firebase.");
+            }
+            const App = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js");
+            const Auth = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
+            const Firestore = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+
+            // Instância secundária com nome único, mesmas credenciais do projeto.
+            const secondaryApp = App.initializeApp(firebaseConfig, "SecondaryAdminCreation_" + Date.now());
+            const secondaryAuth = Auth.getAuth(secondaryApp);
+
+            try {
+                const cred = await Auth.createUserWithEmailAndPassword(secondaryAuth, email, password);
+
+                // Salva metadados na coleção "admins" pra listar no painel
+                // (o cadastro em si de login/senha já fica no Firebase Authentication).
+                await Firestore.setDoc(Firestore.doc(firestoreDb, "admins", cred.user.uid), {
+                    email,
+                    criadoEm: new Date().toISOString()
+                });
+
+                await Auth.signOut(secondaryAuth);
+                await App.deleteApp(secondaryApp);
+
+                return { email, uid: cred.user.uid };
+            } catch (e) {
+                await App.deleteApp(secondaryApp).catch(() => {});
+                if (e.code === "auth/email-already-in-use") {
+                    throw new Error("Este e-mail já está cadastrado como administrador.");
+                }
+                if (e.code === "auth/weak-password") {
+                    throw new Error("Senha muito fraca. Use ao menos 6 caracteres.");
+                }
+                throw new Error("Erro ao criar administrador: " + e.message);
+            }
+        },
+
+        // Lista os administradores cadastrados (metadados salvos no Firestore).
+        listAdmins: async () => {
+            if (dbMode !== "firebase" || !firestoreDb) return [];
+            const { collection, getDocs, orderBy, query } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+            const q = query(collection(firestoreDb, "admins"), orderBy("criadoEm", "desc"));
+            const snap = await getDocs(q);
+            return snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+        },
+
+        // Remove só o registro de metadados no Firestore (a conta de login continua
+        // existindo no Firebase Authentication até ser removida manualmente pelo Console —
+        // o SDK do navegador não tem permissão para excluir contas de terceiros).
+        removeAdminRecord: async (uid) => {
+            if (dbMode !== "firebase" || !firestoreDb) return;
+            const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+            await deleteDoc(doc(firestoreDb, "admins", uid));
         }
     }
 };
