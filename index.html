@@ -312,8 +312,6 @@
                                 <div class="select-wrapper">
                                     <select id="sort-order" class="filter-select">
                                         <option value="destaque">Ordenar por: Destaque</option>
-                                        <option value="preco-cres">Preço: Menor para Maior</option>
-                                        <option value="preco-decres">Preço: Maior para Menor</option>
                                         <option value="nome-az">Nome: A - Z</option>
                                     </select>
                                 </div>
@@ -363,7 +361,6 @@
 
                         <p id="p-desc-short" style="font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: 1.6; margin-bottom: var(--space-sm);"></p>
 
-                        <div id="p-price" style="font-size: var(--fs-lg); font-weight: 600; color: var(--color-text-primary); margin-bottom: var(--space-md); padding-bottom: var(--space-sm); border-bottom: 1px solid var(--color-border);"></div>
 
                         <!-- Tabs detail -->
                         <div>
@@ -817,7 +814,7 @@
                             <div class="admin-table-card">
                                 <table class="admin-table">
                                     <thead>
-                                        <tr><th>Nome</th><th>Marca</th><th>Categoria</th><th>Preço</th></tr>
+                                        <tr><th>Nome</th><th>Marca</th><th>Categoria</th></tr>
                                     </thead>
                                     <tbody id="ap-recent-products-tbody">
                                         <tr><td colspan="4" style="text-align: center; color: #9B8E85;">Carregando produtos...</td></tr>
@@ -869,7 +866,7 @@
                     <div class="admin-table-card">
                         <table class="admin-table">
                             <thead>
-                                <tr><th></th><th>Imagem</th><th>Nome</th><th>Marca</th><th>Categoria</th><th>Preço</th><th>Selos (Badge)</th><th>Ações</th></tr>
+                                <tr><th></th><th>Imagem</th><th>Nome</th><th>Marca</th><th>Categoria</th><th>Selos (Badge)</th><th>Ações</th></tr>
                             </thead>
                             <tbody id="ap-products-tbody">
                                 <tr><td colspan="8" style="text-align: center; color: #9B8E85; padding: 30px;">Carregando produtos...</td></tr>
@@ -1065,11 +1062,7 @@
                         </div>
                     </div>
 
-                    <div class="admin-input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div>
-                            <label class="admin-label" for="ap-p-form-preco">Preço (Ex: R$ 249,00)</label>
-                            <input type="text" id="ap-p-form-preco" class="admin-input" required placeholder="R$ 0,00">
-                        </div>
+                    <div class="admin-input-group">
                         <div>
                             <label class="admin-label" for="ap-p-form-origem">Origem</label>
                             <input type="text" id="ap-p-form-origem" class="admin-input" required value="Coreia do Sul">
