@@ -12,18 +12,16 @@ const WHATSAPP_CONFIG = {
  * Redirects user to WhatsApp with a pre-filled custom message about a specific product.
  * @param {string} productName - The name of the product.
  * @param {string} productBrand - The brand of the product.
- * @param {string} productPrice - The product's display price (e.g. "R$ 249,00").
  * @param {string} productId - The product's ID, used to build a direct link to its page.
  */
-function contactMerchantForProduct(productName, productBrand = '', productPrice = '', productId = '') {
+function contactMerchantForProduct(productName, productBrand = '', productId = '') {
     const brandStr = productBrand ? ` [${productBrand}]` : '';
-    const priceLine = productPrice ? `\n💰 Valor: ${productPrice}` : '';
     const linkLine = productId ? `\n🔗 Link do produto: ${buildProductUrl(productId)}` : '';
 
     // Formatting the message requested by the user
     const message = `Olá!
 Tenho interesse neste produto:
-*${productName}*${brandStr}${priceLine}${linkLine}
+*${productName}*${brandStr}${linkLine}
 
 Poderia me passar mais informações?`;
 
