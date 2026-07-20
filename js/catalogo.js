@@ -24,9 +24,21 @@ function garantirCatalogoCarregado() {
     return new Promise((resolve) => {
         const start = async () => {
             try {
-                productsList = await DB.products.getAll();
                 shopConfig = await DB.config.get();
 
+                // Tempo real: qualquer alteração feita no painel admin reflete
+                // automaticamente aqui, sem precisar dar F5.
+                DB.products.listen((updatedList) => {
+                    productsList = updatedList;
+                    updateFilterSelects();
+                    if (catalogoInicializado) {
+                        // Já estava carregado: apenas re-renderiza com os dados novos.
+                        renderCatalog(productsList);
+                        renderFeatured();
+                    }
+                });
+
+                productsList = await DB.products.getAll();
                 updateFilterSelects();
                 renderCatalog(productsList);
                 initFilters();
@@ -110,12 +122,9 @@ function cardProdutoHtml(product) {
                 <span class="product-brand">${product.marca}</span>
                 <h3 class="product-title" onclick="navegar('produto', {id: '${product.id}'})" style="cursor: pointer;">${product.nome}</h3>
                 <p class="product-meta">${product.descricaoCurta}</p>
-                <div class="product-card-bottom">
-                    <span class="product-price">${product.preco}</span>
-                </div>
                 <div class="product-card-actions">
                     <button class="btn btn-secondary" onclick="navegar('produto', {id: '${product.id}'})">Ver Detalhes</button>
-                    <button class="btn btn-whatsapp" onclick="contactMerchantForProduct('${product.nome}', '${product.marca}', '${product.preco}', '${product.id}')">
+                    <button class="btn btn-whatsapp" onclick="contactMerchantForProduct('${product.nome}', '${product.marca}', '${product.id}')">
                         <i class="fab fa-whatsapp"></i> Falar WhatsApp
                     </button>
                 </div>
@@ -173,11 +182,7 @@ function initFilters() {
         }
 
         if (sortOrder) {
-            if (sortOrder.value === "preco-cres") {
-                results.sort((a, b) => parseFloat(a.preco.replace("R$ ", "").replace(".", "").replace(",", ".")) - parseFloat(b.preco.replace("R$ ", "").replace(".", "").replace(",", ".")));
-            } else if (sortOrder.value === "preco-decres") {
-                results.sort((a, b) => parseFloat(b.preco.replace("R$ ", "").replace(".", "").replace(",", ".")) - parseFloat(a.preco.replace("R$ ", "").replace(".", "").replace(",", ".")));
-            } else if (sortOrder.value === "nome-az") {
+            if (sortOrder.value === "nome-az") {
                 results.sort((a, b) => a.nome.localeCompare(b.nome));
             }
         }
