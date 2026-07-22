@@ -159,11 +159,12 @@ async function handleLoginSubmit(e) {
     e.preventDefault();
     const email = document.getElementById('ap-login-email').value;
     const password = document.getElementById('ap-login-password').value;
+    const remember = document.getElementById('ap-login-remember')?.checked || false;
     const errorBox = document.getElementById('ap-login-error');
     errorBox.style.display = 'none';
 
     try {
-        await DB.auth.login(email, password);
+        await DB.auth.login(email, password, remember);
         closeLoginModal();
         refreshAuthUI();
         openAdminPanel();
