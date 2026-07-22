@@ -481,6 +481,101 @@
 }
 
 /* ==========================================
+   Small phones — force every internal grid
+   inside the admin shell/side panels to
+   stack into a single column, and tighten
+   up spacing so nothing overflows sideways.
+   ========================================== */
+@media (max-width: 600px) {
+    .ap-overlay,
+    .admin-panel-overlay {
+        overflow-x: hidden;
+    }
+
+    .ap-shell {
+        min-width: 0;
+    }
+
+    .ap-sidebar {
+        width: 52px;
+        padding: 14px 6px;
+    }
+
+    .ap-logo {
+        padding-bottom: 10px;
+        margin-bottom: 12px;
+    }
+
+    .ap-menu-link {
+        justify-content: center;
+        padding: 10px 0;
+    }
+
+    .ap-menu-link i {
+        width: auto;
+    }
+
+    .ap-main {
+        padding: 16px 14px;
+        min-width: 0;
+    }
+
+    .admin-header {
+        margin-bottom: 18px;
+        padding-bottom: 14px;
+    }
+
+    .admin-title {
+        font-size: 20px;
+    }
+
+    .admin-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .admin-stat-card {
+        padding: 16px;
+    }
+
+    /* Every inline-styled grid inside the admin shell or the
+       slide-over form panels collapses to one column. */
+    .ap-shell .grid[style*="grid-template-columns"],
+    .admin-panel-overlay [style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    .ap-shell .grid[style*="margin-top: 30px"] {
+        margin-top: 20px !important;
+    }
+
+    .admin-table-card {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    .admin-panel-overlay {
+        width: 100%;
+    }
+
+    .admin-panel-header,
+    .admin-panel-body,
+    .admin-panel-footer {
+        padding: 16px;
+    }
+
+    .ap-gallery-list {
+        grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    }
+}
+
+/* ==========================================
    Drag & drop reordering (produtos / artigos)
    ========================================== */
 .admin-table tr[draggable="true"] {
