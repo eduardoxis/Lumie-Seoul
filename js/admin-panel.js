@@ -89,6 +89,15 @@ function bindStaticAdminEvents() {
 
     // ---- Produtos ----
     document.getElementById('ap-new-product-btn')?.addEventListener('click', () => openProductPanel('new'));
+    document.getElementById('ap-import-json-btn')?.addEventListener('click', () => {
+        document.getElementById('ap-import-json-input').click();
+    });
+    document.getElementById('ap-import-json-input')?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) handleImportJsonFile(file);
+        e.target.value = ''; // allow re-selecting the same file later
+    });
+    document.getElementById('ap-import-close-btn')?.addEventListener('click', closeImportModal);
     document.getElementById('ap-product-panel-close')?.addEventListener('click', closeProductPanel);
     document.getElementById('ap-product-panel-cancel')?.addEventListener('click', closeProductPanel);
     document.getElementById('ap-save-product-btn')?.addEventListener('click', saveProduct);
@@ -750,6 +759,115 @@ async function saveProduct() {
         console.error("Save product error: ", e);
         alert("Erro ao salvar produto.");
     }
+}
+
+// ============================================================
+// IMPORTAR PRODUTOS VIA JSON
+// Lê um arquivo .json (array de produtos), normaliza os campos
+// e grava um por um na coleção "produtos", atualizando uma
+// barra de progresso em tempo real.
+// ============================================================
+function handleImportJsonFile(file) {
+    if (!file.name.toLowerCase().endsWith('.json')) {
+        alert('Por favor, selecione um arquivo .json válido.');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+        let parsed;
+        try {
+            parsed = JSON.parse(event.target.result);
+        } catch (err) {
+            alert('Não foi possível ler o arquivo: JSON inválido.');
+            return;
+        }
+
+        // Aceita tanto um array puro quanto { produtos: [...] }
+        const products = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.produtos) ? parsed.produtos : null);
+        if (!products || products.length === 0) {
+            alert('O arquivo JSON não contém uma lista de produtos válida.');
+            return;
+        }
+
+        await importProductsFromJson(products);
+    };
+    reader.onerror = () => alert('Erro ao ler o arquivo selecionado.');
+    reader.readAsText(file);
+}
+
+function normalizeImportedProduct(raw) {
+    const toArray = (val, splitter) => {
+        if (Array.isArray(val)) return val;
+        if (typeof val === 'string' && val.trim() !== '') return val.split(splitter).map(s => s.trim()).filter(Boolean);
+        return [];
+    };
+
+    return {
+        id: raw.id || undefined,
+        nome: raw.nome || '',
+        marca: raw.marca || '',
+        categoria: raw.categoria || '',
+        origem: raw.origem || '',
+        badge: raw.badge || '',
+        descricaoCurta: raw.descricaoCurta || '',
+        descricaoCompleta: raw.descricaoCompleta || '',
+        modoUso: raw.modoUso || '',
+        indicacao: raw.indicacao || '',
+        beneficios: toArray(raw.beneficios, '\n'),
+        ingredientes: toArray(raw.ingredientes, ','),
+        tiposPele: toArray(raw.tiposPele, ','),
+        imagensUrl: Array.isArray(raw.imagensUrl) && raw.imagensUrl.length ? raw.imagensUrl : ['img/cream.jpg']
+    };
+}
+
+async function importProductsFromJson(rawProducts) {
+    const modal = document.getElementById('ap-import-modal');
+    const statusEl = document.getElementById('ap-import-status');
+    const fillEl = document.getElementById('ap-import-progress-fill');
+    const countEl = document.getElementById('ap-import-count');
+    const closeBtn = document.getElementById('ap-import-close-btn');
+
+    modal.classList.add('active');
+    closeBtn.style.display = 'none';
+    statusEl.textContent = 'Importando produtos para o Firestore...';
+    fillEl.style.width = '0%';
+
+    const total = rawProducts.length;
+    let imported = 0;
+    let failed = 0;
+
+    for (let i = 0; i < total; i++) {
+        const productData = normalizeImportedProduct(rawProducts[i]);
+        if (!productData.nome) {
+            failed++;
+        } else {
+            try {
+                await DB.products.save(productData);
+                imported++;
+            } catch (err) {
+                console.error('Erro ao importar produto:', rawProducts[i], err);
+                failed++;
+            }
+        }
+
+        const progressPct = Math.round(((i + 1) / total) * 100);
+        fillEl.style.width = progressPct + '%';
+        countEl.textContent = `${i + 1} de ${total} produtos processados`;
+    }
+
+    statusEl.textContent = failed === 0
+        ? 'Importação concluída com sucesso!'
+        : `Importação concluída: ${imported} importados, ${failed} com erro.`;
+    countEl.textContent = `${imported} de ${total} produtos importados`;
+    closeBtn.style.display = 'block';
+
+    await logAudit('Importou', 'Produtos', '-', `${imported} produto(s) via JSON`);
+    await loadProductsTab();
+}
+
+function closeImportModal() {
+    document.getElementById('ap-import-modal')?.classList.remove('active');
 }
 
 async function deleteProduct(id) {
