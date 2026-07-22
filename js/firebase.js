@@ -596,12 +596,17 @@ const DB = {
 
     // --- AUTHENTICATION SHIM ---
     auth: {
-        login: async (email, password) => {
+        login: async (email, password, remember = false) => {
+            const storage = remember ? localStorage : sessionStorage;
+            const otherStorage = remember ? sessionStorage : localStorage;
+
             if (dbMode === "firebase" && firebaseAuth) {
                 try {
-                    const { signInWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
+                    const { signInWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
+                    await setPersistence(firebaseAuth, remember ? browserLocalPersistence : browserSessionPersistence);
                     const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
-                    sessionStorage.setItem("lumie_user_session", JSON.stringify({ email: userCredential.user.email }));
+                    otherStorage.removeItem("lumie_user_session");
+                    storage.setItem("lumie_user_session", JSON.stringify({ email: userCredential.user.email }));
                     return userCredential.user;
                 } catch (e) {
                     throw new Error("Erro de login Firebase: " + e.message);
@@ -612,7 +617,8 @@ const DB = {
             const admins = JSON.parse(localStorage.getItem('lumie_admins')) || [];
             const user = admins.find(a => a.email === email && a.password === password);
             if (user) {
-                sessionStorage.setItem("lumie_user_session", JSON.stringify({ email }));
+                otherStorage.removeItem("lumie_user_session");
+                storage.setItem("lumie_user_session", JSON.stringify({ email }));
                 return { email };
             } else {
                 throw new Error("E-mail ou senha incorretos.");
@@ -629,11 +635,12 @@ const DB = {
                 }
             }
             sessionStorage.removeItem("lumie_user_session");
+            localStorage.removeItem("lumie_user_session");
             return true;
         },
 
         getCurrentUser: () => {
-            const session = sessionStorage.getItem("lumie_user_session");
+            const session = sessionStorage.getItem("lumie_user_session") || localStorage.getItem("lumie_user_session");
             return session ? JSON.parse(session) : null;
         },
 
