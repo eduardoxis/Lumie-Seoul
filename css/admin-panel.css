@@ -696,8 +696,12 @@
     padding: 32px;
     border-radius: 8px;
     box-shadow: 0 20px 50px rgba(32, 26, 21, 0.18);
-    max-width: 380px;
+    max-width: 440px;
     width: 100%;
+}
+
+#ap-import-status {
+    word-break: break-word;
 }
 
 .ap-progress-bar-track {
