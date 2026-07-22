@@ -210,32 +210,40 @@
     border-radius: 10px;
     overflow: hidden;
     display: flex;
+    flex-direction: column;
     box-shadow: 0 20px 60px rgba(32, 26, 21, 0.18);
     transform: translateY(30px);
     transition: var(--transition-smooth, all 0.4s ease);
+    position: relative;
 }
 
-.ap-sidebar {
-    width: var(--admin-sidebar-width);
+.ap-shell-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 5;
+}
+
+.ap-topbar {
     flex-shrink: 0;
-    background-color: var(--admin-color-dark);
-    color: #FAF9F6;
-    padding: 26px 18px;
+    background-color: #FFFFFF;
+    color: #2C2621;
+    padding: 16px 60px 16px 24px;
     display: flex;
-    flex-direction: column;
-    overflow-y: auto;
+    align-items: center;
+    gap: 30px;
+    border-bottom: 1px solid var(--admin-color-border);
+    overflow-x: auto;
 }
 
 .ap-logo {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 20px;
+    font-size: 22px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-weight: 300;
-    margin-bottom: 30px;
-    text-align: center;
-    border-bottom: 1px solid rgba(250, 249, 246, 0.1);
-    padding-bottom: 15px;
+    flex-shrink: 0;
+    color: #2C2621;
 }
 
 .ap-logo span {
@@ -244,46 +252,52 @@
 
 .ap-menu {
     display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: 6px;
     flex-grow: 1;
 }
 
 .ap-menu-link {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 11px 14px;
-    color: #9B8E85;
-    font-size: 13px;
+    gap: 4px;
+    padding: 8px 14px;
+    color: #70655C;
+    font-size: 11px;
     font-weight: 500;
-    border-radius: 4px;
+    border-radius: 8px;
     transition: all 0.2s;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .ap-menu-link i {
     font-size: 15px;
-    width: 18px;
 }
 
 .ap-menu-link:hover,
 .ap-menu-link.active {
-    color: #FFFFFF;
-    background-color: rgba(255, 255, 255, 0.06);
+    color: #2C2621;
+    background-color: #F2EBE1;
 }
 
 .ap-menu-link.active {
-    border-left: 3px solid var(--admin-color-accent);
+    color: var(--admin-color-accent);
 }
 
-.ap-menu-divider {
-    margin-top: auto;
-    padding-top: 12px;
-    border-top: 1px solid rgba(250, 249, 246, 0.1);
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+.ap-menu-link.active i {
+    color: var(--admin-color-accent);
+}
+
+.ap-menu-link-danger {
+    margin-left: auto;
+    color: var(--admin-color-danger);
+}
+
+.ap-menu-link-danger:hover {
+    color: var(--admin-color-danger);
+    background-color: #FAF0ED;
 }
 
 .ap-main {
@@ -457,22 +471,21 @@
         padding: 0;
     }
 
-    .ap-sidebar {
-        width: 60px;
-        padding: 18px 8px;
+    .ap-topbar {
+        padding: 14px 50px 14px 16px;
+        gap: 16px;
     }
 
     .ap-logo {
-        font-size: 13px;
-        margin-bottom: 20px;
-    }
-
-    .ap-logo span {
-        display: none;
+        font-size: 16px;
     }
 
     .ap-menu-link span {
         display: none;
+    }
+
+    .ap-menu-link {
+        padding: 8px 10px;
     }
 
     .ap-main {
@@ -496,23 +509,17 @@
         min-width: 0;
     }
 
-    .ap-sidebar {
-        width: 52px;
-        padding: 14px 6px;
+    .ap-topbar {
+        padding: 12px 44px 12px 14px;
+        gap: 10px;
     }
 
     .ap-logo {
-        padding-bottom: 10px;
-        margin-bottom: 12px;
+        font-size: 14px;
     }
 
     .ap-menu-link {
-        justify-content: center;
-        padding: 10px 0;
-    }
-
-    .ap-menu-link i {
-        width: auto;
+        padding: 8px;
     }
 
     .ap-main {
