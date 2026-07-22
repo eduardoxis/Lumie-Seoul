@@ -29,12 +29,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/responsive.css">
-    <link rel="stylesheet" href="css/spa.css">
-    <link rel="stylesheet" href="css/admin-panel.css">
+    <link rel="stylesheet" href="css/style.css?v=2">
+    <link rel="stylesheet" href="css/components.css?v=2">
+    <link rel="stylesheet" href="css/animations.css?v=2">
+    <link rel="stylesheet" href="css/responsive.css?v=2">
+    <link rel="stylesheet" href="css/spa.css?v=2">
+    <link rel="stylesheet" href="css/admin-panel.css?v=2">
 </head>
 <body>
 
@@ -47,7 +47,7 @@
     <!-- 2. HEADER & DESKTOP NAVIGATION -->
     <header class="main-header">
         <div class="container header-container">
-            <a href="#inicio" class="logo logo-img-wrap" data-page="inicio"><img src="img/logo.png" alt="Lumié Seoul" class="logo-img"></a>
+            <a href="#inicio" class="logo logo-img-wrap" data-page="inicio"><img src="img/logo.png" alt="Lumié Seoul" class="logo-img" height="48"></a>
 
             <nav class="desktop-nav">
                 <a href="#inicio" class="nav-link" data-page="inicio">Início</a>
@@ -754,24 +754,22 @@
     <!-- ============================================================ -->
     <div id="ap-panel-overlay" class="ap-overlay">
         <div class="ap-shell">
-            <!-- SIDEBAR -->
-            <aside class="ap-sidebar">
+            <button id="ap-panel-close" class="ap-close-btn ap-shell-close" aria-label="Fechar Painel"><i class="fa-solid fa-xmark"></i></button>
+
+            <!-- TOP NAVBAR -->
+            <header class="ap-topbar">
                 <div class="ap-logo">Lumié <span>Seoul</span></div>
                 <nav class="ap-menu">
                     <a href="javascript:void(0)" class="ap-menu-link active" data-tab="dashboard"><i class="fa-solid fa-chart-line"></i> <span>Dashboard</span></a>
                     <a href="javascript:void(0)" class="ap-menu-link" data-tab="produtos"><i class="fa-solid fa-spa"></i> <span>Produtos</span></a>
-                    <a href="javascript:void(0)" class="ap-menu-link" data-tab="categorias"><i class="fa-solid fa-tags"></i> <span>Categorias & Marcas</span></a>
+                    <a href="javascript:void(0)" class="ap-menu-link" data-tab="categorias"><i class="fa-solid fa-tags"></i> <span>Categorias</span></a>
                     <a href="javascript:void(0)" class="ap-menu-link" data-tab="blog"><i class="fa-solid fa-pen-nib"></i> <span>Blog</span></a>
-                    <a href="javascript:void(0)" class="ap-menu-link" data-tab="administradores"><i class="fa-solid fa-users-gear"></i> <span>Administradores</span></a>
+                    <a href="javascript:void(0)" class="ap-menu-link" data-tab="administradores"><i class="fa-solid fa-users-gear"></i> <span>Usuários</span></a>
                     <a href="javascript:void(0)" class="ap-menu-link" data-tab="configuracoes"><i class="fa-solid fa-sliders"></i> <span>Configurações</span></a>
                     <a href="javascript:void(0)" class="ap-menu-link" data-tab="historico"><i class="fa-solid fa-clock-rotate-left"></i> <span>Histórico</span></a>
-
-                    <div class="ap-menu-divider">
-                        <a href="javascript:void(0)" id="ap-panel-close" class="ap-menu-link"><i class="fa-solid fa-xmark"></i> <span>Fechar Painel</span></a>
-                        <a href="javascript:void(0)" id="ap-logout-btn" class="ap-menu-link" style="color: var(--admin-color-danger);"><i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span></a>
-                    </div>
+                    <a href="javascript:void(0)" id="ap-logout-btn" class="ap-menu-link ap-menu-link-danger"><i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span></a>
                 </nav>
-            </aside>
+            </header>
 
             <!-- MAIN CONTENT -->
             <main class="ap-main">
@@ -1224,14 +1222,14 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/firebase.js"></script>
-    <script src="js/spa-router.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/whatsapp.js"></script>
-    <script src="js/catalogo.js"></script>
-    <script src="js/produto.js"></script>
-    <script src="js/blog.js"></script>
-    <script src="js/animations.js"></script>
-    <script src="js/admin-panel.js"></script>
+    <script src="js/firebase.js?v=2"></script>
+    <script src="js/spa-router.js?v=2"></script>
+    <script src="js/main.js?v=2"></script>
+    <script src="js/whatsapp.js?v=2"></script>
+    <script src="js/catalogo.js?v=2"></script>
+    <script src="js/produto.js?v=2"></script>
+    <script src="js/blog.js?v=2"></script>
+    <script src="js/animations.js?v=2"></script>
+    <script src="js/admin-panel.js?v=2"></script>
 </body>
 </html>
