@@ -802,22 +802,23 @@ function normalizeImportedProduct(raw) {
         if (typeof val === 'string' && val.trim() !== '') return val.split(splitter).map(s => s.trim()).filter(Boolean);
         return [];
     };
+    const pick = (...vals) => vals.find(v => v !== undefined && v !== null && v !== '') || '';
 
     return {
-        id: raw.id || undefined,
-        nome: raw.nome || '',
-        marca: raw.marca || '',
-        categoria: raw.categoria || '',
-        origem: raw.origem || '',
-        badge: raw.badge || '',
-        descricaoCurta: raw.descricaoCurta || '',
-        descricaoCompleta: raw.descricaoCompleta || '',
-        modoUso: raw.modoUso || '',
-        indicacao: raw.indicacao || '',
-        beneficios: toArray(raw.beneficios, '\n'),
-        ingredientes: toArray(raw.ingredientes, ','),
-        tiposPele: toArray(raw.tiposPele, ','),
-        imagensUrl: Array.isArray(raw.imagensUrl) && raw.imagensUrl.length ? raw.imagensUrl : ['img/cream.jpg']
+        id: raw.id || raw.slug || undefined,
+        nome: pick(raw.nome, raw.name, raw.titulo, raw.produto, raw.nome_produto),
+        marca: pick(raw.marca, raw.brand),
+        categoria: pick(raw.categoria, raw.category),
+        origem: pick(raw.origem, raw.origin),
+        badge: pick(raw.badge, raw.selo),
+        descricaoCurta: pick(raw.descricaoCurta, raw.descricao_curta, raw.shortDescription),
+        descricaoCompleta: pick(raw.descricaoCompleta, raw.descricao_completa, raw.descricao, raw.description),
+        modoUso: pick(raw.modoUso, raw.modo_uso, raw.usage),
+        indicacao: pick(raw.indicacao, raw.indication),
+        beneficios: toArray(raw.beneficios || raw.benefits, '\n'),
+        ingredientes: toArray(raw.ingredientes || raw.ingredients, ','),
+        tiposPele: toArray(raw.tiposPele || raw.tipos_pele || raw.skinTypes, ','),
+        imagensUrl: Array.isArray(raw.imagensUrl || raw.images) && (raw.imagensUrl || raw.images).length ? (raw.imagensUrl || raw.images) : ['img/cream.jpg']
     };
 }
 
@@ -836,11 +837,13 @@ async function importProductsFromJson(rawProducts) {
     const total = rawProducts.length;
     let imported = 0;
     let failed = 0;
+    let firstErrorMsg = '';
 
     for (let i = 0; i < total; i++) {
         const productData = normalizeImportedProduct(rawProducts[i]);
         if (!productData.nome) {
             failed++;
+            if (!firstErrorMsg) firstErrorMsg = `Produto no índice ${i} não tem um campo de nome reconhecido. Campos encontrados: ${Object.keys(rawProducts[i] || {}).join(', ') || 'nenhum'}.`;
         } else {
             try {
                 await DB.products.save(productData);
@@ -848,6 +851,7 @@ async function importProductsFromJson(rawProducts) {
             } catch (err) {
                 console.error('Erro ao importar produto:', rawProducts[i], err);
                 failed++;
+                if (!firstErrorMsg) firstErrorMsg = err.message || String(err);
             }
         }
 
@@ -858,7 +862,7 @@ async function importProductsFromJson(rawProducts) {
 
     statusEl.textContent = failed === 0
         ? 'Importação concluída com sucesso!'
-        : `Importação concluída: ${imported} importados, ${failed} com erro.`;
+        : `Importação concluída: ${imported} importados, ${failed} com erro.` + (firstErrorMsg ? ` Motivo: ${firstErrorMsg}` : '');
     countEl.textContent = `${imported} de ${total} produtos importados`;
     closeBtn.style.display = 'block';
 
