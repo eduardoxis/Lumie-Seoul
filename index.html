@@ -34,7 +34,7 @@
     <link rel="stylesheet" href="css/animations.css?v=2">
     <link rel="stylesheet" href="css/responsive.css?v=2">
     <link rel="stylesheet" href="css/spa.css?v=2">
-    <link rel="stylesheet" href="css/admin-panel.css?v=2">
+    <link rel="stylesheet" href="css/admin-panel.css?v=3">
 </head>
 <body>
 
@@ -864,7 +864,11 @@
                             <h1 class="admin-title">Gerenciar Produtos</h1>
                             <p style="font-size: 12px; color: #70655C; margin-top: 4px;">Adicione, edite ou remova produtos do seu catálogo virtual.</p>
                         </div>
-                        <button id="ap-new-product-btn" class="admin-btn admin-btn-accent"><i class="fa-solid fa-plus"></i> Novo Produto</button>
+                        <div style="display: flex; gap: 10px;">
+                            <button id="ap-import-json-btn" class="admin-btn" style="border: 1px solid var(--admin-color-border); background: #FFFFFF;"><i class="fa-solid fa-file-import"></i> Importar JSON</button>
+                            <input type="file" id="ap-import-json-input" accept=".json,application/json" style="display: none;">
+                            <button id="ap-new-product-btn" class="admin-btn admin-btn-accent"><i class="fa-solid fa-plus"></i> Novo Produto</button>
+                        </div>
                     </div>
                     <div class="admin-table-card">
                         <table class="admin-table">
@@ -875,6 +879,19 @@
                                 <tr><td colspan="8" style="text-align: center; color: #9B8E85; padding: 30px;">Carregando produtos...</td></tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- IMPORT JSON PROGRESS MODAL -->
+                <div id="ap-import-modal" class="ap-import-modal">
+                    <div class="ap-import-card">
+                        <h3 class="serif-title" style="font-size: 20px; margin-bottom: 6px;">Importando Produtos</h3>
+                        <p id="ap-import-status" style="font-size: 12px; color: #70655C; margin-bottom: 18px;">Lendo arquivo JSON...</p>
+                        <div class="ap-progress-bar-track">
+                            <div id="ap-import-progress-fill" class="ap-progress-bar-fill" style="width: 0%;"></div>
+                        </div>
+                        <p id="ap-import-count" style="font-size: 12px; color: #70655C; margin-top: 10px; text-align: center;">0 de 0 produtos importados</p>
+                        <button id="ap-import-close-btn" class="admin-btn admin-btn-accent" style="width: 100%; justify-content: center; margin-top: 20px; display: none;">Concluir</button>
                     </div>
                 </div>
 
@@ -1230,6 +1247,6 @@
     <script src="js/produto.js?v=2"></script>
     <script src="js/blog.js?v=2"></script>
     <script src="js/animations.js?v=2"></script>
-    <script src="js/admin-panel.js?v=2"></script>
+    <script src="js/admin-panel.js?v=3"></script>
 </body>
 </html>
