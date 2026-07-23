@@ -1286,7 +1286,7 @@ async function loadConfigTab() {
     try {
         apConfig = await DB.config.get();
 
-        document.getElementById('ap-cfg-whatsapp').value = apConfig.whatsappNumero || '5511999998888';
+        document.getElementById('ap-cfg-whatsapp').value = apConfig.whatsappNumero || '5561993193756';
         document.getElementById('ap-cfg-msg').value = apConfig.whatsappMensagemPadrao || '';
         document.getElementById('ap-cfg-seo-title').value = apConfig.seoTituloPadrao || '';
         document.getElementById('ap-cfg-seo-desc').value = apConfig.seoDescricaoPadrao || '';
