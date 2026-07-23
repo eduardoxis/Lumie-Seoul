@@ -4,7 +4,7 @@
  */
 
 const WHATSAPP_CONFIG = {
-    phone: '5511999998888', // Substitute with merchant number
+    phone: '5561993193756', // Número oficial Lumié Seoul
     defaultMessage: 'Olá! Gostaria de tirar algumas dúvidas sobre os produtos de skincare.'
 };
 
