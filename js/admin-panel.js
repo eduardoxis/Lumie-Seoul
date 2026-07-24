@@ -15,7 +15,7 @@ let apArticles = [];
 let apCurrentProductImages = []; // galeria do produto sendo editado no formulário
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (window.DB) {
+    if (window.dbReady) {
         initAdminAuthUI();
     } else {
         document.addEventListener('db-ready', initAdminAuthUI);
