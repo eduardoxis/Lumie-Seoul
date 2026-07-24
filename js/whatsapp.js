@@ -33,13 +33,15 @@ Poderia me passar mais informações?`;
 }
 
 /**
- * Builds a shareable, direct link to a product's detail page, preserving the
- * SPA's hash-based routing (#produto?id=...).
+ * Builds a shareable link to a product's detail page. This goes through
+ * /p/:id first — a serverless function that shows a rich WhatsApp/social
+ * preview card (photo, name, description) for crawlers, then redirects
+ * real visitors straight into the SPA's product page.
  * @param {string} productId
  * @returns {string}
  */
 function buildProductUrl(productId) {
-    return `${window.location.origin}${window.location.pathname}#produto?id=${encodeURIComponent(productId)}`;
+    return `${window.location.origin}/p/${encodeURIComponent(productId)}`;
 }
 
 /**
