@@ -30,6 +30,17 @@ let firebaseAuth = null;
 let firebaseStorage = null;
 let dbMode = "local"; // "local" or "firebase"
 
+// Sinal real de "banco pronto pra uso". Diferente de `window.DB` (que existe
+// desde o início do arquivo), esta flag só vira true depois que já sabemos
+// se o modo é "firebase" ou "local" — evita ler dados mockados por engano
+// enquanto o Firebase ainda está conectando.
+window.dbReady = false;
+
+function markDbReady(mode) {
+    window.dbReady = true;
+    document.dispatchEvent(new CustomEvent("db-ready", { detail: { mode } }));
+}
+
 // Load Firebase dynamically if configured
 if (isFirebaseConfigured) {
     try {
@@ -47,22 +58,30 @@ if (isFirebaseConfigured) {
                 firebaseStorage = Storage.getStorage(firebaseApp);
                 dbMode = "firebase";
                 console.log("Lumié Seoul: Connected to Firebase Cloud Services.");
-                
-                // Trigger event so other scripts know DB is ready
-                document.dispatchEvent(new CustomEvent("db-ready", { detail: { mode: "firebase" } }));
+                markDbReady("firebase");
+            }).catch((e) => {
+                console.error("Lumié Seoul: Failed to load Firebase SDK modules. Falling back to local storage.", e);
+                dbMode = "local";
+                markDbReady("local");
             });
+        }).catch((e) => {
+            console.error("Lumié Seoul: Failed to load Firebase App SDK. Falling back to local storage.", e);
+            dbMode = "local";
+            markDbReady("local");
         });
     } catch (e) {
         console.warn("Lumié Seoul: Failed to load Firebase SDKs. Falling back to local storage.", e);
         dbMode = "local";
+        markDbReady("local");
     }
 } else {
     console.log("Lumié Seoul: Firebase credentials not set. Running in LocalStorage fallback mode.");
     // Wait for DOM load to fire ready event
     document.addEventListener("DOMContentLoaded", () => {
-        document.dispatchEvent(new CustomEvent("db-ready", { detail: { mode: "local" } }));
+        markDbReady("local");
     });
 }
+
 
 // 2. Mock / Initial Datasets (Local Fallback storage)
 const INITIAL_PRODUCTS = [
