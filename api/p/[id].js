@@ -27,6 +27,7 @@ function absoluteUrl(origin, maybeRelative) {
     const value = typeof maybeRelative === 'string' ? maybeRelative.trim() : '';
     if (!value) return `${origin}/img/banner.jpg`;
     if (/^https?:\/\//i.test(value)) return value;
+    if (/^data:/i.test(value)) return `${origin}/img/banner.jpg`;
     return `${origin}/${value.replace(/^\//, '')}`;
 }
 
