@@ -15,10 +15,6 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-// Crawlers that need the raw HTML (with <meta> tags already filled in)
-// instead of a redirect, so the link preview card can be built.
-const BOT_UA_REGEX = /whatsapp|facebookexternalhit|facebot|twitterbot|telegrambot|slackbot|discordbot|linkedinbot|pinterest|skypeuripreview|redditbot|embedly|quora link preview|vkshare|w3c_validator|outbrain|whatsapp/i;
-
 function escapeHtml(str = '') {
     return String(str)
         .replace(/&/g, '&amp;')
@@ -37,8 +33,6 @@ module.exports = async (req, res) => {
     const { id } = req.query;
     const origin = `https://${req.headers.host}`;
     const appUrl = `${origin}/#produto?id=${encodeURIComponent(id || '')}`;
-    const userAgent = req.headers['user-agent'] || '';
-    const isBot = BOT_UA_REGEX.test(userAgent);
 
     let product = null;
     try {
@@ -50,14 +44,7 @@ module.exports = async (req, res) => {
         console.error('Erro ao buscar produto para preview:', err);
     }
 
-    // Não é um bot de preview: manda a pessoa direto para o app (SPA).
-    if (!isBot) {
-        res.writeHead(302, { Location: appUrl });
-        res.end();
-        return;
-    }
-
-    // Produto não encontrado: manda o bot para a página de catálogo geral.
+    // Produto não encontrado: manda todo mundo (bot ou humano) pro catálogo geral.
     if (!product) {
         res.writeHead(302, { Location: `${origin}/#catalogo` });
         res.end();
@@ -94,6 +81,7 @@ module.exports = async (req, res) => {
 </head>
 <body>
 <p>Redirecionando para <a href="${appUrl}">${title}</a>...</p>
+<script>window.location.replace(${JSON.stringify(appUrl)});</script>
 </body>
 </html>`;
 
