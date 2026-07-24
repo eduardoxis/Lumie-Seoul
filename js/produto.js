@@ -15,7 +15,7 @@ document.addEventListener("spaNavigate", (e) => {
         return;
     }
 
-    if (window.DB) carregarProduto(productId);
+    if (window.dbReady) carregarProduto(productId);
     else document.addEventListener("db-ready", () => carregarProduto(productId), { once: true });
 });
 
