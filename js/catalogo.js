@@ -49,7 +49,7 @@ function garantirCatalogoCarregado() {
             resolve();
         };
 
-        if (window.DB) start();
+        if (window.dbReady) start();
         else document.addEventListener("db-ready", start, { once: true });
     });
 }
