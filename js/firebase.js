@@ -721,6 +721,135 @@ const DB = {
             const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
             await deleteDoc(doc(firestoreDb, "admins", uid));
         }
+    },
+
+    // --- ESTOQUE (Gerenciamento de Estoque interno, separado do catálogo público) ---
+    estoque: {
+        produtos: {
+            getAll: async () => {
+                if (dbMode === "firebase" && firestoreDb) {
+                    try {
+                        const { getDocs, collection, query, orderBy } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                        const q = query(collection(firestoreDb, "estoque_produtos"), orderBy("criadoEm", "desc"));
+                        const snap = await getDocs(q);
+                        const list = [];
+                        snap.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
+                        return list;
+                    } catch (e) {
+                        console.error("Firebase read estoque_produtos error. Falling back to local.", e);
+                    }
+                }
+                return JSON.parse(localStorage.getItem('lumie_estoque_produtos')) || [];
+            },
+
+            getById: async (id) => {
+                if (dbMode === "firebase" && firestoreDb) {
+                    try {
+                        const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                        const docSnap = await getDoc(doc(firestoreDb, "estoque_produtos", id));
+                        if (docSnap.exists()) return { id: docSnap.id, ...docSnap.data() };
+                    } catch (e) {
+                        console.error("Firebase estoque product fetch error.", e);
+                    }
+                }
+                const list = JSON.parse(localStorage.getItem('lumie_estoque_produtos')) || [];
+                return list.find((p) => p.id === id) || null;
+            },
+
+            // Cria (sem id) ou atualiza (com id) um produto do estoque.
+            save: async (productData) => {
+                if (!productData.id) {
+                    productData.id = 'eq-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+                    productData.criadoEm = new Date().toISOString();
+                }
+
+                if (dbMode === "firebase" && firestoreDb) {
+                    try {
+                        const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                        await setDoc(doc(firestoreDb, "estoque_produtos", productData.id), productData, { merge: true });
+                        return productData.id;
+                    } catch (e) {
+                        console.error("Firebase write estoque product error. Attempting local save.", e);
+                    }
+                }
+
+                const list = JSON.parse(localStorage.getItem('lumie_estoque_produtos')) || [];
+                const index = list.findIndex((p) => p.id === productData.id);
+                if (index > -1) {
+                    list[index] = { ...list[index], ...productData };
+                } else {
+                    list.push(productData);
+                }
+                localStorage.setItem('lumie_estoque_produtos', JSON.stringify(list));
+                return productData.id;
+            },
+
+            delete: async (id) => {
+                if (dbMode === "firebase" && firestoreDb) {
+                    try {
+                        const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                        await deleteDoc(doc(firestoreDb, "estoque_produtos", id));
+                        return true;
+                    } catch (e) {
+                        console.error("Firebase delete estoque product error.", e);
+                    }
+                }
+
+                let list = JSON.parse(localStorage.getItem('lumie_estoque_produtos')) || [];
+                list = list.filter((p) => p.id !== id);
+                localStorage.setItem('lumie_estoque_produtos', JSON.stringify(list));
+                return true;
+            }
+        },
+
+        // Histórico de movimentações de estoque (entrada, saída, ajuste, transferência).
+        movimentacoes: {
+            add: async (entry) => {
+                const currentUser = DB.auth.getCurrentUser();
+                const record = {
+                    id: 'mv-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+                    produtoId: entry.produtoId,
+                    produtoNome: entry.produtoNome,
+                    tipo: entry.tipo,
+                    quantidade: entry.quantidade,
+                    localizacao: entry.localizacao || '',
+                    observacoes: entry.observacoes || '',
+                    usuario: (currentUser && currentUser.email) || 'sistema',
+                    data: new Date().toISOString()
+                };
+
+                if (dbMode === "firebase" && firestoreDb) {
+                    try {
+                        const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                        await setDoc(doc(firestoreDb, "estoque_movimentacoes", record.id), record);
+                        return record;
+                    } catch (e) {
+                        console.error("Firebase write movimentacao error. Falling back to local.", e);
+                    }
+                }
+
+                const list = JSON.parse(localStorage.getItem('lumie_estoque_movimentacoes')) || [];
+                list.unshift(record);
+                localStorage.setItem('lumie_estoque_movimentacoes', JSON.stringify(list.slice(0, 1000)));
+                return record;
+            },
+
+            getAll: async () => {
+                if (dbMode === "firebase" && firestoreDb) {
+                    try {
+                        const { getDocs, collection, query, orderBy, limit } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                        const q = query(collection(firestoreDb, "estoque_movimentacoes"), orderBy("data", "desc"), limit(500));
+                        const snap = await getDocs(q);
+                        const list = [];
+                        snap.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
+                        if (list.length) return list;
+                    } catch (e) {
+                        console.error("Firebase read movimentacoes error. Falling back to local.", e);
+                    }
+                }
+                return JSON.parse(localStorage.getItem('lumie_estoque_movimentacoes')) || [];
+            }
+        }
     }
 };
 
