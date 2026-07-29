@@ -25,6 +25,7 @@ function garantirCatalogoCarregado() {
         const start = async () => {
             try {
                 shopConfig = await DB.config.get();
+                aplicarBannerHome();
 
                 // Tempo real: qualquer alteração feita no painel admin reflete
                 // automaticamente aqui, sem precisar dar F5.
@@ -36,6 +37,12 @@ function garantirCatalogoCarregado() {
                         renderCatalog(productsList);
                         renderFeatured();
                     }
+                });
+
+                DB.config.listen((updatedConfig) => {
+                    shopConfig = updatedConfig;
+                    updateFilterSelects();
+                    aplicarBannerHome();
                 });
 
                 productsList = await DB.products.getAll();
@@ -61,6 +68,19 @@ function aplicarCategoriaPendente() {
     const pill = document.querySelector(`.category-pill[data-category="${categoriaPendente}"]`);
     if (pill) pill.click();
     categoriaPendente = null;
+}
+
+// Aplica o banner configurado no painel admin (aba Configurações) à imagem
+// do hero da Home. Se nenhum banner customizado tiver sido salvo ainda,
+// mantém a imagem padrão do repositório (img/banner.jpg).
+function aplicarBannerHome() {
+    const heroImg = document.getElementById('hero-banner-img');
+    if (!heroImg) return;
+
+    const bannerUrl = shopConfig.bannerDesktopUrl;
+    if (bannerUrl && bannerUrl !== heroImg.getAttribute('src')) {
+        heroImg.src = bannerUrl;
+    }
 }
 
 // Populate brands and categories dynamically in selectors
