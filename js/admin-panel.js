@@ -212,6 +212,7 @@ function switchAdminTab(tab) {
     switch (tab) {
         case 'dashboard': loadDashboardTab(); break;
         case 'produtos': loadProductsTab(); break;
+        case 'estoque': if (typeof loadEstoqueTab === 'function') loadEstoqueTab(); break;
         case 'categorias': loadCategoriasTab(); break;
         case 'blog': loadBlogTab(); break;
         case 'administradores': loadAdminsTab(); break;
