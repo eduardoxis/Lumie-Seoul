@@ -38,6 +38,7 @@
     <link rel="stylesheet" href="css/responsive.css?v=3">
     <link rel="stylesheet" href="css/spa.css?v=3">
     <link rel="stylesheet" href="css/admin-panel.css?v=4">
+    <link rel="stylesheet" href="css/estoque.css?v=1">
 </head>
 <body>
 
@@ -765,6 +766,7 @@
                 <nav class="ap-menu">
                     <a href="javascript:void(0)" class="ap-menu-link active" data-tab="dashboard"><i class="fa-solid fa-chart-line"></i> <span>Dashboard</span></a>
                     <a href="javascript:void(0)" class="ap-menu-link" data-tab="produtos"><i class="fa-solid fa-spa"></i> <span>Produtos</span></a>
+                    <a href="javascript:void(0)" class="ap-menu-link" data-tab="estoque"><i class="fa-solid fa-boxes-stacked"></i> <span>Estoque</span></a>
                     <a href="javascript:void(0)" class="ap-menu-link" data-tab="categorias"><i class="fa-solid fa-tags"></i> <span>Categorias</span></a>
                     <a href="javascript:void(0)" class="ap-menu-link" data-tab="blog"><i class="fa-solid fa-pen-nib"></i> <span>Blog</span></a>
                     <a href="javascript:void(0)" class="ap-menu-link" data-tab="administradores"><i class="fa-solid fa-users-gear"></i> <span>Usuários</span></a>
@@ -1056,6 +1058,160 @@
                     </div>
                 </div>
 
+                <!-- TAB: ESTOQUE (Gerenciamento de Estoque) -->
+                <div class="ap-tab-content" data-tab-content="estoque">
+                    <div class="admin-header">
+                        <div>
+                            <h1 class="admin-title">Gerenciamento de Estoque</h1>
+                            <p style="font-size: 12px; color: #70655C; margin-top: 4px;">Controle completo de produtos, quantidades e movimentações do seu estoque.</p>
+                        </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button id="ap-eq-import-btn" class="admin-btn" style="border: 1px solid var(--admin-color-border); background: #FFFFFF;"><i class="fa-solid fa-file-import"></i> Importar Dados</button>
+                            <div class="ap-eq-export-dropdown">
+                                <button id="ap-eq-export-btn" class="admin-btn" style="border: 1px solid var(--admin-color-border); background: #FFFFFF;"><i class="fa-solid fa-file-export"></i> Exportar <i class="fa-solid fa-chevron-down" style="font-size: 9px;"></i></button>
+                                <div id="ap-eq-export-menu" class="ap-eq-export-menu">
+                                    <a href="javascript:void(0)" data-export-format="xlsx"><i class="fa-solid fa-file-excel"></i> Excel (.xlsx)</a>
+                                    <a href="javascript:void(0)" data-export-format="json"><i class="fa-solid fa-file-code"></i> JSON</a>
+                                    <a href="javascript:void(0)" data-export-format="csv"><i class="fa-solid fa-file-csv"></i> CSV</a>
+                                </div>
+                            </div>
+                            <button id="ap-eq-new-product-btn" class="admin-btn admin-btn-accent"><i class="fa-solid fa-plus"></i> Novo Produto</button>
+                        </div>
+                    </div>
+
+                    <!-- Sub-navegação interna do módulo de Estoque -->
+                    <div class="ap-eq-subnav">
+                        <button class="ap-eq-subtab-btn active" data-eq-tab="dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
+                        <button class="ap-eq-subtab-btn" data-eq-tab="produtos"><i class="fa-solid fa-boxes-stacked"></i> Produtos</button>
+                        <button class="ap-eq-subtab-btn" data-eq-tab="movimentacoes"><i class="fa-solid fa-right-left"></i> Movimentações</button>
+                    </div>
+
+                    <!-- SUB-TAB: DASHBOARD DE ESTOQUE -->
+                    <div class="ap-eq-subtab-content active" data-eq-tab-content="dashboard">
+                        <div class="admin-stats-grid ap-eq-stats-grid">
+                            <div class="admin-stat-card">
+                                <div>
+                                    <div class="ap-eq-stat-label">Total de Produtos</div>
+                                    <div id="ap-eq-stat-total" class="admin-stat-num">0</div>
+                                </div>
+                                <i class="fa-solid fa-boxes-stacked"></i>
+                            </div>
+                            <div class="admin-stat-card">
+                                <div>
+                                    <div class="ap-eq-stat-label">Em Estoque</div>
+                                    <div id="ap-eq-stat-em-estoque" class="admin-stat-num">0</div>
+                                </div>
+                                <i class="fa-solid fa-check-circle" style="color: #607255;"></i>
+                            </div>
+                            <div class="admin-stat-card">
+                                <div>
+                                    <div class="ap-eq-stat-label">Estoque Baixo</div>
+                                    <div id="ap-eq-stat-baixo" class="admin-stat-num">0</div>
+                                </div>
+                                <i class="fa-solid fa-triangle-exclamation" style="color: #C99A3B;"></i>
+                            </div>
+                            <div class="admin-stat-card">
+                                <div>
+                                    <div class="ap-eq-stat-label">Sem Estoque</div>
+                                    <div id="ap-eq-stat-sem-estoque" class="admin-stat-num">0</div>
+                                </div>
+                                <i class="fa-solid fa-circle-xmark" style="color: var(--admin-color-danger);"></i>
+                            </div>
+                            <div class="admin-stat-card">
+                                <div>
+                                    <div class="ap-eq-stat-label">Valor Total em Estoque</div>
+                                    <div id="ap-eq-stat-valor-total" class="admin-stat-num" style="font-size: 20px;">R$ 0,00</div>
+                                </div>
+                                <i class="fa-solid fa-sack-dollar"></i>
+                            </div>
+                        </div>
+
+                        <div id="ap-eq-alerts-wrapper" style="margin-bottom: 28px;"></div>
+
+                        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 30px; display: grid;">
+                            <div>
+                                <h3 class="serif-title" style="font-size: 20px; margin-bottom: 1rem;">Produtos Mais Vendidos</h3>
+                                <div class="admin-table-card">
+                                    <table class="admin-table">
+                                        <thead><tr><th>Produto</th><th>SKU</th><th>Qtd. Vendida</th></tr></thead>
+                                        <tbody id="ap-eq-top-vendidos-tbody">
+                                            <tr><td colspan="3" style="text-align: center; color: #9B8E85;">Carregando...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="serif-title" style="font-size: 20px; margin-bottom: 1rem;">Adicionados Recentemente</h3>
+                                <div class="admin-table-card">
+                                    <table class="admin-table">
+                                        <thead><tr><th>Produto</th><th>SKU</th><th>Qtd.</th></tr></thead>
+                                        <tbody id="ap-eq-recentes-tbody">
+                                            <tr><td colspan="3" style="text-align: center; color: #9B8E85;">Carregando...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-TAB: PRODUTOS DO ESTOQUE -->
+                    <div class="ap-eq-subtab-content" data-eq-tab-content="produtos">
+                        <div class="ap-eq-toolbar">
+                            <div class="ap-eq-search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="ap-eq-search-input" placeholder="Buscar por nome, SKU ou código de barras...">
+                            </div>
+                            <select id="ap-eq-filter-categoria" class="admin-input ap-eq-filter-select"><option value="">Todas as Categorias</option></select>
+                            <select id="ap-eq-filter-fornecedor" class="admin-input ap-eq-filter-select"><option value="">Todos os Fornecedores</option></select>
+                            <select id="ap-eq-filter-status" class="admin-input ap-eq-filter-select">
+                                <option value="">Todos os Status</option>
+                                <option value="Ativo">Ativo</option>
+                                <option value="Inativo">Inativo</option>
+                            </select>
+                        </div>
+
+                        <div class="admin-table-card">
+                            <table class="admin-table ap-eq-sortable-table">
+                                <thead>
+                                    <tr>
+                                        <th data-sort="nome">Nome <i class="fa-solid fa-sort"></i></th>
+                                        <th data-sort="sku">SKU <i class="fa-solid fa-sort"></i></th>
+                                        <th data-sort="categoria">Categoria <i class="fa-solid fa-sort"></i></th>
+                                        <th data-sort="fornecedor">Fornecedor <i class="fa-solid fa-sort"></i></th>
+                                        <th data-sort="quantidade">Qtd. <i class="fa-solid fa-sort"></i></th>
+                                        <th data-sort="precoCusto">Custo <i class="fa-solid fa-sort"></i></th>
+                                        <th data-sort="precoVenda">Venda <i class="fa-solid fa-sort"></i></th>
+                                        <th data-sort="status">Status <i class="fa-solid fa-sort"></i></th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ap-eq-products-tbody">
+                                    <tr><td colspan="9" style="text-align: center; color: #9B8E85; padding: 30px;">Carregando produtos...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="ap-eq-pagination" class="ap-eq-pagination"></div>
+                    </div>
+
+                    <!-- SUB-TAB: MOVIMENTAÇÕES DE ESTOQUE -->
+                    <div class="ap-eq-subtab-content" data-eq-tab-content="movimentacoes">
+                        <div class="ap-eq-toolbar" style="justify-content: flex-end;">
+                            <button id="ap-eq-new-movement-btn" class="admin-btn admin-btn-accent"><i class="fa-solid fa-plus"></i> Registrar Movimentação</button>
+                        </div>
+                        <div class="admin-table-card">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr><th>Data/Hora</th><th>Produto</th><th>Tipo</th><th>Quantidade</th><th>Usuário</th><th>Observações</th></tr>
+                                </thead>
+                                <tbody id="ap-eq-mov-tbody">
+                                    <tr><td colspan="6" style="text-align: center; color: #9B8E85; padding: 30px;">Carregando movimentações...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="ap-eq-mov-pagination" class="ap-eq-pagination"></div>
+                    </div>
+                </div>
+
             </main>
         </div>
 
@@ -1239,6 +1395,192 @@
                 <button id="ap-save-admin-user-btn" class="admin-btn admin-btn-accent">Criar Usuário</button>
             </div>
         </div>
+
+        <!-- SIDE PANEL: FORMULÁRIO DE PRODUTO DO ESTOQUE -->
+        <div id="ap-eq-product-panel" class="admin-panel-overlay">
+            <div class="admin-panel-header">
+                <h3 id="ap-eq-product-panel-title" class="serif-title" style="font-size: 22px;">Novo Produto</h3>
+                <button id="ap-eq-product-panel-close" style="font-size: 20px; color: #70655C;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="admin-panel-body">
+                <form id="ap-eq-product-form">
+                    <input type="hidden" id="ap-eq-form-id">
+
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-eq-form-nome">Nome do Produto</label>
+                        <input type="text" id="ap-eq-form-nome" class="admin-input" required placeholder="Ex: Caixa de Papel A4">
+                    </div>
+
+                    <div class="admin-input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label class="admin-label" for="ap-eq-form-sku">SKU</label>
+                            <input type="text" id="ap-eq-form-sku" class="admin-input" required placeholder="Ex: PAP-A4-001">
+                        </div>
+                        <div>
+                            <label class="admin-label" for="ap-eq-form-barcode">Código de Barras</label>
+                            <input type="text" id="ap-eq-form-barcode" class="admin-input" placeholder="Ex: 7891234567890">
+                        </div>
+                    </div>
+
+                    <div class="admin-input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label class="admin-label" for="ap-eq-form-categoria">Categoria</label>
+                            <input type="text" id="ap-eq-form-categoria" class="admin-input" list="ap-eq-categorias-datalist" required placeholder="Ex: Papelaria">
+                            <datalist id="ap-eq-categorias-datalist"></datalist>
+                        </div>
+                        <div>
+                            <label class="admin-label" for="ap-eq-form-fornecedor">Fornecedor</label>
+                            <input type="text" id="ap-eq-form-fornecedor" class="admin-input" list="ap-eq-fornecedores-datalist" required placeholder="Ex: Distribuidora Central">
+                            <datalist id="ap-eq-fornecedores-datalist"></datalist>
+                        </div>
+                    </div>
+
+                    <div class="admin-input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label class="admin-label" for="ap-eq-form-quantidade">Quantidade em Estoque</label>
+                            <input type="number" id="ap-eq-form-quantidade" class="admin-input" min="0" step="1" required value="0">
+                        </div>
+                        <div>
+                            <label class="admin-label" for="ap-eq-form-min">Estoque Mínimo</label>
+                            <input type="number" id="ap-eq-form-min" class="admin-input" min="0" step="1" required value="0">
+                        </div>
+                    </div>
+
+                    <div class="admin-input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label class="admin-label" for="ap-eq-form-custo">Preço de Custo (R$)</label>
+                            <input type="number" id="ap-eq-form-custo" class="admin-input" min="0" step="0.01" required value="0">
+                        </div>
+                        <div>
+                            <label class="admin-label" for="ap-eq-form-venda">Preço de Venda (R$)</label>
+                            <input type="number" id="ap-eq-form-venda" class="admin-input" min="0" step="0.01" required value="0">
+                        </div>
+                    </div>
+
+                    <div class="admin-input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label class="admin-label" for="ap-eq-form-unidade">Unidade</label>
+                            <select id="ap-eq-form-unidade" class="admin-input">
+                                <option value="un">Unidade (un)</option>
+                                <option value="cx">Caixa (cx)</option>
+                                <option value="kg">Quilograma (kg)</option>
+                                <option value="g">Grama (g)</option>
+                                <option value="l">Litro (l)</option>
+                                <option value="ml">Mililitro (ml)</option>
+                                <option value="m">Metro (m)</option>
+                                <option value="par">Par</option>
+                                <option value="pct">Pacote (pct)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="admin-label" for="ap-eq-form-localizacao">Localização</label>
+                            <input type="text" id="ap-eq-form-localizacao" class="admin-input" placeholder="Ex: Prateleira A3">
+                        </div>
+                    </div>
+
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-eq-form-descricao">Descrição</label>
+                        <textarea id="ap-eq-form-descricao" class="admin-textarea" placeholder="Detalhes adicionais sobre o produto..."></textarea>
+                    </div>
+
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-eq-form-status">Status</label>
+                        <select id="ap-eq-form-status" class="admin-input">
+                            <option value="Ativo">Ativo</option>
+                            <option value="Inativo">Inativo</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="admin-panel-footer">
+                <button id="ap-eq-product-panel-cancel" class="admin-btn admin-btn-secondary">Cancelar</button>
+                <button id="ap-eq-save-product-btn" class="admin-btn admin-btn-accent">Salvar Produto</button>
+            </div>
+        </div>
+
+        <!-- SIDE PANEL: REGISTRAR MOVIMENTAÇÃO DE ESTOQUE -->
+        <div id="ap-eq-movement-panel" class="admin-panel-overlay" style="height: auto; top: 10%; border-radius: 8px; max-width: 480px; margin: 0 auto;">
+            <div class="admin-panel-header">
+                <h3 class="serif-title" style="font-size: 20px;">Registrar Movimentação</h3>
+                <button id="ap-eq-movement-panel-close" style="font-size: 20px; color: #70655C;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="admin-panel-body">
+                <form id="ap-eq-movement-form">
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-eq-mov-produto">Produto</label>
+                        <input type="text" id="ap-eq-mov-produto-busca" class="admin-input" list="ap-eq-mov-produtos-datalist" required placeholder="Digite para buscar pelo nome ou SKU...">
+                        <datalist id="ap-eq-mov-produtos-datalist"></datalist>
+                        <input type="hidden" id="ap-eq-mov-produto">
+                    </div>
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-eq-mov-tipo">Tipo de Movimentação</label>
+                        <select id="ap-eq-mov-tipo" class="admin-input">
+                            <option value="entrada">Entrada de Estoque</option>
+                            <option value="saida">Saída de Estoque</option>
+                            <option value="ajuste">Ajuste Manual</option>
+                            <option value="transferencia">Transferência</option>
+                        </select>
+                    </div>
+                    <div class="admin-input-group">
+                        <label id="ap-eq-mov-qtd-label" class="admin-label" for="ap-eq-mov-quantidade">Quantidade</label>
+                        <input type="number" id="ap-eq-mov-quantidade" class="admin-input" min="0" step="1" required value="1">
+                    </div>
+                    <div class="admin-input-group" id="ap-eq-mov-localizacao-group" style="display: none;">
+                        <label class="admin-label" for="ap-eq-mov-localizacao">Nova Localização</label>
+                        <input type="text" id="ap-eq-mov-localizacao" class="admin-input" placeholder="Ex: Prateleira B2">
+                    </div>
+                    <div class="admin-input-group">
+                        <label class="admin-label" for="ap-eq-mov-obs">Observações</label>
+                        <textarea id="ap-eq-mov-obs" class="admin-textarea" placeholder="Detalhes sobre esta movimentação..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="admin-panel-footer">
+                <button id="ap-eq-movement-panel-cancel" class="admin-btn admin-btn-secondary">Cancelar</button>
+                <button id="ap-eq-save-movement-btn" class="admin-btn admin-btn-accent">Registrar</button>
+            </div>
+        </div>
+
+        <!-- MODAL: IMPORTAÇÃO DE DADOS (JSON / Excel) -->
+        <div id="ap-eq-import-modal" class="ap-import-modal">
+            <div class="ap-import-card ap-eq-import-card">
+                <h3 class="serif-title" style="font-size: 20px; margin-bottom: 6px;">Importar Dados de Estoque</h3>
+
+                <div id="ap-eq-import-step-file">
+                    <p style="font-size: 12px; color: #70655C; margin-bottom: 16px;">Selecione um arquivo <strong>.json</strong>, <strong>.xlsx</strong> ou <strong>.xls</strong> com os produtos a importar.</p>
+                    <input type="file" id="ap-eq-import-file-input" accept=".json,application/json,.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
+                </div>
+
+                <div id="ap-eq-import-step-preview" style="display: none;">
+                    <div id="ap-eq-import-summary" class="ap-eq-import-summary"></div>
+                    <div id="ap-eq-import-errors" class="ap-eq-import-errors"></div>
+                    <div class="ap-eq-import-preview-wrap">
+                        <table class="admin-table">
+                            <thead><tr><th>Nome</th><th>SKU</th><th>Qtd.</th><th>Situação</th></tr></thead>
+                            <tbody id="ap-eq-import-preview-tbody"></tbody>
+                        </table>
+                    </div>
+                    <label class="ap-eq-import-checkbox">
+                        <input type="checkbox" id="ap-eq-import-update-existing" checked>
+                        Atualizar produtos existentes (mesmo SKU ou Código de Barras)
+                    </label>
+                </div>
+
+                <div id="ap-eq-import-step-progress" style="display: none;">
+                    <p id="ap-eq-import-status" style="font-size: 12px; color: #70655C; margin-bottom: 18px;">Importando produtos...</p>
+                    <div class="ap-progress-bar-track">
+                        <div id="ap-eq-import-progress-fill" class="ap-progress-bar-fill" style="width: 0%;"></div>
+                    </div>
+                    <p id="ap-eq-import-count" style="font-size: 12px; color: #70655C; margin-top: 10px; text-align: center;">0 de 0 produtos processados</p>
+                </div>
+
+                <div class="ap-eq-import-actions">
+                    <button id="ap-eq-import-cancel-btn" class="admin-btn admin-btn-secondary">Cancelar</button>
+                    <button id="ap-eq-import-confirm-btn" class="admin-btn admin-btn-accent" style="display: none;">Confirmar Importação</button>
+                    <button id="ap-eq-import-close-btn" class="admin-btn admin-btn-accent" style="display: none;">Concluir</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
@@ -1251,5 +1593,7 @@
     <script src="js/blog.js?v=3"></script>
     <script src="js/animations.js?v=3"></script>
     <script src="js/admin-panel.js?v=5"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="js/estoque.js?v=1"></script>
 </body>
 </html>
