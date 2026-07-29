@@ -137,7 +137,6 @@ async function renderRelatedProducts() {
 function initGalleryControls() {
     const thumbs = document.querySelectorAll("#p-thumbs .gallery-thumb");
     const mainImg = document.getElementById("p-main-img");
-    const mainImgWrapper = document.querySelector(".product-gallery-main");
 
     thumbs.forEach(thumb => {
         thumb.addEventListener("click", () => {
@@ -146,22 +145,6 @@ function initGalleryControls() {
             mainImg.src = thumb.dataset.img;
         });
     });
-
-    if (mainImgWrapper && mainImg) {
-        mainImgWrapper.onmousemove = (e) => {
-            const { left, top, width, height } = mainImgWrapper.getBoundingClientRect();
-            const x = ((e.clientX - left) / width) * 100;
-            const y = ((e.clientY - top) / height) * 100;
-
-            mainImg.style.transformOrigin = `${x}% ${y}%`;
-            mainImg.style.transform = "scale(1.5)";
-        };
-
-        mainImgWrapper.onmouseleave = () => {
-            mainImg.style.transform = "scale(1)";
-            mainImg.style.transformOrigin = "center center";
-        };
-    }
 }
 
 function initTabControls() {
