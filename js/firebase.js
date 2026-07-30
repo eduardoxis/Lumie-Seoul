@@ -567,6 +567,39 @@ const DB = {
         }
     },
 
+    // --- STORAGE (Upload de Imagens) ---
+    // Faz upload do arquivo para o Firebase Storage e devolve a URL pública
+    // (curta) para ser salva no Firestore. Isso evita o bug de salvar a
+    // imagem inteira em base64 dentro do documento de configuração/produto/
+    // artigo, o que estoura o limite de 1 MiB por documento do Firestore
+    // (e a cota do localStorage no fallback local).
+    storage: {
+        uploadImage: async (file, folder = 'uploads') => {
+            if (dbMode === "firebase" && firebaseStorage) {
+                const { ref, uploadBytes, getDownloadURL } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js");
+                const safeName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+                const storageRef = ref(firebaseStorage, `${folder}/${safeName}`);
+                await uploadBytes(storageRef, file);
+                return await getDownloadURL(storageRef);
+            }
+
+            // Fallback SEM Firebase (modo local/dev): não existe um servidor de
+            // arquivos disponível, então convertemos para base64 apenas para
+            // pré-visualização em memória/localStorage. Isso é aceitável só
+            // porque o modo "local" já não persiste nada em um banco real —
+            // em produção (dbMode === "firebase") este caminho não é usado.
+            if (file.size > 700 * 1024) {
+                throw new Error('Imagem grande demais para o modo local (sem Firebase configurado). Use uma imagem menor que 700KB ou configure o Firebase Storage.');
+            }
+            return await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = () => reject(new Error('Falha ao ler o arquivo.'));
+                reader.readAsDataURL(file);
+            });
+        }
+    },
+
     // --- AUDIT LOG (Histórico de Ações do Painel) ---
     historico: {
         add: async (entry) => {
