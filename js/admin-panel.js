@@ -13,6 +13,7 @@ let apConfig = {};
 let apProducts = [];
 let apArticles = [];
 let apCurrentProductImages = []; // galeria do produto sendo editado no formulário
+let apPendingUploads = 0; // nº de uploads de imagem em andamento (bloqueia "Salvar" enquanto > 0)
 
 document.addEventListener('DOMContentLoaded', () => {
     if (window.dbReady) {
@@ -118,15 +119,24 @@ function bindStaticAdminEvents() {
     document.getElementById('ap-blog-panel-close')?.addEventListener('click', closeBlogPanel);
     document.getElementById('ap-blog-panel-cancel')?.addEventListener('click', closeBlogPanel);
     document.getElementById('ap-save-blog-btn')?.addEventListener('click', saveArticle);
-    document.getElementById('ap-b-form-file')?.addEventListener('change', (e) => {
+    document.getElementById('ap-b-form-file')?.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            document.getElementById('ap-b-form-img-url').value = event.target.result;
-            showBlogPreview(event.target.result);
-        };
-        reader.readAsDataURL(file);
+        const input = document.getElementById('ap-b-form-img-url');
+        input.disabled = true;
+        apPendingUploads++;
+        try {
+            const url = await DB.storage.uploadImage(file, 'blog');
+            input.value = url;
+            showBlogPreview(url);
+        } catch (err) {
+            console.error('Erro ao enviar imagem de capa:', err);
+            alert('Falha ao enviar a imagem: ' + err.message);
+        } finally {
+            input.disabled = false;
+            apPendingUploads--;
+            e.target.value = '';
+        }
     });
     document.getElementById('ap-b-form-img-url')?.addEventListener('input', (e) => showBlogPreview(e.target.value));
 
@@ -138,14 +148,26 @@ function bindStaticAdminEvents() {
 
     // ---- Configurações ----
     document.getElementById('ap-config-form')?.addEventListener('submit', saveConfigForm);
-    document.getElementById('ap-cfg-banner-file')?.addEventListener('change', (e) => {
+    document.getElementById('ap-cfg-banner-file')?.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            document.getElementById('ap-cfg-banner-desktop').value = event.target.result;
-        };
-        reader.readAsDataURL(file);
+        const input = document.getElementById('ap-cfg-banner-desktop');
+        const previousValue = input.value;
+        input.disabled = true;
+        input.value = 'Enviando imagem...';
+        apPendingUploads++;
+        try {
+            const url = await DB.storage.uploadImage(file, 'banners');
+            input.value = url;
+        } catch (err) {
+            console.error('Erro ao enviar banner:', err);
+            alert('Falha ao enviar a imagem: ' + err.message);
+            input.value = previousValue;
+        } finally {
+            input.disabled = false;
+            apPendingUploads--;
+            e.target.value = '';
+        }
     });
 }
 
@@ -708,18 +730,29 @@ function addProductImageFromUrl() {
     renderProductGallery();
 }
 
-function addProductImagesFromFiles(fileList) {
-    Array.from(fileList).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            apCurrentProductImages.push(event.target.result);
+async function addProductImagesFromFiles(fileList) {
+    const files = Array.from(fileList);
+    for (const file of files) {
+        apPendingUploads++;
+        try {
+            const url = await DB.storage.uploadImage(file, 'produtos');
+            apCurrentProductImages.push(url);
             renderProductGallery();
-        };
-        reader.readAsDataURL(file);
-    });
+        } catch (err) {
+            console.error('Erro ao enviar imagem do produto:', err);
+            alert(`Falha ao enviar a imagem "${file.name}": ${err.message}`);
+        } finally {
+            apPendingUploads--;
+        }
+    }
 }
 
 async function saveProduct() {
+    if (apPendingUploads > 0) {
+        alert('Aguarde o upload das imagens terminar antes de salvar.');
+        return;
+    }
+
     const nome = document.getElementById('ap-p-form-nome').value;
     if (!nome) {
         alert("Por favor, digite o nome do produto.");
@@ -1110,6 +1143,11 @@ function showBlogPreview(url) {
 }
 
 async function saveArticle() {
+    if (apPendingUploads > 0) {
+        alert('Aguarde o upload da imagem terminar antes de salvar.');
+        return;
+    }
+
     const titulo = document.getElementById('ap-b-form-titulo').value;
     if (!titulo) {
         alert("Por favor, digite o título do artigo.");
@@ -1299,6 +1337,11 @@ async function loadConfigTab() {
 
 async function saveConfigForm(e) {
     e.preventDefault();
+
+    if (apPendingUploads > 0) {
+        alert('Aguarde o upload da imagem terminar antes de salvar.');
+        return;
+    }
 
     const whatsappNumero = document.getElementById('ap-cfg-whatsapp').value.trim();
     const whatsappMensagemPadrao = document.getElementById('ap-cfg-msg').value;
