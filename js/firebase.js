@@ -27,7 +27,6 @@ const isFirebaseConfigured =
 let firebaseApp = null;
 let firestoreDb = null;
 let firebaseAuth = null;
-let firebaseStorage = null;
 let dbMode = "local"; // "local" or "firebase"
 
 // Sinal real de "banco pronto pra uso". Diferente de `window.DB` (que existe
@@ -50,12 +49,10 @@ if (isFirebaseConfigured) {
             
             Promise.all([
                 import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"),
-                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"),
-                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js")
-            ]).then(([Firestore, Auth, Storage]) => {
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js")
+            ]).then(([Firestore, Auth]) => {
                 firestoreDb = Firestore.getFirestore(firebaseApp);
                 firebaseAuth = Auth.getAuth(firebaseApp);
-                firebaseStorage = Storage.getStorage(firebaseApp);
                 dbMode = "firebase";
                 console.log("Lumié Seoul: Connected to Firebase Cloud Services.");
                 markDbReady("firebase");
@@ -252,6 +249,34 @@ function sortByOrdem(list) {
         const oa = typeof a.ordem === 'number' ? a.ordem : 9999;
         const ob = typeof b.ordem === 'number' ? b.ordem : 9999;
         return oa - ob;
+    });
+}
+
+// Helper: redimensiona (largura máxima) e recomprime uma imagem como JPEG
+// no próprio navegador, usando <canvas>. Usado para manter as imagens
+// salvas como base64 dentro do limite de tamanho do Firestore/localStorage,
+// já que o projeto não usa Firebase Storage (evita custo do plano Blaze).
+function compressImageToDataUrl(file, { maxWidth = 1600, quality = 0.75 } = {}) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Falha ao ler o arquivo.'));
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onerror = () => reject(new Error('Arquivo de imagem inválido.'));
+            img.onload = () => {
+                const scale = Math.min(1, maxWidth / img.width);
+                const w = Math.max(1, Math.round(img.width * scale));
+                const h = Math.max(1, Math.round(img.height * scale));
+                const canvas = document.createElement('canvas');
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
     });
 }
 
@@ -567,36 +592,27 @@ const DB = {
         }
     },
 
-    // --- STORAGE (Upload de Imagens) ---
-    // Faz upload do arquivo para o Firebase Storage e devolve a URL pública
-    // (curta) para ser salva no Firestore. Isso evita o bug de salvar a
-    // imagem inteira em base64 dentro do documento de configuração/produto/
-    // artigo, o que estoura o limite de 1 MiB por documento do Firestore
-    // (e a cota do localStorage no fallback local).
+    // --- IMAGENS (compressão client-side, sem Firebase Storage) ---
+    // Sem Storage (que hoje exige plano Blaze), a única forma sem custo de
+    // salvar imagem é embutida como base64 no próprio documento. Para isso
+    // não estourar o limite de 1 MiB por documento do Firestore, a imagem é
+    // redimensionada e recomprimida como JPEG no navegador antes de virar
+    // base64. Isso resolve o erro de salvar, mas o documento ainda fica mais
+    // pesado do que ficaria com um serviço de arquivo dedicado — é o
+    // trade-off de não usar Storage.
     storage: {
         uploadImage: async (file, folder = 'uploads') => {
-            if (dbMode === "firebase" && firebaseStorage) {
-                const { ref, uploadBytes, getDownloadURL } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js");
-                const safeName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-                const storageRef = ref(firebaseStorage, `${folder}/${safeName}`);
-                await uploadBytes(storageRef, file);
-                return await getDownloadURL(storageRef);
-            }
+            const dataUrl = await compressImageToDataUrl(file, { maxWidth: 1600, quality: 0.75 });
 
-            // Fallback SEM Firebase (modo local/dev): não existe um servidor de
-            // arquivos disponível, então convertemos para base64 apenas para
-            // pré-visualização em memória/localStorage. Isso é aceitável só
-            // porque o modo "local" já não persiste nada em um banco real —
-            // em produção (dbMode === "firebase") este caminho não é usado.
-            if (file.size > 700 * 1024) {
-                throw new Error('Imagem grande demais para o modo local (sem Firebase configurado). Use uma imagem menor que 700KB ou configure o Firebase Storage.');
+            // 1 MiB do Firestore ≈ 1.398.101 caracteres em base64. Deixamos
+            // bastante margem porque o documento "configuracoes/geral" tem
+            // vários outros campos, e produtos podem ter várias fotos na
+            // mesma galeria (o limite é por documento, não por imagem).
+            const maxCharsPerImage = folder === 'produtos' ? 250 * 1024 : 500 * 1024;
+            if (dataUrl.length > maxCharsPerImage) {
+                throw new Error('Mesmo comprimida, a imagem ainda é grande demais para salvar. Tente uma foto com menor resolução.');
             }
-            return await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target.result);
-                reader.onerror = () => reject(new Error('Falha ao ler o arquivo.'));
-                reader.readAsDataURL(file);
-            });
+            return dataUrl;
         }
     },
 
