@@ -209,6 +209,7 @@
     max-height: 900px;
     border-radius: 10px;
     overflow: hidden;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
     box-shadow: 0 20px 60px rgba(32, 26, 21, 0.18);
@@ -304,6 +305,8 @@
     flex-grow: 1;
     padding: 34px;
     overflow-y: auto;
+    overflow-x: hidden;
+    touch-action: pan-y;
     background-color: #FDFCFB;
 }
 
