@@ -62,13 +62,13 @@
        with padding-top. */
     .hero-section {
         height: auto !important;
-        min-height: 100vh !important;
+        min-height: 0 !important;
         max-height: none !important;
         display: flex !important;
         align-items: center !important;
         text-align: left;
         padding-top: 80px !important;
-        padding-bottom: var(--space-lg) !important;
+        padding-bottom: var(--space-xl) !important;
     }
 
     .hero-bg {
@@ -230,7 +230,7 @@
 
     /* Floating benefits card - mobile compact version */
     .benefits-overlay-wrapper {
-        margin-top: 0;
+        margin-top: -30px;
         margin-bottom: var(--space-md);
         position: relative;
         z-index: 3;
