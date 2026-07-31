@@ -83,7 +83,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        object-position: center 20%;
+        object-position: 88% 35%;
     }
 
     /* Horizontal scrim like desktop: opaque behind the text on the
