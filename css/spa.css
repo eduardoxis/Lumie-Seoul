@@ -200,6 +200,13 @@
     margin-bottom: 6px;
 }
 
+.single-post-body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-sm);
+    margin: var(--space-sm) 0;
+}
+
 @media (max-width: 768px) {
     .blog-container {
         grid-template-columns: 1fr;
