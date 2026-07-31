@@ -232,9 +232,8 @@
     padding: 16px 60px 16px 24px;
     display: flex;
     align-items: center;
-    gap: 30px;
+    gap: 16px;
     border-bottom: 1px solid var(--admin-color-border);
-    overflow-x: auto;
 }
 
 .ap-logo {
@@ -256,6 +255,14 @@
     align-items: center;
     gap: 6px;
     flex-grow: 1;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.ap-menu::-webkit-scrollbar {
+    display: none;
 }
 
 .ap-menu-link {
@@ -294,6 +301,11 @@
 .ap-menu-link-danger {
     margin-left: auto;
     color: var(--admin-color-danger);
+}
+
+.ap-menu-link-fixed {
+    flex-shrink: 0;
+    margin-left: 8px;
 }
 
 .ap-menu-link-danger:hover {
