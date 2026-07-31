@@ -477,7 +477,12 @@
     }
 
     .ap-logo {
-        font-size: 16px;
+        display: none;
+    }
+
+    .ap-menu {
+        justify-content: space-around;
+        gap: 10px;
     }
 
     .ap-menu-link span {
@@ -485,7 +490,11 @@
     }
 
     .ap-menu-link {
-        padding: 8px 10px;
+        padding: 12px 16px;
+    }
+
+    .ap-menu-link i {
+        font-size: 18px;
     }
 
     .ap-main {
@@ -511,15 +520,25 @@
 
     .ap-topbar {
         padding: 12px 44px 12px 14px;
-        gap: 10px;
+        gap: 8px;
     }
 
     .ap-logo {
-        font-size: 14px;
+        display: none;
+    }
+
+    .ap-menu {
+        justify-content: space-around;
+        gap: 6px;
+        width: 100%;
     }
 
     .ap-menu-link {
-        padding: 8px;
+        padding: 12px 14px;
+    }
+
+    .ap-menu-link i {
+        font-size: 17px;
     }
 
     .ap-main {
