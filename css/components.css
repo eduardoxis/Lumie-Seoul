@@ -326,6 +326,22 @@
 /* ==========================================
    3. PRODUCT CARDS & GRID
    ========================================== */
+.contact-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
+}
+
+.contact-cards-grid > div {
+    min-width: 0;
+}
+
+@media (max-width: 600px) {
+    .contact-cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .bastidores-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
