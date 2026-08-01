@@ -848,6 +848,49 @@ const DB = {
                 list = list.filter((p) => p.id !== id);
                 localStorage.setItem('lumie_estoque_produtos', JSON.stringify(list));
                 return true;
+            },
+
+            // Importa/atualiza os produtos do catálogo público (coleção "produtos")
+            // dentro do estoque interno. Funciona tanto no modo Firebase quanto no
+            // modo local, pois reaproveita os próprios métodos do DB em vez de
+            // acessar o Firestore diretamente.
+            syncFromCatalog: async () => {
+                const catalogProducts = await DB.products.getAll();
+                const stockProducts = await DB.estoque.produtos.getAll();
+
+                let novos = 0;
+                let atualizados = 0;
+
+                for (const catalogProduct of catalogProducts) {
+                    const referenceData = {
+                        nome: catalogProduct.nome || '',
+                        sku: catalogProduct.sku || catalogProduct.id,
+                        categoria: catalogProduct.categoria || '',
+                        fornecedor: catalogProduct.marca || ''
+                    };
+
+                    const existing = stockProducts.find((p) => p.id === catalogProduct.id);
+                    if (existing) {
+                        await DB.estoque.produtos.save({ ...existing, ...referenceData, id: catalogProduct.id });
+                        atualizados++;
+                    } else {
+                        await DB.estoque.produtos.save({
+                            id: catalogProduct.id,
+                            ...referenceData,
+                            quantidade: 0,
+                            estoqueMinimo: 5,
+                            precoCusto: 0,
+                            precoVenda: 0,
+                            unidade: 'un',
+                            localizacao: '',
+                            descricao: '',
+                            status: 'Ativo'
+                        });
+                        novos++;
+                    }
+                }
+
+                return { novos, atualizados, total: catalogProducts.length };
             }
         },
 
