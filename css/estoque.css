@@ -1,0 +1,395 @@
+/*
+ * Lumié Seoul - Módulo de Gerenciamento de Estoque
+ * Pure Vanilla CSS3 — reaproveita as variáveis e classes já existentes
+ * em admin-panel.css (admin-input, admin-btn, admin-table, etc.)
+ */
+
+/* ==========================================
+   Sub-navegação interna (Dashboard / Produtos / Movimentações)
+   ========================================== */
+.ap-eq-subnav {
+    display: flex;
+    gap: 6px;
+    border-bottom: 1px solid var(--admin-color-border);
+    margin-bottom: 24px;
+    overflow-x: auto;
+}
+
+.ap-eq-subtab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #70655C;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.ap-eq-subtab-btn:hover {
+    color: #2C2621;
+}
+
+.ap-eq-subtab-btn.active {
+    color: var(--admin-color-accent);
+    border-bottom-color: var(--admin-color-accent);
+}
+
+.ap-eq-subtab-content {
+    display: none;
+}
+
+.ap-eq-subtab-content.active {
+    display: block;
+    animation: apFadeIn 0.25s ease;
+}
+
+.ap-eq-stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #9B8E85;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.ap-eq-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+/* ==========================================
+   Barra de ferramentas: busca + filtros
+   ========================================== */
+.ap-eq-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+    align-items: center;
+}
+
+.ap-eq-search-box {
+    position: relative;
+    flex: 1 1 260px;
+    min-width: 200px;
+}
+
+.ap-eq-search-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9B8E85;
+    font-size: 13px;
+}
+
+.ap-eq-search-box input {
+    width: 100%;
+    padding: 11px 14px 11px 38px;
+    border: 1px solid var(--admin-color-border);
+    background: #FAF9F6;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.ap-eq-search-box input:focus {
+    border-color: var(--admin-color-accent);
+    background: #FFFFFF;
+}
+
+.ap-eq-filter-select {
+    flex: 0 1 200px;
+    min-width: 160px;
+    font-size: 12px;
+    padding: 10px 12px;
+}
+
+/* ==========================================
+   Cabeçalhos de tabela ordenáveis
+   ========================================== */
+.ap-eq-sortable-table th[data-sort] {
+    cursor: pointer;
+    user-select: none;
+}
+
+.ap-eq-sortable-table th[data-sort] i {
+    font-size: 9px;
+    margin-left: 4px;
+    color: #C9BFB5;
+}
+
+.ap-eq-sortable-table th[data-sort].ap-eq-sort-active i {
+    color: var(--admin-color-accent);
+}
+
+/* ==========================================
+   Badges de status e tipo de movimentação
+   ========================================== */
+.ap-eq-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 99px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.ap-eq-badge-ativo { background: #EBF6EE; color: #607255; }
+.ap-eq-badge-inativo { background: #F4EFEA; color: #9B8E85; }
+.ap-eq-badge-ok { background: #EBF6EE; color: #607255; }
+.ap-eq-badge-baixo { background: #FCF3DE; color: #9C7A21; }
+.ap-eq-badge-sem { background: #FAF0ED; color: var(--admin-color-danger); }
+
+.ap-eq-badge-entrada { background: #EBF6EE; color: #607255; }
+.ap-eq-badge-saida { background: #FAF0ED; color: var(--admin-color-danger); }
+.ap-eq-badge-ajuste { background: #EAF1FB; color: #3B5C8F; }
+.ap-eq-badge-transferencia { background: #F2EBE1; color: var(--admin-color-accent); }
+
+.ap-eq-qty-baixo { color: #9C7A21; font-weight: 700; }
+.ap-eq-qty-sem { color: var(--admin-color-danger); font-weight: 700; }
+
+/* ==========================================
+   Alertas automáticos do dashboard
+   ========================================== */
+.ap-eq-alert-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #FFFFFF;
+    border: 1px solid var(--admin-color-border);
+    border-left: 3px solid var(--admin-color-accent);
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.ap-eq-alert-card.ap-eq-alert-danger { border-left-color: var(--admin-color-danger); }
+.ap-eq-alert-card.ap-eq-alert-warning { border-left-color: #C99A3B; }
+
+.ap-eq-alert-card i {
+    font-size: 16px;
+    margin-top: 2px;
+    color: var(--admin-color-accent);
+}
+
+.ap-eq-alert-card.ap-eq-alert-danger i { color: var(--admin-color-danger); }
+.ap-eq-alert-card.ap-eq-alert-warning i { color: #C99A3B; }
+
+.ap-eq-alert-title {
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.ap-eq-alert-empty {
+    font-size: 12px;
+    color: #9B8E85;
+    background: #FAF9F6;
+    border: 1px dashed var(--admin-color-border);
+    border-radius: 6px;
+    padding: 16px;
+    text-align: center;
+}
+
+/* ==========================================
+   Paginação
+   ========================================== */
+.ap-eq-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.ap-eq-page-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid var(--admin-color-border);
+    background: #FFFFFF;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #70655C;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.ap-eq-page-btn:hover:not(:disabled) {
+    border-color: var(--admin-color-accent);
+    color: var(--admin-color-accent);
+}
+
+.ap-eq-page-btn.active {
+    background: var(--admin-color-accent);
+    border-color: var(--admin-color-accent);
+    color: #FFFFFF;
+}
+
+.ap-eq-page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ==========================================
+   Menu de exportação (dropdown)
+   ========================================== */
+.ap-eq-export-dropdown {
+    position: relative;
+}
+
+.ap-eq-export-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: #FFFFFF;
+    border: 1px solid var(--admin-color-border);
+    border-radius: 6px;
+    box-shadow: 0 10px 30px rgba(32, 26, 21, 0.12);
+    min-width: 180px;
+    z-index: 20;
+    overflow: hidden;
+}
+
+.ap-eq-export-menu.active {
+    display: block;
+}
+
+.ap-eq-export-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: #2C2621;
+    transition: background 0.15s;
+}
+
+.ap-eq-export-menu a:hover {
+    background: #FAF9F6;
+    color: var(--admin-color-accent);
+}
+
+/* ==========================================
+   Modal de importação (JSON / Excel)
+   ========================================== */
+.ap-eq-import-card {
+    max-width: 640px;
+}
+
+.ap-eq-import-card input[type="file"] {
+    width: 100%;
+    font-size: 12px;
+    padding: 10px;
+    border: 1px dashed var(--admin-color-border);
+    border-radius: 4px;
+    background: #FAF9F6;
+}
+
+.ap-eq-import-summary {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: #70655C;
+    margin-bottom: 12px;
+}
+
+.ap-eq-import-summary strong {
+    color: #2C2621;
+}
+
+.ap-eq-import-errors {
+    max-height: 120px;
+    overflow-y: auto;
+    font-size: 11px;
+    color: var(--admin-color-danger);
+    background: #FAF0ED;
+    border: 1px solid #E8D7D0;
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    display: none;
+}
+
+.ap-eq-import-errors.active {
+    display: block;
+}
+
+.ap-eq-import-errors div {
+    margin-bottom: 4px;
+}
+
+.ap-eq-import-preview-wrap {
+    max-height: 260px;
+    overflow-y: auto;
+    border: 1px solid var(--admin-color-border);
+    border-radius: 6px;
+    margin-bottom: 14px;
+}
+
+.ap-eq-import-preview-wrap table {
+    font-size: 12px;
+}
+
+.ap-eq-import-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #70655C;
+    margin-bottom: 6px;
+    cursor: pointer;
+}
+
+.ap-eq-import-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+/* ==========================================
+   Responsivo
+   ========================================== */
+@media (max-width: 600px) {
+    .ap-eq-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ap-eq-search-box,
+    .ap-eq-filter-select {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+
+    .ap-eq-subnav {
+        gap: 2px;
+    }
+
+    .ap-eq-subtab-btn {
+        padding: 8px 10px;
+        font-size: 11px;
+    }
+
+    .ap-eq-export-menu {
+        right: auto;
+        left: 0;
+    }
+}
