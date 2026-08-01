@@ -675,6 +675,24 @@ const DB = {
                     const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
                     otherStorage.removeItem("lumie_user_session");
                     storage.setItem("lumie_user_session", JSON.stringify({ email: userCredential.user.email }));
+
+                    // Garante que este usuário apareça em "Administradores Autorizados",
+                    // mesmo que a conta tenha sido criada direto pelo Firebase Console
+                    // (sem passar pelo botão "Novo Administrador" do painel).
+                    try {
+                        const { doc, getDoc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                        const adminRef = doc(firestoreDb, "admins", userCredential.user.uid);
+                        const adminSnap = await getDoc(adminRef);
+                        if (!adminSnap.exists()) {
+                            await setDoc(adminRef, {
+                                email: userCredential.user.email,
+                                criadoEm: new Date().toISOString()
+                            });
+                        }
+                    } catch (e) {
+                        console.error("Não foi possível sincronizar o registro deste administrador.", e);
+                    }
+
                     return userCredential.user;
                 } catch (e) {
                     throw new Error("Erro de login Firebase: " + e.message);
