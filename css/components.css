@@ -326,6 +326,38 @@
 /* ==========================================
    3. PRODUCT CARDS & GRID
    ========================================== */
+.bastidores-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+}
+
+.bastidores-img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    display: block;
+}
+
+.bastidores-img.bastidores-tall {
+    height: 340px;
+    grid-row: span 2;
+}
+
+@media (max-width: 900px) {
+    .bastidores-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .bastidores-img,
+    .bastidores-img.bastidores-tall {
+        height: 220px;
+        grid-row: auto;
+    }
+}
+
 .products-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: var(--space-md);
