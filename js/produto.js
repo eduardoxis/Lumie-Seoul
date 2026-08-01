@@ -4,10 +4,14 @@
  */
 
 let currentProduct = null;
+let currentProductId = null;
+let currentPageIsProduto = false;
+let produtoListenerIniciado = false;
 
 document.addEventListener("spaNavigate", (e) => {
     const { page, params } = e.detail;
-    if (page !== "produto") return;
+    currentPageIsProduto = page === "produto";
+    if (!currentPageIsProduto) return;
 
     const productId = params.get("id");
     if (!productId) {
@@ -15,6 +19,7 @@ document.addEventListener("spaNavigate", (e) => {
         return;
     }
 
+    currentProductId = productId;
     if (window.dbReady) carregarProduto(productId);
     else document.addEventListener("db-ready", () => carregarProduto(productId), { once: true });
 });
@@ -31,9 +36,35 @@ async function carregarProduto(productId) {
         renderRelatedProducts();
         initGalleryControls();
         initTabControls();
+        iniciarAtualizacaoEmTempoReal();
     } catch (e) {
         console.error("Error loading product detail page: ", e);
     }
+}
+
+// Tempo real: se um admin editar (ou remover) este produto no painel,
+// a página reflete a mudança sozinha, sem precisar de F5. O listener é
+// montado uma única vez e permanece ativo enquanto o site estiver aberto,
+// só age quando a pessoa ainda está vendo a página de produto.
+function iniciarAtualizacaoEmTempoReal() {
+    if (produtoListenerIniciado) return;
+    produtoListenerIniciado = true;
+
+    DB.products.listen((updatedList) => {
+        if (!currentPageIsProduto || !currentProductId) return;
+
+        const updatedProduct = updatedList.find((p) => p.id === currentProductId);
+        if (!updatedProduct) {
+            // Produto foi removido do catálogo enquanto a pessoa via a página.
+            navegar("catalogo");
+            return;
+        }
+
+        currentProduct = updatedProduct;
+        renderProductDetails();
+        renderRelatedProducts();
+        initGalleryControls();
+    });
 }
 
 function renderProductDetails() {
