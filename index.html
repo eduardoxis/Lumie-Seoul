@@ -618,70 +618,87 @@
     <!-- PÁGINA: CONTATO                                               -->
     <!-- ============================================================ -->
     <section id="page-contato" class="page" hidden>
-        <main style="padding-top: 120px; padding-bottom: var(--space-xl);">
-            <div class="container">
+        <main style="padding-bottom: var(--space-xl);">
 
-                <div class="section-header">
-                    <span class="subtitle">Atendimento</span>
-                    <h1 class="serif-title title">Canais de Contato</h1>
-                    <p style="font-size: var(--fs-sm); color: var(--color-text-secondary); max-width: 500px; margin: 8px auto 0;">Fale diretamente com nossa equipe de especialistas em rotina de beleza coreana.</p>
-                    <div class="divider"></div>
+            <!-- HERO BANNER -->
+            <div style="position: relative; padding: 140px var(--space-md) var(--space-lg); text-align: center; background: linear-gradient(rgba(250, 249, 246, 0.75), rgba(250, 249, 246, 0.85)), url('img/cream.jpg') center 30% / cover no-repeat;">
+                <div class="container" style="max-width: 700px;">
+                    <h1 class="serif-title" style="font-size: var(--fs-xxl); color: var(--color-text-primary); margin-bottom: var(--space-xs);">Contacte a Lumié</h1>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 14px; margin: var(--space-xs) 0;">
+                        <span style="width: 50px; height: 1px; background: var(--color-gold);"></span>
+                        <i class="fa-solid fa-leaf" style="color: var(--color-gold); font-size: 14px;"></i>
+                        <span style="width: 50px; height: 1px; background: var(--color-gold);"></span>
+                    </div>
+                    <p style="font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: 1.6;">Estamos aqui para te atender com carinho e oferecer a melhor experiência.</p>
                 </div>
+            </div>
 
-                <!-- Main Contact Grid -->
-                <div class="grid" style="grid-template-columns: 1fr 1.2fr; gap: var(--space-lg); align-items: start;">
-                    <!-- Contact info cards -->
-                    <div class="flex flex-column" style="gap: var(--space-sm);">
+            <div class="container" style="margin-top: -30px; position: relative; z-index: 2;">
 
-                        <div class="reveal reveal-right" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm); display: flex; align-items: flex-start; gap: var(--space-sm);">
-                            <i class="fa-brands fa-whatsapp" style="font-size: 2rem; color: var(--color-success);"></i>
-                            <div>
-                                <h3 class="serif-title" style="font-size: var(--fs-md); margin-bottom: 4px;">WhatsApp Principal</h3>
-                                <p style="font-size: var(--fs-xs); color: var(--color-text-secondary); line-height: 1.5; margin-bottom: var(--space-xs);">Para consultas de rotina de pele, dúvidas sobre produtos e finalização de pedidos.</p>
-                                <span style="font-weight: 600; color: var(--color-text-primary); font-size: var(--fs-sm); display: block; margin-bottom: 8px;">+55 61 99319-3756</span>
-                                <button class="btn btn-whatsapp" style="padding: 0.5rem 1.2rem; font-size: 10px;" onclick="contactMerchantGeneral()">Iniciar Conversa</button>
-                            </div>
+                <!-- Contact Cards Grid -->
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-sm);">
+
+                    <!-- WhatsApp Principal -->
+                    <div class="reveal reveal-up" style="background: var(--color-success); border-radius: var(--radius-md); padding: var(--space-md); color: #FFFFFF;">
+                        <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-sm);">
+                            <i class="fa-brands fa-whatsapp" style="font-size: 22px; color: var(--color-gold-light);"></i>
                         </div>
-
-                        <div class="reveal reveal-right delay-100" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm); display: flex; align-items: flex-start; gap: var(--space-sm);">
-                            <i class="fa-solid fa-clock" style="font-size: 2rem; color: var(--color-gold);"></i>
-                            <div>
-                                <h3 class="serif-title" style="font-size: var(--fs-md); margin-bottom: 4px;">Horários de Atendimento</h3>
-                                <p style="font-size: var(--fs-xs); color: var(--color-text-secondary); line-height: 1.6;">
-                                    Segunda a Sexta: 09h às 18h<br>
-                                    Sábado: 09h às 13h<br>
-                                    *Pedidos feitos fora do horário serão atendidos no próximo dia útil.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="reveal reveal-right delay-200" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm); display: flex; align-items: flex-start; gap: var(--space-sm);">
-                            <i class="fa-solid fa-envelope" style="font-size: 2rem; color: var(--color-text-light);"></i>
-                            <div>
-                                <h3 class="serif-title" style="font-size: var(--fs-md); margin-bottom: 4px;">E-mail & Redes Sociais</h3>
-                                <p style="font-size: var(--fs-xs); color: var(--color-text-secondary); line-height: 1.6; margin-bottom: var(--space-xs);">
-                                    E-mail: contato@lumieseoul.com<br>
-                                    Instagram: @seoullumie
-                                </p>
-                            </div>
-                        </div>
-
+                        <h3 class="serif-title" style="font-size: var(--fs-md); color: #FFFFFF; margin-bottom: var(--space-xs); line-height: 1.25;">WhatsApp Principal</h3>
+                        <p style="font-size: 12.5px; color: rgba(255,255,255,0.75); line-height: 1.5; margin-bottom: var(--space-sm);">Para consultas de rotina de pele, dúvidas sobre produtos e finalização de pedidos.</p>
+                        <span style="font-weight: 700; color: var(--color-gold-light); font-size: var(--fs-sm); display: block; margin-bottom: var(--space-sm);">+55 61 99319-3756</span>
+                        <button class="btn" style="background: #FFFFFF; color: var(--color-text-primary); width: 100%; padding: 0.7rem 1rem; font-size: 10px;" onclick="contactMerchantGeneral()"><i class="fa-brands fa-whatsapp"></i> Iniciar Conversa</button>
                     </div>
 
-                    <!-- Map and address -->
-                    <div class="reveal reveal-left" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-sm);">
-                        <h3 class="serif-title" style="font-size: var(--fs-lg); margin-bottom: var(--space-xs); color: var(--color-text-primary);">Escritório Lumié</h3>
-                        <p style="font-size: var(--fs-xs); color: var(--color-text-secondary); margin-bottom: var(--space-sm);">Apesar de nossas vendas serem exclusivas online via WhatsApp com entrega nacional via Correios, possuímos um centro administrativo em Luziânia para suporte e controle fiscal.</p>
+                    <!-- Escritório / Mapa -->
+                    <div class="reveal reveal-up delay-100" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-md);">
+                        <h3 class="serif-title" style="font-size: var(--fs-md); color: var(--color-text-primary); margin-bottom: var(--space-xs); line-height: 1.25;">Escritório Lumié</h3>
+                        <p style="font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: var(--space-sm);">Apesar de nossas vendas serem exclusivas online via WhatsApp com entrega nacional via Correios, possuímos um centro administrativo em Luziânia para suporte e controle fiscal.</p>
 
-                        <div style="width: 100%; height: 250px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--color-border); background-color: var(--color-bg-base); position: relative;">
-                            <div style="position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #FAF9F6; gap: 8px;">
-                                <i class="fa-solid fa-map-location-dot" style="font-size: 3rem; color: var(--color-gold);"></i>
-                                <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary);">Luziânia, GO - Brasil</span>
-                                <span style="font-size: 9px; color: var(--color-text-light);">Centro Administrativo Lumié</span>
+                        <div style="width: 100%; height: 130px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--color-border); background-color: #EFEAE3; position: relative; margin-bottom: var(--space-xs);">
+                            <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+                                <i class="fa-solid fa-location-dot" style="font-size: 1.8rem; color: var(--color-gold-hover);"></i>
                             </div>
                         </div>
+                        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-primary); display: block;">Luziânia, GO - Brasil</span>
+                        <span style="font-size: 10px; color: var(--color-text-light);">Centro Administrativo Lumié</span>
                     </div>
+
+                    <!-- Horários -->
+                    <div class="reveal reveal-up" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-md);">
+                        <div style="width: 46px; height: 46px; border-radius: 50%; background: var(--color-gold-light); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-sm);">
+                            <i class="fa-solid fa-clock" style="font-size: 18px; color: var(--color-gold-hover);"></i>
+                        </div>
+                        <h3 class="serif-title" style="font-size: var(--fs-md); color: var(--color-text-primary); margin-bottom: var(--space-xs); line-height: 1.25;">Horários de Atendimento</h3>
+                        <ul style="font-size: 12.5px; color: var(--color-text-secondary); line-height: 2; list-style: none; padding: 0; margin-bottom: var(--space-xs); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-xs);">
+                            <li>• Segunda a Sexta: <strong style="color: var(--color-text-primary);">09h às 18h</strong></li>
+                            <li>• Sábado: <strong style="color: var(--color-text-primary);">09h às 13h</strong></li>
+                        </ul>
+                        <p style="font-size: 11px; color: var(--color-text-light); line-height: 1.5;"><i class="fa-solid fa-star" style="color: var(--color-gold); margin-right: 4px;"></i>*Pedidos feitos fora do horário serão atendidos no próximo dia útil.</p>
+                    </div>
+
+                    <!-- E-mail & Redes Sociais -->
+                    <div class="reveal reveal-up delay-100" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-md);">
+                        <div style="width: 46px; height: 46px; border-radius: 50%; background: var(--color-gold-light); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-sm);">
+                            <i class="fa-solid fa-envelope" style="font-size: 18px; color: var(--color-gold-hover);"></i>
+                        </div>
+                        <h3 class="serif-title" style="font-size: var(--fs-md); color: var(--color-text-primary); margin-bottom: var(--space-sm); line-height: 1.25;">E-mail & Redes Sociais</h3>
+                        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); display: block; margin-bottom: 2px;">E-mail:</span>
+                        <span style="font-size: 12.5px; color: var(--color-text-primary); display: block; margin-bottom: var(--space-xs); padding-bottom: var(--space-xs); border-bottom: 1px solid var(--color-border);">contato@lumieseoul.com</span>
+                        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); display: block; margin-bottom: 2px;">Instagram:</span>
+                        <span style="font-size: 12.5px; color: var(--color-text-primary); display: inline-flex; align-items: center; gap: 6px;">@seoullumie <i class="fa-brands fa-instagram" style="color: var(--color-gold-hover);"></i></span>
+                    </div>
+
                 </div>
+
+                <!-- Bottom banner strip -->
+                <div class="reveal reveal-fade" style="margin-top: var(--space-md); background: var(--color-gold-light); border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); display: flex; align-items: center; gap: var(--space-sm);">
+                    <i class="fa-regular fa-heart" style="font-size: 1.4rem; color: var(--color-gold-hover); flex-shrink: 0;"></i>
+                    <p style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.5;">Atendimento humanizado e exclusivo para cuidar da sua pele e da sua experiência.</p>
+                </div>
+
+            </div>
+
+            <div class="container" style="margin-top: var(--space-xl);">
 
                 <!-- FAQ Section -->
                 <section style="margin-top: var(--space-xl);">
