@@ -73,6 +73,11 @@ html {
     -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+    overflow-x: hidden;
+    width: 100%;
+}
+
 body {
     background-color: var(--color-bg-base);
     color: var(--color-text-primary);
@@ -80,6 +85,8 @@ body {
     font-size: var(--fs-base);
     line-height: 1.6;
     overflow-x: hidden;
+    width: 100%;
+    touch-action: pan-y;
     letter-spacing: -0.01em;
 }
 
