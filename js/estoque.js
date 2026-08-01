@@ -140,6 +140,7 @@ function bindEstoqueEvents() {
     });
 
     // ---- Importação ----
+    document.getElementById('ap-eq-sync-catalog-btn')?.addEventListener('click', handleSyncCatalogClick);
     document.getElementById('ap-eq-import-btn')?.addEventListener('click', openEstoqueImportModal);
     document.getElementById('ap-eq-import-cancel-btn')?.addEventListener('click', closeEstoqueImportModal);
     document.getElementById('ap-eq-import-close-btn')?.addEventListener('click', () => {
@@ -151,6 +152,33 @@ function bindEstoqueEvents() {
         if (file) handleEstoqueImportFile(file);
     });
     document.getElementById('ap-eq-import-confirm-btn')?.addEventListener('click', confirmEstoqueImport);
+}
+
+/* ============================================================
+   1.1 SINCRONIZAÇÃO COM O CATÁLOGO DA LOJA
+   ============================================================ */
+async function handleSyncCatalogClick() {
+    const btn = document.getElementById('ap-eq-sync-catalog-btn');
+    if (!btn) return;
+
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sincronizando...';
+
+    try {
+        const result = await DB.estoque.produtos.syncFromCatalog();
+        alert(`Sincronização concluída!\n\n${result.novos} produto(s) novo(s) adicionado(s) ao estoque.\n${result.atualizados} produto(s) já existente(s) atualizado(s).\nTotal no catálogo: ${result.total}.`);
+        await loadEstoqueDashboard();
+        if (typeof loadEstoqueProdutosSubtab === 'function') {
+            loadEstoqueProdutosSubtab();
+        }
+    } catch (e) {
+        console.error('Erro ao sincronizar com o catálogo:', e);
+        alert('Não foi possível sincronizar com o catálogo. Verifique sua conexão com o Firebase e tente novamente.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+    }
 }
 
 /* ============================================================
