@@ -1,3 +1,4 @@
+// api/p/[id].js
 const admin = require('firebase-admin');
 
 // Initialize the Firebase Admin SDK once per serverless instance (cold start).
@@ -23,11 +24,11 @@ function escapeHtml(str = '') {
         .replace(/"/g, '&quot;');
 }
 
-function absoluteUrl(origin, maybeRelative) {
+function absoluteUrl(origin, maybeRelative, id) {
     const value = typeof maybeRelative === 'string' ? maybeRelative.trim() : '';
     if (!value) return `${origin}/img/banner.jpg`;
+    if (/^data:/i.test(value)) return `${origin}/api/img/${encodeURIComponent(id)}`;
     if (/^https?:\/\//i.test(value)) return value;
-    if (/^data:/i.test(value)) return `${origin}/img/banner.jpg`;
     return `${origin}/${value.replace(/^\//, '')}`;
 }
 
@@ -59,7 +60,7 @@ module.exports = async (req, res) => {
         product.descricaoCurta ||
         (product.descricaoCompleta ? String(product.descricaoCompleta).slice(0, 180) : 'Curadoria K-Beauty premium. Fale conosco pelo WhatsApp.')
     );
-    const image = absoluteUrl(origin, Array.isArray(product.imagensUrl) ? product.imagensUrl[0] : null);
+    const image = absoluteUrl(origin, Array.isArray(product.imagensUrl) ? product.imagensUrl[0] : null, id);
     const shareUrl = `${origin}/p/${encodeURIComponent(id)}`;
 
     const html = `<!DOCTYPE html>
