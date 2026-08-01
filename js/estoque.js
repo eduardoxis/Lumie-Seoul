@@ -174,7 +174,7 @@ async function handleSyncCatalogClick() {
         }
     } catch (e) {
         console.error('Erro ao sincronizar com o catálogo:', e);
-        alert('Não foi possível sincronizar com o catálogo. Verifique sua conexão com o Firebase e tente novamente.');
+        alert(`Não foi possível sincronizar com o catálogo.\n\nErro técnico: ${e.code || e.name || ''} ${e.message || e}`);
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalHtml;
