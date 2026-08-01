@@ -3,11 +3,18 @@
  * Pure Vanilla ES6+ — integrado ao spa-router.js
  */
 
+let blogArticlesCache = [];
+let currentBlogArticleId = null;
+let currentPageIsBlog = false;
+let blogListenerIniciado = false;
+
 document.addEventListener("spaNavigate", (e) => {
     const { page, params } = e.detail;
-    if (page !== "blog") return;
+    currentPageIsBlog = page === "blog";
+    if (!currentPageIsBlog) return;
 
     const articleId = params.get("id");
+    currentBlogArticleId = articleId || null;
 
     if (window.DB) mostrarBlog(articleId);
     else document.addEventListener("db-ready", () => mostrarBlog(articleId), { once: true });
@@ -26,6 +33,32 @@ function mostrarBlog(articleId) {
         if (singleSection) singleSection.style.display = "none";
         renderArticleList();
     }
+
+    iniciarAtualizacaoBlogEmTempoReal();
+}
+
+// Tempo real: qualquer artigo criado, editado ou removido no painel admin
+// aparece aqui sozinho, sem precisar de F5. Montado uma única vez e ativo
+// enquanto o site estiver aberto; só re-renderiza a view que estiver visível.
+function iniciarAtualizacaoBlogEmTempoReal() {
+    if (blogListenerIniciado) return;
+    blogListenerIniciado = true;
+
+    DB.blog.listen((updatedList) => {
+        blogArticlesCache = updatedList;
+        if (!currentPageIsBlog) return;
+
+        if (currentBlogArticleId) {
+            const stillExists = updatedList.some((p) => p.id === currentBlogArticleId);
+            if (!stillExists) {
+                navegar("blog");
+                return;
+            }
+            renderSingleArticle(currentBlogArticleId);
+        } else {
+            renderArticleList();
+        }
+    });
 }
 
 async function renderArticleList() {
