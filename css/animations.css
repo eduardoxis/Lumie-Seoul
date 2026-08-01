@@ -4,6 +4,58 @@
  */
 
 /* ==========================================
+   0. SCROLL REVEAL SYSTEM
+   Classes toggled by js/animations.js via IntersectionObserver
+   ========================================== */
+.reveal,
+.reveal-fade {
+    opacity: 0;
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+.reveal {
+    transform: translateY(28px);
+}
+
+.reveal-up {
+    transform: translateY(36px);
+}
+
+.reveal-left {
+    transform: translateX(-36px);
+}
+
+.reveal-right {
+    transform: translateX(36px);
+}
+
+.reveal-fade {
+    transform: none;
+}
+
+.reveal.reveal-active,
+.reveal-fade.reveal-active {
+    opacity: 1;
+    transform: none;
+}
+
+.delay-100 { transition-delay: 0.1s; }
+.delay-200 { transition-delay: 0.2s; }
+.delay-300 { transition-delay: 0.3s; }
+.delay-400 { transition-delay: 0.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal,
+    .reveal-fade {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
+
+/* ==========================================
    1. TABLETS (Up to 1024px)
    ========================================== */
 @media (max-width: 1024px) {
