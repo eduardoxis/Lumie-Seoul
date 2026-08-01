@@ -809,6 +809,12 @@ const DB = {
             save: async (productData) => {
                 if (!productData.id) {
                     productData.id = 'eq-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+                }
+                // Garante o campo criadoEm mesmo quando o id já vem pronto
+                // (ex: sincronização com o catálogo, que usa o slug do produto
+                // como id). Sem esse campo, a consulta com orderBy("criadoEm")
+                // descarta o documento inteiro dos resultados no Firestore.
+                if (!productData.criadoEm) {
                     productData.criadoEm = new Date().toISOString();
                 }
 
