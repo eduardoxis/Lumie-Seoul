@@ -76,6 +76,10 @@
     margin-top: var(--space-md);
 }
 
+.product-page-grid > div {
+    min-width: 0;
+}
+
 .product-gallery-main {
     width: 100%;
     aspect-ratio: 1;
@@ -112,9 +116,10 @@
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--color-text-light);
-    padding: 10px 20px;
+    padding: 10px 14px;
     border-bottom: 2px solid transparent;
     transition: var(--transition-fast);
+    white-space: nowrap;
 }
 
 .product-tab-btn.active {
