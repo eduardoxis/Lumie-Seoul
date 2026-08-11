@@ -840,17 +840,17 @@ function normalizeImportedProduct(raw) {
 
     return {
         id: raw.id || raw.slug || undefined,
-        nome: pick(raw.nome, raw.name, raw.titulo, raw.produto, raw.nome_produto),
-        marca: pick(raw.marca, raw.brand),
-        categoria: pick(raw.categoria, raw.category),
-        origem: pick(raw.origem, raw.origin),
-        badge: pick(raw.badge, raw.selo),
-        descricaoCurta: pick(raw.descricaoCurta, raw.descricao_curta, raw.shortDescription),
-        descricaoCompleta: pick(raw.descricaoCompleta, raw.descricao_completa, raw.descricao, raw.description),
-        modoUso: pick(raw.modoUso, raw.modo_uso, raw.usage),
-        indicacao: pick(raw.indicacao, raw.indication),
-        beneficios: toArray(raw.beneficios || raw.benefits, '\n'),
-        ingredientes: toArray(raw.ingredientes || raw.ingredients, ','),
+        nome: pick(raw.nome, raw.name, raw.titulo, raw.produto, raw.nome_produto, raw['Nome do Produto']),
+        marca: pick(raw.marca, raw.brand, raw['Marca']),
+        categoria: pick(raw.categoria, raw.category, raw['Categoria']),
+        origem: pick(raw.origem, raw.origin, raw['Origem']),
+        badge: pick(raw.badge, raw.selo, raw['Selo / Destaque (Badge)']),
+        descricaoCurta: pick(raw.descricaoCurta, raw.descricao_curta, raw.shortDescription, raw['Descrição Curta (Exibido no Card)']),
+        descricaoCompleta: pick(raw.descricaoCompleta, raw.descricao_completa, raw.descricao, raw.description, raw['Descrição Completa']),
+        modoUso: pick(raw.modoUso, raw.modo_uso, raw.usage, raw['Modo de Uso']),
+        indicacao: pick(raw.indicacao, raw.indication, raw['Indicação']),
+        beneficios: toArray(raw.beneficios || raw.benefits || raw['Benefícios (Um por linha)'], '\n'),
+        ingredientes: toArray(raw.ingredientes || raw.ingredients || raw['Ingredientes (Separados por vírgula)'], ','),
         tiposPele: toArray(raw.tiposPele || raw.tipos_pele || raw.skinTypes, ','),
         imagensUrl: Array.isArray(raw.imagensUrl || raw.images) && (raw.imagensUrl || raw.images).length ? (raw.imagensUrl || raw.images) : ['img/cream.jpg']
     };
