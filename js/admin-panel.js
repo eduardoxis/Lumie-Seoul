@@ -851,7 +851,7 @@ function normalizeImportedProduct(raw) {
         indicacao: pick(raw.indicacao, raw.indication, raw['Indicação']),
         beneficios: toArray(raw.beneficios || raw.benefits || raw['Benefícios (Um por linha)'], '\n'),
         ingredientes: toArray(raw.ingredientes || raw.ingredients || raw['Ingredientes (Separados por vírgula)'], ','),
-        tiposPele: toArray(raw.tiposPele || raw.tipos_pele || raw.skinTypes, ','),
+        tiposPele: toArray(raw.tiposPele || raw.tipos_pele || raw.skinTypes || raw['Tipos de Pele'], ','),
         imagensUrl: Array.isArray(raw.imagensUrl || raw.images) && (raw.imagensUrl || raw.images).length ? (raw.imagensUrl || raw.images) : ['img/cream.jpg']
     };
 }
