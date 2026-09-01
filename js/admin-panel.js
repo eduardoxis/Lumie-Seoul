@@ -91,6 +91,7 @@ function bindStaticAdminEvents() {
 
     // ---- Produtos ----
     document.getElementById('ap-new-product-btn')?.addEventListener('click', () => openProductPanel('new'));
+    document.getElementById('ap-export-json-btn')?.addEventListener('click', exportProductsToJson);
     document.getElementById('ap-import-json-btn')?.addEventListener('click', () => {
         document.getElementById('ap-import-json-input').click();
     });
@@ -830,6 +831,29 @@ function handleImportJsonFile(file) {
     };
     reader.onerror = () => alert('Erro ao ler o arquivo selecionado.');
     reader.readAsText(file);
+}
+
+async function exportProductsToJson() {
+    try {
+        const products = await DB.products.getAll();
+        const backup = {
+            exportadoEm: new Date().toISOString(),
+            sistema: 'Lumié Seoul',
+            versao: 1,
+            produtos: products
+        };
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `lumie-seoul-produtos-${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+        if (typeof logAudit === 'function') logAudit('Exportou', 'Produtos', '', `${products.length} produtos em JSON`);
+    } catch (error) {
+        console.error('Erro ao exportar produtos:', error);
+        alert('Não foi possível exportar os produtos. Tente novamente.');
+    }
 }
 
 function normalizeImportedProduct(raw) {
