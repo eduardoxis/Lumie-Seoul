@@ -129,9 +129,11 @@ function renderCatalog(filteredProducts = productsList) {
     grid.innerHTML = filteredProducts.slice(start, start + CATALOG_PAGE_SIZE).map(product => cardProdutoHtml(product)).join("");
     let pagination = document.getElementById('catalog-pagination');
     if (!pagination) { pagination = document.createElement('div'); pagination.id = 'catalog-pagination'; pagination.className = 'catalog-pagination'; grid.insertAdjacentElement('afterend', pagination); }
-    pagination.innerHTML = totalPages > 1 ? `<button ${catalogPage === 1 ? 'disabled' : ''} data-page="prev">Anterior</button><span>Página ${catalogPage} de ${totalPages}</span><button ${catalogPage === totalPages ? 'disabled' : ''} data-page="next">Próxima</button>` : '';
-    pagination.querySelector('[data-page="prev"]')?.addEventListener('click', () => { catalogPage--; renderCatalog(filteredProducts); window.scrollTo({ top: 0, behavior: 'smooth' }); });
-    pagination.querySelector('[data-page="next"]')?.addEventListener('click', () => { catalogPage++; renderCatalog(filteredProducts); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    // Não use data-page aqui: o SPA usa esse atributo para trocar de rota
+    // e, por isso, o botão "Próxima" acabava abrindo a página Inicial.
+    pagination.innerHTML = totalPages > 1 ? `<button ${catalogPage === 1 ? 'disabled' : ''} data-catalog-page="prev">Anterior</button><span>Página ${catalogPage} de ${totalPages}</span><button ${catalogPage === totalPages ? 'disabled' : ''} data-catalog-page="next">Próxima</button>` : '';
+    pagination.querySelector('[data-catalog-page="prev"]')?.addEventListener('click', () => { catalogPage--; renderCatalog(filteredProducts); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    pagination.querySelector('[data-catalog-page="next"]')?.addEventListener('click', () => { catalogPage++; renderCatalog(filteredProducts); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
     if (typeof initScrollReveal === "function") initScrollReveal();
 }
