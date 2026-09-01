@@ -13,8 +13,14 @@ const CATALOG_PAGE_SIZE = 12;
 document.addEventListener("spaNavigate", (e) => {
     const { page, params } = e.detail;
     if (page === "catalogo") {
+        // A navegação para outra página não deve preservar a página anterior
+        // do catálogo. Ao voltar, sempre começamos na primeira página.
+        catalogPage = 1;
         categoriaPendente = params.get("categoria");
-        garantirCatalogoCarregado().then(() => aplicarCategoriaPendente());
+        garantirCatalogoCarregado().then(() => {
+            renderCatalog(productsList);
+            aplicarCategoriaPendente();
+        });
     } else if (page === "inicio") {
         garantirCatalogoCarregado().then(renderFeatured);
     }
