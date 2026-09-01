@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     bindStaticAdminEvents();
+    document.addEventListener('admin-auth-state', refreshAuthUI);
 });
 
 /* ============================================================
@@ -1266,8 +1267,8 @@ async function saveAdminUser() {
     const email = document.getElementById('ap-adm-email').value.trim();
     const password = document.getElementById('ap-adm-password').value;
 
-    if (!email || !password || password.length < 6) {
-        alert("Por favor, digite um e-mail válido e uma senha de no mínimo 6 caracteres.");
+    if (!email || !password || password.length < 10) {
+        alert("Por favor, digite um e-mail válido e uma senha de no mínimo 10 caracteres.");
         return;
     }
 

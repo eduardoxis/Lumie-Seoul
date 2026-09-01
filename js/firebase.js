@@ -29,6 +29,38 @@ let firestoreDb = null;
 let firebaseAuth = null;
 let dbMode = "local"; // "local" or "firebase"
 
+const LOGIN_LIMIT = 5;
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+
+function loginAttemptKey(email) {
+    return `lumie_login_attempts:${String(email || '').trim().toLowerCase()}`;
+}
+
+function checkLoginLimit(email) {
+    const key = loginAttemptKey(email);
+    const now = Date.now();
+    const attempts = (JSON.parse(localStorage.getItem(key) || '[]') || [])
+        .filter(timestamp => Number.isFinite(timestamp) && now - timestamp < LOGIN_WINDOW_MS);
+    localStorage.setItem(key, JSON.stringify(attempts));
+    if (attempts.length >= LOGIN_LIMIT) {
+        const remainingMinutes = Math.ceil((LOGIN_WINDOW_MS - (now - attempts[0])) / 60000);
+        throw new Error(`Muitas tentativas. Aguarde ${remainingMinutes} minuto(s) para tentar novamente.`);
+    }
+}
+
+function registerFailedLogin(email) {
+    const key = loginAttemptKey(email);
+    const now = Date.now();
+    const attempts = (JSON.parse(localStorage.getItem(key) || '[]') || [])
+        .filter(timestamp => Number.isFinite(timestamp) && now - timestamp < LOGIN_WINDOW_MS);
+    attempts.push(now);
+    localStorage.setItem(key, JSON.stringify(attempts));
+}
+
+function clearLoginAttempts(email) {
+    localStorage.removeItem(loginAttemptKey(email));
+}
+
 // Sinal real de "banco pronto pra uso". Diferente de `window.DB` (que existe
 // desde o início do arquivo), esta flag só vira true depois que já sabemos
 // se o modo é "firebase" ou "local" — evita ler dados mockados por engano
@@ -57,25 +89,26 @@ if (isFirebaseConfigured) {
                 console.log("Lumié Seoul: Connected to Firebase Cloud Services.");
                 markDbReady("firebase");
 
-                // Garante que qualquer conta autenticada apareça em "Administradores
-                // Autorizados", mesmo que já estivesse logada antes desta correção
-                // (sessão persistida) ou tenha sido criada direto no Firebase Console.
-                // onAuthStateChanged dispara tanto em logins novos quanto ao recarregar
-                // a página com uma sessão já salva pelo navegador.
+                // A autenticação não concede acesso administrativo sozinha.
                 Auth.onAuthStateChanged(firebaseAuth, async (user) => {
-                    if (!user) return;
+                    if (!user) {
+                        sessionStorage.removeItem("lumie_user_session");
+                        localStorage.removeItem("lumie_user_session");
+                        document.dispatchEvent(new CustomEvent("admin-auth-state"));
+                        return;
+                    }
                     try {
-                        const { doc, getDoc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                        const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
                         const adminRef = doc(firestoreDb, "admins", user.uid);
                         const adminSnap = await getDoc(adminRef);
-                        if (!adminSnap.exists()) {
-                            await setDoc(adminRef, {
-                                email: user.email,
-                                criadoEm: new Date().toISOString()
-                            });
+                        if (!adminSnap.exists() || adminSnap.data().ativo === false) {
+                            await Auth.signOut(firebaseAuth);
+                            return;
                         }
+                        document.dispatchEvent(new CustomEvent("admin-auth-state"));
                     } catch (e) {
-                        console.error("Não foi possível sincronizar o registro deste administrador.", e);
+                        console.error("Não foi possível validar a autorização administrativa.", e);
+                        await Auth.signOut(firebaseAuth);
                     }
                 });
             }).catch((e) => {
@@ -690,15 +723,26 @@ const DB = {
             const storage = remember ? localStorage : sessionStorage;
             const otherStorage = remember ? sessionStorage : localStorage;
 
+            checkLoginLimit(email);
+
             if (dbMode === "firebase" && firebaseAuth) {
                 try {
-                    const { signInWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
+                    const { signInWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence, signOut } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
+                    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
                     await setPersistence(firebaseAuth, remember ? browserLocalPersistence : browserSessionPersistence);
                     const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
+                    const adminSnap = await getDoc(doc(firestoreDb, "admins", userCredential.user.uid));
+                    if (!adminSnap.exists() || adminSnap.data().ativo === false) {
+                        await signOut(firebaseAuth);
+                        registerFailedLogin(email);
+                        throw new Error("Esta conta não tem autorização para acessar o painel.");
+                    }
                     otherStorage.removeItem("lumie_user_session");
                     storage.setItem("lumie_user_session", JSON.stringify({ email: userCredential.user.email }));
+                    clearLoginAttempts(email);
                     return userCredential.user;
                 } catch (e) {
+                    if (!String(e.message || '').includes("não tem autorização")) registerFailedLogin(email);
                     throw new Error("Erro de login Firebase: " + e.message);
                 }
             }
@@ -709,8 +753,10 @@ const DB = {
             if (user) {
                 otherStorage.removeItem("lumie_user_session");
                 storage.setItem("lumie_user_session", JSON.stringify({ email }));
+                clearLoginAttempts(email);
                 return { email };
             } else {
+                registerFailedLogin(email);
                 throw new Error("E-mail ou senha incorretos.");
             }
         },
@@ -734,45 +780,16 @@ const DB = {
             return session ? JSON.parse(session) : null;
         },
 
-        // Cria um novo administrador SEM derrubar a sessão do admin atual.
-        // Truque: abre uma instância secundária e isolada do Firebase App só
-        // para esse cadastro, e a descarta logo em seguida.
+        // Cria/revoga administradores através de uma rota protegida no servidor.
         createAdmin: async (email, password) => {
             if (dbMode !== "firebase" || !firebaseApp) {
                 throw new Error("Cadastro de administradores só está disponível em modo Firebase.");
             }
-            const App = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js");
-            const Auth = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
-            const Firestore = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-
-            // Instância secundária com nome único, mesmas credenciais do projeto.
-            const secondaryApp = App.initializeApp(firebaseConfig, "SecondaryAdminCreation_" + Date.now());
-            const secondaryAuth = Auth.getAuth(secondaryApp);
-
-            try {
-                const cred = await Auth.createUserWithEmailAndPassword(secondaryAuth, email, password);
-
-                // Salva metadados na coleção "admins" pra listar no painel
-                // (o cadastro em si de login/senha já fica no Firebase Authentication).
-                await Firestore.setDoc(Firestore.doc(firestoreDb, "admins", cred.user.uid), {
-                    email,
-                    criadoEm: new Date().toISOString()
-                });
-
-                await Auth.signOut(secondaryAuth);
-                await App.deleteApp(secondaryApp);
-
-                return { email, uid: cred.user.uid };
-            } catch (e) {
-                await App.deleteApp(secondaryApp).catch(() => {});
-                if (e.code === "auth/email-already-in-use") {
-                    throw new Error("Este e-mail já está cadastrado como administrador.");
-                }
-                if (e.code === "auth/weak-password") {
-                    throw new Error("Senha muito fraca. Use ao menos 6 caracteres.");
-                }
-                throw new Error("Erro ao criar administrador: " + e.message);
-            }
+            const token = await firebaseAuth.currentUser?.getIdToken();
+            const response = await fetch('/api/admins', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token || ''}` }, body: JSON.stringify({ email, password }) });
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(payload.error || 'Não foi possível criar o administrador.');
+            return payload;
         },
 
         // Lista os administradores cadastrados (metadados salvos no Firestore).
@@ -789,8 +806,10 @@ const DB = {
         // o SDK do navegador não tem permissão para excluir contas de terceiros).
         removeAdminRecord: async (uid) => {
             if (dbMode !== "firebase" || !firestoreDb) return;
-            const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-            await deleteDoc(doc(firestoreDb, "admins", uid));
+            const token = await firebaseAuth.currentUser?.getIdToken();
+            const response = await fetch(`/api/admins?uid=${encodeURIComponent(uid)}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token || ''}` } });
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(payload.error || 'Não foi possível remover o administrador.');
         }
     },
 
