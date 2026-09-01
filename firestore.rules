@@ -46,6 +46,16 @@ service cloud.firestore {
       allow read, write: if ehAdmin();
     }
 
+    match /pedidos/{id} { allow read, write: if ehAdmin(); }
+    match /clientes/{id} { allow read, write: if ehAdmin(); }
+    match /campanhas/{id} { allow read, write: if ehAdmin(); }
+    match /backups/{id} { allow read, write: if ehAdmin(); }
+
+    // Preferências sincronizadas de clientes autenticados (favoritos e carrinho).
+    match /usuarios/{uid} {
+      allow read, write: if autenticado() && request.auth.uid == uid;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

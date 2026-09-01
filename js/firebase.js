@@ -813,6 +813,31 @@ const DB = {
         }
     },
 
+    // Dados internos compartilhados entre os dispositivos do painel.
+    adminData: {
+        getAll: async (collectionName) => {
+            if (dbMode === "firebase" && firestoreDb) {
+                const { collection, getDocs, query, orderBy } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                const snap = await getDocs(query(collection(firestoreDb, collectionName), orderBy('criadoEm', 'desc')));
+                return snap.docs.map(item => ({ id: item.id, ...item.data() }));
+            }
+            return JSON.parse(localStorage.getItem(`lumie_${collectionName}`) || '[]');
+        },
+        save: async (collectionName, data) => {
+            const record = { ...data, atualizadoEm: new Date().toISOString(), criadoEm: data.criadoEm || new Date().toISOString() };
+            if (dbMode === "firebase" && firestoreDb) {
+                const { addDoc, collection, doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                if (record.id) { await setDoc(doc(firestoreDb, collectionName, record.id), record, { merge: true }); return record.id; }
+                return (await addDoc(collection(firestoreDb, collectionName), record)).id;
+            }
+            const list = JSON.parse(localStorage.getItem(`lumie_${collectionName}`) || '[]');
+            const id = record.id || `${collectionName}-${Date.now()}`;
+            const index = list.findIndex(item => item.id === id);
+            if (index >= 0) list[index] = { ...list[index], ...record, id }; else list.unshift({ ...record, id });
+            localStorage.setItem(`lumie_${collectionName}`, JSON.stringify(list)); return id;
+        }
+    },
+
     // --- ESTOQUE (Gerenciamento de Estoque interno, separado do catálogo público) ---
     estoque: {
         produtos: {
