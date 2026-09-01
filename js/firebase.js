@@ -29,6 +29,28 @@ let firestoreDb = null;
 let firebaseAuth = null;
 let dbMode = "local"; // "local" or "firebase"
 
+// Cache curto: evita leituras repetidas ao trocar de tela. Os listeners em
+// tempo real atualizam o cache assim que houver alteração no banco.
+const readCache = new Map();
+const CACHE_TTL = 2 * 60 * 1000;
+function cacheRead(key) {
+    const item = readCache.get(key);
+    return item && Date.now() - item.time < CACHE_TTL ? item.value : null;
+}
+function cacheWrite(key, value) {
+    readCache.set(key, { value, time: Date.now() });
+    try { sessionStorage.setItem(`lumie_cache_${key}`, JSON.stringify({ value, time: Date.now() })); } catch (_) {}
+    return value;
+}
+function cacheRestore(key) {
+    const memory = cacheRead(key); if (memory) return memory;
+    try {
+        const item = JSON.parse(sessionStorage.getItem(`lumie_cache_${key}`) || 'null');
+        if (item && Date.now() - item.time < CACHE_TTL) return cacheWrite(key, item.value);
+    } catch (_) {}
+    return null;
+}
+
 const LOGIN_LIMIT = 5;
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 
@@ -343,6 +365,8 @@ const DB = {
     // --- PRODUCTS COLLECTION ---
     products: {
         getAll: async () => {
+            const cached = cacheRestore('products');
+            if (cached) return cached;
             if (dbMode === "firebase" && firestoreDb) {
                 try {
                     const { getDocs, collection, query, orderBy } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
@@ -352,12 +376,12 @@ const DB = {
                     querySnapshot.forEach((doc) => {
                         list.push({ id: doc.id, ...doc.data() });
                     });
-                    return sortByOrdem(list);
+                    return cacheWrite('products', sortByOrdem(list));
                 } catch (e) {
                     console.error("Firebase read products error. Falling back to local.", e);
                 }
             }
-            return sortByOrdem(JSON.parse(localStorage.getItem('lumie_products')) || []);
+            return cacheWrite('products', sortByOrdem(JSON.parse(localStorage.getItem('lumie_products')) || []));
         },
 
         // Escuta mudanças em tempo real na coleção "produtos".
@@ -370,7 +394,7 @@ const DB = {
                     unsub = onSnapshot(q, (snapshot) => {
                         const list = [];
                         snapshot.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
-                        callback(sortByOrdem(list));
+                        callback(cacheWrite('products', sortByOrdem(list)));
                     }, (e) => console.error("Firebase products listener error.", e));
                 });
                 return () => unsub();
@@ -381,6 +405,8 @@ const DB = {
         },
         
         getById: async (id) => {
+            const cached = cacheRestore('products');
+            if (cached) return cached.find(item => item.id === id) || null;
             if (dbMode === "firebase" && firestoreDb) {
                 try {
                     const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
@@ -473,6 +499,8 @@ const DB = {
     // --- BLOG COLLECTION ---
     blog: {
         getAll: async () => {
+            const cached = cacheRestore('blog');
+            if (cached) return cached;
             if (dbMode === "firebase" && firestoreDb) {
                 try {
                     const { getDocs, collection, query, orderBy } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
@@ -482,12 +510,12 @@ const DB = {
                     querySnapshot.forEach((doc) => {
                         list.push({ id: doc.id, ...doc.data() });
                     });
-                    return sortByOrdem(list);
+                    return cacheWrite('blog', sortByOrdem(list));
                 } catch (e) {
                     console.error("Firebase read blog error. Falling back to local.", e);
                 }
             }
-            return sortByOrdem(JSON.parse(localStorage.getItem('lumie_blog')) || []);
+            return cacheWrite('blog', sortByOrdem(JSON.parse(localStorage.getItem('lumie_blog')) || []));
         },
 
         listen: (callback) => {
@@ -498,7 +526,7 @@ const DB = {
                     unsub = onSnapshot(q, (snapshot) => {
                         const list = [];
                         snapshot.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
-                        callback(sortByOrdem(list));
+                        callback(cacheWrite('blog', sortByOrdem(list)));
                     }, (e) => console.error("Firebase blog listener error.", e));
                 });
                 return () => unsub();
@@ -600,19 +628,21 @@ const DB = {
     // --- GLOBAL CONFIG / SYSTEM ---
     config: {
         get: async () => {
+            const cached = cacheRestore('config');
+            if (cached) return cached;
             if (dbMode === "firebase" && firestoreDb) {
                 try {
                     const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
                     const docRef = doc(firestoreDb, "configuracoes", "geral");
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
-                        return docSnap.data();
+                        return cacheWrite('config', docSnap.data());
                     }
                 } catch (e) {
                     console.error("Firebase config fetch error.", e);
                 }
             }
-            return JSON.parse(localStorage.getItem('lumie_config')) || INITIAL_CONFIG;
+            return cacheWrite('config', JSON.parse(localStorage.getItem('lumie_config')) || INITIAL_CONFIG);
         },
 
         listen: (callback) => {
@@ -621,7 +651,7 @@ const DB = {
                 import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js").then(({ doc, onSnapshot }) => {
                     const docRef = doc(firestoreDb, "configuracoes", "geral");
                     unsub = onSnapshot(docRef, (docSnap) => {
-                        callback(docSnap.exists() ? docSnap.data() : INITIAL_CONFIG);
+                        callback(cacheWrite('config', docSnap.exists() ? docSnap.data() : INITIAL_CONFIG));
                     }, (e) => console.error("Firebase config listener error.", e));
                 });
                 return () => unsub();
