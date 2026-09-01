@@ -1,0 +1,4 @@
+// Altere estes dados para usar um Reel manual enquanto a API oficial não estiver configurada.
+const latestReel = { thumbnail: 'img/banner.jpg', url: 'https://www.instagram.com/seoullumie/', username: 'lumie.seoul', duration: '0:28' };
+function renderLatestReel(reel) { document.getElementById('latest-reel-image').src = reel.thumbnail || latestReel.thumbnail; document.getElementById('latest-reel-link').href = reel.url || latestReel.url; document.getElementById('latest-reel-user').textContent = reel.username || latestReel.username; document.getElementById('latest-reel-duration').textContent = reel.duration || latestReel.duration; }
+document.addEventListener('DOMContentLoaded', async () => { renderLatestReel(latestReel); try { const response = await fetch('/api/instagram/reels'); if (response.ok) renderLatestReel(await response.json()); } catch (_) { /* fallback manual */ } });
