@@ -16,6 +16,8 @@ let apCurrentProductImages = []; // galeria do produto sendo editado no formulá
 let apPendingUploads = 0; // nº de uploads de imagem em andamento (bloqueia "Salvar" enquanto > 0)
 let apProductsPage = 1;
 const AP_PRODUCTS_PAGE_SIZE = 20;
+let apHistoricoPage = 1;
+const AP_HISTORICO_PAGE_SIZE = 25;
 
 document.addEventListener('DOMContentLoaded', () => {
     if (window.dbReady) {
@@ -271,7 +273,10 @@ async function loadHistoricoTab() {
             return;
         }
 
-        tbody.innerHTML = entries.map(entry => {
+        const totalPages = Math.max(1, Math.ceil(entries.length / AP_HISTORICO_PAGE_SIZE));
+        apHistoricoPage = Math.min(apHistoricoPage, totalPages);
+        const pageEntries = entries.slice((apHistoricoPage - 1) * AP_HISTORICO_PAGE_SIZE, apHistoricoPage * AP_HISTORICO_PAGE_SIZE);
+        tbody.innerHTML = pageEntries.map(entry => {
             const dateStr = new Date(entry.data).toLocaleString('pt-BR');
             return `
                 <tr>
@@ -283,6 +288,11 @@ async function loadHistoricoTab() {
                 </tr>
             `;
         }).join('');
+        let pager = document.getElementById('ap-historico-pagination');
+        if (!pager) { pager = document.createElement('div'); pager.id = 'ap-historico-pagination'; pager.className = 'catalog-pagination'; tbody.closest('.admin-table-card').appendChild(pager); }
+        pager.innerHTML = totalPages > 1 ? `<button ${apHistoricoPage === 1 ? 'disabled' : ''} data-history-page="prev">Anterior</button><span>Página ${apHistoricoPage} de ${totalPages}</span><button ${apHistoricoPage === totalPages ? 'disabled' : ''} data-history-page="next">Próxima</button>` : '';
+        pager.querySelector('[data-history-page="prev"]')?.addEventListener('click', () => { apHistoricoPage--; loadHistoricoTab(); });
+        pager.querySelector('[data-history-page="next"]')?.addEventListener('click', () => { apHistoricoPage++; loadHistoricoTab(); });
     } catch (e) {
         console.error("Error loading audit history: ", e);
         tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #9B8E85;">Erro ao carregar histórico.</td></tr>`;
