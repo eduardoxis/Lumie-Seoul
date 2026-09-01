@@ -14,6 +14,8 @@ let apProducts = [];
 let apArticles = [];
 let apCurrentProductImages = []; // galeria do produto sendo editado no formulário
 let apPendingUploads = 0; // nº de uploads de imagem em andamento (bloqueia "Salvar" enquanto > 0)
+let apProductsPage = 1;
+const AP_PRODUCTS_PAGE_SIZE = 20;
 
 document.addEventListener('DOMContentLoaded', () => {
     if (window.dbReady) {
@@ -591,7 +593,10 @@ async function loadProductsTab() {
             return;
         }
 
-        tbody.innerHTML = apProducts.map(p => {
+        const totalPages = Math.max(1, Math.ceil(apProducts.length / AP_PRODUCTS_PAGE_SIZE));
+        apProductsPage = Math.min(apProductsPage, totalPages);
+        const pageProducts = apProducts.slice((apProductsPage - 1) * AP_PRODUCTS_PAGE_SIZE, apProductsPage * AP_PRODUCTS_PAGE_SIZE);
+        tbody.innerHTML = pageProducts.map(p => {
             const imgUrl = p.imagensUrl && p.imagensUrl[0] ? p.imagensUrl[0] : 'img/cream.jpg';
             return `
                 <tr draggable="true" data-row-id="${p.id}">
@@ -617,6 +622,11 @@ async function loadProductsTab() {
         });
 
         enableRowDragDrop(tbody, row => row.dataset.rowId, reorderProducts);
+        let pager = document.getElementById('ap-products-pagination');
+        if (!pager) { pager = document.createElement('div'); pager.id = 'ap-products-pagination'; pager.className = 'catalog-pagination'; tbody.closest('.admin-table-card').appendChild(pager); }
+        pager.innerHTML = totalPages > 1 ? `<button ${apProductsPage === 1 ? 'disabled' : ''} data-ap-page="prev">Anterior</button><span>Página ${apProductsPage} de ${totalPages}</span><button ${apProductsPage === totalPages ? 'disabled' : ''} data-ap-page="next">Próxima</button>` : '';
+        pager.querySelector('[data-ap-page="prev"]')?.addEventListener('click', () => { apProductsPage--; loadProductsTab(); });
+        pager.querySelector('[data-ap-page="next"]')?.addEventListener('click', () => { apProductsPage++; loadProductsTab(); });
     } catch (e) {
         console.error("Error loading products list: ", e);
     }

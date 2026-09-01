@@ -7,6 +7,8 @@ let productsList = [];
 let shopConfig = {};
 let catalogoInicializado = false;
 let categoriaPendente = null;
+let catalogPage = 1;
+const CATALOG_PAGE_SIZE = 12;
 
 document.addEventListener("spaNavigate", (e) => {
     const { page, params } = e.detail;
@@ -115,7 +117,15 @@ function renderCatalog(filteredProducts = productsList) {
         return;
     }
 
-    grid.innerHTML = filteredProducts.map(product => cardProdutoHtml(product)).join("");
+    const totalPages = Math.max(1, Math.ceil(filteredProducts.length / CATALOG_PAGE_SIZE));
+    catalogPage = Math.min(catalogPage, totalPages);
+    const start = (catalogPage - 1) * CATALOG_PAGE_SIZE;
+    grid.innerHTML = filteredProducts.slice(start, start + CATALOG_PAGE_SIZE).map(product => cardProdutoHtml(product)).join("");
+    let pagination = document.getElementById('catalog-pagination');
+    if (!pagination) { pagination = document.createElement('div'); pagination.id = 'catalog-pagination'; pagination.className = 'catalog-pagination'; grid.insertAdjacentElement('afterend', pagination); }
+    pagination.innerHTML = totalPages > 1 ? `<button ${catalogPage === 1 ? 'disabled' : ''} data-page="prev">Anterior</button><span>Página ${catalogPage} de ${totalPages}</span><button ${catalogPage === totalPages ? 'disabled' : ''} data-page="next">Próxima</button>` : '';
+    pagination.querySelector('[data-page="prev"]')?.addEventListener('click', () => { catalogPage--; renderCatalog(filteredProducts); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    pagination.querySelector('[data-page="next"]')?.addEventListener('click', () => { catalogPage++; renderCatalog(filteredProducts); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
     if (typeof initScrollReveal === "function") initScrollReveal();
 }
@@ -176,6 +186,7 @@ function initFilters() {
     }
 
     const applyFilters = () => {
+        catalogPage = 1;
         let results = [...productsList];
 
         if (searchInput && searchInput.value) {

@@ -1012,3 +1012,4 @@
     color: var(--color-gold);
     transform: translateY(-2px);
 }
+.catalog-pagination{display:flex;justify-content:center;align-items:center;gap:14px;margin:28px 0}.catalog-pagination button{border:1px solid var(--color-border);background:#fff;border-radius:999px;padding:9px 16px;color:var(--color-text-primary);font-weight:600}.catalog-pagination button:disabled{opacity:.45;cursor:not-allowed}.catalog-pagination span{font-size:14px;color:var(--color-text-secondary)}
