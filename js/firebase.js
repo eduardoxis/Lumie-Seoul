@@ -9,7 +9,7 @@
 
 // 1. Firebase configuration credentials (Merchant updates this when ready)
 const firebaseConfig = {
-    apiKey: "AIzaSyDV_mi3G1Dafpxd03aKi47oS_Gn-b5B1t8",
+    apiKey: "AIzaSyA_o-SfstdKCttP_JFI4UEdC6CxKbrEzAE",
     authDomain: "lumie-seoul.firebaseapp.com",
     projectId: "lumie-seoul",
     storageBucket: "lumie-seoul.firebasestorage.app",
