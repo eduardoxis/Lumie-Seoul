@@ -30,7 +30,7 @@
 @keyframes rotinaPulse { from { transform: scale(.92); opacity: .5; } to { transform: scale(1.08); opacity: 1; } }
 .rotina-result { text-align: left; }
 .rotina-result::before { display: block; width: min(260px, 38%); height: 1px; margin: 0 auto 1.4rem; background: #e5d9c8; content: ""; }
-.rotina-result-head { text-align: center; margin-bottom: 2.2rem; }
+.rotina-result-head { scroll-margin-top: 105px; text-align: center; margin-bottom: 2.2rem; }
 .rotina-result-head h2 { margin: .6rem 0; color: #3f3228; font-size: clamp(2rem, 4vw, 3.5rem); }
 .rotina-result-head p { color: #74675c; line-height: 1.7; }
 .rotina-chips { display: flex; justify-content: center; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }

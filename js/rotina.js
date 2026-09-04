@@ -164,15 +164,21 @@
     app.querySelector("#rotina-next").onclick = () => { if (selecionadas.length) avancarComTransicao(); };
   }
 
-  function renderAnalise() { app.innerHTML = `<div class="rotina-quiz rotina-loading"><span class="rotina-sparkle">✦</span><h2 class="rotina-question">Estamos preparando seu Ritual Lumiê…</h2><p class="rotina-note">Analisando as necessidades da sua pele...</p></div>`; setTimeout(renderResultado, 1200); }
+  function renderAnalise() { app.innerHTML = `<div class="rotina-quiz rotina-loading"><span class="rotina-sparkle">✦</span><h2 class="rotina-question">Estamos preparando seu Ritual Lumiê…</h2><p class="rotina-note">Analisando as necessidades da sua pele...</p></div>`; setTimeout(() => renderResultado(true), 1200); }
 
-  async function renderResultado() {
+  function rolarParaResultado() {
+    window.setTimeout(() => app.querySelector(".rotina-result-head")?.scrollIntoView({ behavior: "smooth", block: "start" }), 40);
+  }
+
+  async function renderResultado(rolarAteResultado = false) {
     const tags = tagsDoPerfil();
     const produtos = escolherRotina(await produtosReaisDisponiveis(), tags);
     estado.concluido = true; salvarEstado();
     if (!produtos.length) {
       app.innerHTML = `<div class="rotina-result"><div class="rotina-result-head"><span class="rotina-eyebrow">SEU RITUAL LUMIÊ ✦</span><h2 class="serif-title">Estamos atualizando nossa curadoria</h2><p class="rotina-empty">No momento, não encontramos produtos disponíveis para esta combinação. Fale com uma consultora Lumiê para receber uma indicação personalizada.</p><button class="btn btn-primary" type="button" onclick="contactMerchantGeneral()">Falar com consultora</button><button class="btn btn-secondary" id="rotina-restart" type="button">Refazer o teste</button></div></div>`;
-      app.querySelector("#rotina-restart").onclick = reiniciarQuiz; return;
+      app.querySelector("#rotina-restart").onclick = reiniciarQuiz;
+      if (rolarAteResultado) rolarParaResultado();
+      return;
     }
     app.innerHTML = `<div class="rotina-result"><div class="rotina-result-head"><span class="rotina-eyebrow">SEU RITUAL LUMIÊ ✦</span><h2 class="serif-title">Seu Ritual Lumiê</h2><p>Com base nas suas respostas, selecionamos produtos que podem combinar melhor com as necessidades que você nos contou.</p><div class="rotina-chips">${chips(tags)}</div>${tags.includes("beginner") ? `<p><strong>Comece aos poucos ✦</strong><br>Uma rotina não precisa ser complicada. Comece com poucos produtos e observe como sua pele responde.</p>` : ""}</div><div class="rotina-products">${produtos.map(produto => cardResultadoHtml(produto, tags)).join("")}</div><div class="text-center" style="margin-top:2rem"><button id="rotina-catalogo" class="btn btn-primary" type="button">Conhecer os produtos</button><button id="rotina-restart" class="btn btn-secondary" type="button">Refazer o teste</button></div><p class="rotina-disclaimer">As recomendações têm finalidade cosmética e não substituem uma avaliação dermatológica profissional.</p></div>`;
     app.querySelectorAll("[data-ritual-produto]").forEach(botao => {
@@ -188,6 +194,7 @@
     });
     app.querySelector("#rotina-catalogo").onclick = () => navegar("catalogo");
     app.querySelector("#rotina-restart").onclick = reiniciarQuiz;
+    if (rolarAteResultado) rolarParaResultado();
   }
 
   document.addEventListener("DOMContentLoaded", () => { estado.iniciada && !estado.concluido ? renderPergunta() : estado.concluido ? renderResultado() : renderIntroducao(); });
