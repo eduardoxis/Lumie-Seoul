@@ -997,6 +997,10 @@
     align-items: center;
 }
 
+.footer-credits { display: flex; flex-direction: column; gap: 4px; }
+.footer-credits a { color: var(--color-gold); font-weight: 600; }
+.footer-credits a:hover { text-decoration: underline; }
+
 .footer-socials {
     display: flex;
     gap: var(--space-sm);
