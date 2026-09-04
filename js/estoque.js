@@ -612,6 +612,7 @@ async function saveEstoqueProduct() {
 
     try {
         await DB.estoque.produtos.save(productData);
+        await eqSincronizarDisponibilidadePublica(productData);
         await logAudit(id ? 'Editou' : 'Criou', 'Produto de Estoque', productData.id || '', nome);
         closeEstoqueProductPanel();
         await loadEstoqueProdutosSubtab();
@@ -630,11 +631,34 @@ async function deleteEstoqueProduct(id) {
 
     try {
         await DB.estoque.produtos.delete(id);
+        if (product) await eqSincronizarDisponibilidadePublica(product, null, false);
         await logAudit('Removeu', 'Produto de Estoque', id, product ? product.nome : '');
         await loadEstoqueProdutosSubtab();
     } catch (e) {
         console.error('Erro ao remover produto de estoque: ', e);
         alert('Não foi possível remover o produto.');
+    }
+}
+
+// O catálogo público não expõe quantidade de estoque. Mantemos nele somente
+// uma indicação sim/não: itens cadastrados no estoque participam do quiz.
+async function eqSincronizarDisponibilidadePublica(produtoEstoque, catalogo = null, disponivel = true) {
+    try {
+        const produtosCatalogo = catalogo || await DB.products.getAll();
+        const sku = String(produtoEstoque.sku || '').trim().toLowerCase();
+        const produtoPublico = produtosCatalogo.find(produto =>
+            produto.id === produtoEstoque.id ||
+            (sku && String(produto.sku || '').trim().toLowerCase() === sku)
+        );
+        if (produtoPublico) {
+            await DB.products.save({
+                id: produtoPublico.id,
+                disponivelNoQuiz: disponivel
+            });
+        }
+    } catch (erro) {
+        // A movimentação de estoque continua válida mesmo se a vitrine pública falhar.
+        console.warn('Não foi possível sincronizar disponibilidade pública:', erro);
     }
 }
 
@@ -733,6 +757,7 @@ async function saveEstoqueMovement() {
         const updatedProduct = { ...product, quantidade: newQty };
         if (tipo === 'transferencia' && novaLocalizacao) updatedProduct.localizacao = novaLocalizacao;
         await DB.estoque.produtos.save(updatedProduct);
+        await eqSincronizarDisponibilidadePublica(updatedProduct);
 
         await DB.estoque.movimentacoes.add({
             produtoId: product.id,
@@ -993,6 +1018,8 @@ async function confirmEstoqueImport() {
 
     let imported = 0;
     let failed = 0;
+    let catalogoPublico = [];
+    try { catalogoPublico = await DB.products.getAll(); } catch (_) { catalogoPublico = []; }
 
     for (let i = 0; i < importable.length; i++) {
         const row = { ...importable[i] };
@@ -1003,6 +1030,7 @@ async function confirmEstoqueImport() {
 
         try {
             await DB.estoque.produtos.save(row);
+            await eqSincronizarDisponibilidadePublica(row, catalogoPublico);
             imported++;
         } catch (err) {
             console.error('Erro ao importar produto de estoque: ', row, err);
