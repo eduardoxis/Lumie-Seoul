@@ -96,6 +96,26 @@
     return [...new Set(tags)].filter(tag => nomes[tag]).slice(0, 5).map(tag => `<span class="rotina-chip">${nomes[tag]}</span>`).join("");
   }
 
+  // Mantém exatamente a linguagem visual dos cards já usados no catálogo.
+  function cardResultadoHtml(produto, tags) {
+    const imagem = produto.imagensUrl?.[0] || "img/cream.jpg";
+    return `<article class="product-card rotina-result-product">
+      <div class="product-card-img-wrapper" role="button" tabindex="0" data-ritual-produto="${esc(produto.id)}">
+        <span class="product-badge">${esc(produto.perfil.etapa)}</span>
+        <img src="${esc(imagem)}" alt="${esc(produto.nome)}" class="product-card-img" loading="lazy">
+      </div>
+      <div class="product-card-info">
+        <span class="product-brand">${esc(produto.marca)}</span>
+        <h3 class="product-title" role="button" tabindex="0" data-ritual-produto="${esc(produto.id)}">${esc(produto.nome)}</h3>
+        <p class="product-meta"><strong>Ideal para:</strong><br>${motivo(produto, tags)}</p>
+        <div class="product-card-actions">
+          <button class="btn btn-secondary" type="button" data-ritual-produto="${esc(produto.id)}">Ver detalhes</button>
+          <button class="btn btn-whatsapp" type="button" data-ritual-whatsapp="${esc(produto.id)}"><i class="fab fa-whatsapp"></i> Falar WhatsApp</button>
+        </div>
+      </div>
+    </article>`;
+  }
+
   function renderIntroducao() {
     app.innerHTML = `<div class="rotina-intro"><span class="rotina-eyebrow">01 · CONSULTORIA DIGITAL</span><h2 class="serif-title">Descubra sua rotina</h2><p>Responda algumas perguntas rápidas e descubra quais produtos Lumiê podem complementar o seu ritual de cuidados.</p><button id="rotina-start" class="btn btn-primary" type="button">Começar</button></div>`;
     app.querySelector("#rotina-start").onclick = () => { estado = estadoInicial(); estado.iniciada = true; salvarEstado(); renderPergunta(); };
@@ -147,8 +167,18 @@
       app.innerHTML = `<div class="rotina-result"><div class="rotina-result-head"><span class="rotina-eyebrow">SEU RITUAL LUMIÊ ✦</span><h2 class="serif-title">Estamos atualizando nossa curadoria</h2><p class="rotina-empty">No momento, não encontramos produtos disponíveis para esta combinação. Fale com uma consultora Lumiê para receber uma indicação personalizada.</p><button class="btn btn-primary" type="button" onclick="contactMerchantGeneral()">Falar com consultora</button><button class="btn btn-secondary" id="rotina-restart" type="button">Refazer o teste</button></div></div>`;
       app.querySelector("#rotina-restart").onclick = renderIntroducao; return;
     }
-    app.innerHTML = `<div class="rotina-result"><div class="rotina-result-head"><span class="rotina-eyebrow">SEU RITUAL LUMIÊ ✦</span><h2 class="serif-title">Seu Ritual Lumiê</h2><p>Com base nas suas respostas, selecionamos produtos que podem combinar melhor com as necessidades que você nos contou.</p><div class="rotina-chips">${chips(tags)}</div>${tags.includes("beginner") ? `<p><strong>Comece aos poucos ✦</strong><br>Uma rotina não precisa ser complicada. Comece com poucos produtos e observe como sua pele responde.</p>` : ""}</div><div class="rotina-products">${produtos.map(produto => `<article class="rotina-product"><div class="rotina-product-image">${produto.imagensUrl?.[0] ? `<img src="${esc(produto.imagensUrl[0])}" alt="${esc(produto.nome)}" loading="lazy">` : ""}</div><div class="rotina-product-body"><span class="rotina-product-step">${produto.perfil.etapa}</span><span class="rotina-product-brand">${esc(produto.marca)}</span><h3>${esc(produto.nome)}</h3><p><strong>Por que escolhemos para você:</strong><br>${motivo(produto, tags)}</p><button class="btn btn-secondary" type="button" data-produto-id="${esc(produto.id)}">Ver produto</button></div></article>`).join("")}</div><div class="text-center" style="margin-top:2rem"><button id="rotina-catalogo" class="btn btn-primary" type="button">Conhecer os produtos</button><button id="rotina-restart" class="btn btn-secondary" type="button">Refazer o teste</button></div><p class="rotina-disclaimer">As recomendações têm finalidade cosmética e não substituem uma avaliação dermatológica profissional.</p></div>`;
-    app.querySelectorAll("[data-produto-id]").forEach(botao => botao.onclick = () => navegar("produto", { id: botao.dataset.produtoId }));
+    app.innerHTML = `<div class="rotina-result"><div class="rotina-result-head"><span class="rotina-eyebrow">SEU RITUAL LUMIÊ ✦</span><h2 class="serif-title">Seu Ritual Lumiê</h2><p>Com base nas suas respostas, selecionamos produtos que podem combinar melhor com as necessidades que você nos contou.</p><div class="rotina-chips">${chips(tags)}</div>${tags.includes("beginner") ? `<p><strong>Comece aos poucos ✦</strong><br>Uma rotina não precisa ser complicada. Comece com poucos produtos e observe como sua pele responde.</p>` : ""}</div><div class="rotina-products">${produtos.map(produto => cardResultadoHtml(produto, tags)).join("")}</div><div class="text-center" style="margin-top:2rem"><button id="rotina-catalogo" class="btn btn-primary" type="button">Conhecer os produtos</button><button id="rotina-restart" class="btn btn-secondary" type="button">Refazer o teste</button></div><p class="rotina-disclaimer">As recomendações têm finalidade cosmética e não substituem uma avaliação dermatológica profissional.</p></div>`;
+    app.querySelectorAll("[data-ritual-produto]").forEach(botao => {
+      const abrirProduto = () => navegar("produto", { id: botao.dataset.ritualProduto });
+      botao.onclick = abrirProduto;
+      botao.onkeydown = evento => {
+        if (evento.key === "Enter" || evento.key === " ") { evento.preventDefault(); abrirProduto(); }
+      };
+    });
+    app.querySelectorAll("[data-ritual-whatsapp]").forEach(botao => botao.onclick = () => {
+      const produto = produtos.find(item => item.id === botao.dataset.ritualWhatsapp);
+      if (produto) contactMerchantForProduct(produto.nome, produto.marca, produto.id);
+    });
     app.querySelector("#rotina-catalogo").onclick = () => navegar("catalogo");
     app.querySelector("#rotina-restart").onclick = renderIntroducao;
   }

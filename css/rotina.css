@@ -35,6 +35,8 @@
 .rotina-chips { display: flex; justify-content: center; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
 .rotina-chip { padding: .4rem .65rem; border: 1px solid #d9c7af; border-radius: 999px; color: #806039; font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .rotina-products { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(1.25rem, 2vw, 2rem); }
+.rotina-result-product .product-card-img-wrapper, .rotina-result-product .product-title { cursor: pointer; }
+.rotina-result-product [data-ritual-produto]:focus-visible { outline: 2px solid #b17a38; outline-offset: -2px; }
 .rotina-product { display: flex; flex-direction: column; overflow: hidden; border: 1px solid #e5dbce; background: #fffdfb; box-shadow: 0 10px 24px rgba(93, 73, 50, .05); }
 .rotina-product-image { aspect-ratio: 1 / 1; background: #f4eee6; }
 .rotina-product-image img { width: 100%; height: 100%; object-fit: cover; }
