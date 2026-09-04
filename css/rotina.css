@@ -1,5 +1,5 @@
 .rotina-section { padding: clamp(4rem, 9vw, 8rem) 0; background: #f7f3ed; border-top: 1px solid #e9e0d5; }
-.rotina-app { max-width: 960px; margin: 0 auto; }
+.rotina-app { width: 100%; max-width: 1240px; margin: 0 auto; }
 .rotina-intro, .rotina-quiz, .rotina-result { background: #fffdf9; border: 1px solid #e5dbce; padding: clamp(2rem, 5vw, 4.5rem); text-align: center; box-shadow: 0 18px 50px rgba(72, 55, 35, .06); }
 .rotina-quiz { transform-style: preserve-3d; animation: rotinaCardEnter .42s cubic-bezier(.2, .75, .25, 1) both; }
 .rotina-quiz.is-leaving { pointer-events: none; animation: rotinaCardLeave .34s ease-in both; }
