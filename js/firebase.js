@@ -301,17 +301,6 @@ const INITIAL_CONFIG = {
     marcas: ['Sulwhasoo', 'COSRX', 'Innisfree', 'Skin1004', 'Laneige', 'Beauty of Joseon']
 };
 
-const INITIAL_RITUAL_LUMIE = {
-    eyebrow: 'RITUAL LUMIÊ',
-    title: 'O Ritual Lumiê em 3 Passos',
-    subtitle: 'Um caminho simples e delicado para descobrir, viver e sentir o seu ritual.',
-    steps: [
-        { number: '01', title: 'Descubra sua rotina', description: 'Encontre os produtos ideais para as necessidades da sua pele.', imageUrl: 'img/bastidores/bastidores-3.jpg' },
-        { number: '02', title: 'Viva o ritual K-Beauty', description: 'Transforme o cuidado diário em um momento especial de autocuidado.', imageUrl: 'img/bastidores/bastidores-1.jpg' },
-        { number: '03', title: 'Sinta a diferença', description: 'Texturas, hidratação e luminosidade inspiradas na rotina coreana.', imageUrl: 'img/serum.jpg' }
-    ]
-};
-
 // Initialize local fallback databases only when Firebase isn't configured.
 // (When Firebase is active, all reads/writes go straight to Firestore/Auth.)
 if (!isFirebaseConfigured) {
@@ -323,9 +312,6 @@ if (!isFirebaseConfigured) {
     }
     if (!localStorage.getItem('lumie_config')) {
         localStorage.setItem('lumie_config', JSON.stringify(INITIAL_CONFIG));
-    }
-    if (!localStorage.getItem('lumie_ritual_lumie')) {
-        localStorage.setItem('lumie_ritual_lumie', JSON.stringify(INITIAL_RITUAL_LUMIE));
     }
     if (!localStorage.getItem('lumie_admins')) {
         // Local-only dev fallback admin, used exclusively when no Firebase project is connected.
@@ -691,52 +677,6 @@ const DB = {
         }
     },
 
-    // --- RITUAL LUMIÊ (seção pública editável pelo painel) ---
-    ritualLumie: {
-        get: async () => {
-            const cached = cacheRestore('ritualLumie');
-            if (cached) return cached;
-            if (dbMode === 'firebase' && firestoreDb) {
-                try {
-                    const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-                    const snapshot = await getDoc(doc(firestoreDb, 'configuracoes', 'ritualLumie'));
-                    if (snapshot.exists()) return cacheWrite('ritualLumie', snapshot.data());
-                } catch (e) { console.error('Firebase ritual fetch error.', e); }
-            }
-            return cacheWrite('ritualLumie', JSON.parse(localStorage.getItem('lumie_ritual_lumie')) || INITIAL_RITUAL_LUMIE);
-        },
-
-        listen: (callback) => {
-            if (dbMode === 'firebase' && firestoreDb) {
-                let unsubscribe = () => {};
-                import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js').then(({ doc, onSnapshot }) => {
-                    unsubscribe = onSnapshot(doc(firestoreDb, 'configuracoes', 'ritualLumie'), snapshot => {
-                        callback(cacheWrite('ritualLumie', snapshot.exists() ? snapshot.data() : INITIAL_RITUAL_LUMIE));
-                    }, e => console.error('Firebase ritual listener error.', e));
-                });
-                return () => unsubscribe();
-            }
-            DB.ritualLumie.get().then(callback);
-            return () => {};
-        },
-
-        save: async (data) => {
-            const updated = { ...data, updatedAt: new Date().toISOString() };
-            if (dbMode === 'firebase' && firestoreDb) {
-                try {
-                    const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-                    await setDoc(doc(firestoreDb, 'configuracoes', 'ritualLumie'), updated, { merge: true });
-                    cacheWrite('ritualLumie', updated);
-                    return true;
-                } catch (e) { console.error('Firebase ritual save error.', e); throw e; }
-            }
-            localStorage.setItem('lumie_ritual_lumie', JSON.stringify(updated));
-            cacheWrite('ritualLumie', updated);
-            document.dispatchEvent(new CustomEvent('ritual-lumie-updated', { detail: updated }));
-            return true;
-        }
-    },
-
     // --- IMAGENS (compressão client-side, sem Firebase Storage) ---
     // Sem Storage (que hoje exige plano Blaze), a única forma sem custo de
     // salvar imagem é embutida como base64 no próprio documento. Para isso
@@ -753,7 +693,7 @@ const DB = {
             // bastante margem porque o documento "configuracoes/geral" tem
             // vários outros campos, e produtos podem ter várias fotos na
             // mesma galeria (o limite é por documento, não por imagem).
-            const maxCharsPerImage = (folder === 'produtos' || folder === 'ritual') ? 250 * 1024 : 500 * 1024;
+            const maxCharsPerImage = folder === 'produtos' ? 250 * 1024 : 500 * 1024;
             if (dataUrl.length > maxCharsPerImage) {
                 throw new Error('Mesmo comprimida, a imagem ainda é grande demais para salvar. Tente uma foto com menor resolução.');
             }

@@ -12,7 +12,6 @@
 let apConfig = {};
 let apProducts = [];
 let apArticles = [];
-let apRitual = null;
 let apCurrentProductImages = []; // galeria do produto sendo editado no formulário
 let apPendingUploads = 0; // nº de uploads de imagem em andamento (bloqueia "Salvar" enquanto > 0)
 let apProductsPage = 1;
@@ -147,11 +146,6 @@ function bindStaticAdminEvents() {
     });
     document.getElementById('ap-b-form-img-url')?.addEventListener('input', (e) => showBlogPreview(e.target.value));
 
-    // ---- Ritual Lumiê ----
-    document.getElementById('ap-ritual-form')?.addEventListener('submit', saveRitualLumie);
-    document.getElementById('ap-ritual-steps')?.addEventListener('change', handleRitualImageUpload);
-    document.getElementById('ap-ritual-steps')?.addEventListener('input', handleRitualImageUrlInput);
-    document.getElementById('ap-ritual-preview-btn')?.addEventListener('click', previewRitualLumie);
 
     // ---- Administradores ----
     document.getElementById('ap-new-admin-btn')?.addEventListener('click', openAdminUserPanel);
@@ -251,142 +245,10 @@ function switchAdminTab(tab) {
         case 'operacoes': if (typeof loadOperacoesTab === 'function') loadOperacoesTab(); break;
         case 'categorias': loadCategoriasTab(); break;
         case 'blog': loadBlogTab(); break;
-        case 'ritual': loadRitualLumieTab(); break;
         case 'administradores': loadAdminsTab(); break;
         case 'configuracoes': loadConfigTab(); break;
         case 'historico': loadHistoricoTab(); break;
     }
-}
-
-/* ============================================================
-   3.1 RITUAL LUMIÊ — CMS DA SEÇÃO PÚBLICA
-   ============================================================ */
-function ritualPadrao() {
-    return {
-        eyebrow: 'RITUAL LUMIÊ',
-        title: 'O Ritual Lumiê em 3 Passos',
-        subtitle: 'Um caminho simples e delicado para descobrir, viver e sentir o seu ritual.',
-        steps: [
-            { number: '01', title: 'Descubra sua rotina', description: 'Encontre os produtos ideais para as necessidades da sua pele.', imageUrl: 'img/bastidores/bastidores-3.jpg' },
-            { number: '02', title: 'Viva o ritual K-Beauty', description: 'Transforme o cuidado diário em um momento especial de autocuidado.', imageUrl: 'img/bastidores/bastidores-1.jpg' },
-            { number: '03', title: 'Sinta a diferença', description: 'Texturas, hidratação e luminosidade inspiradas na rotina coreana.', imageUrl: 'img/serum.jpg' }
-        ]
-    };
-}
-
-function escapeAdminHtml(value) {
-    const node = document.createElement('div');
-    node.textContent = String(value || '');
-    return node.innerHTML;
-}
-
-function ritualStepEditorHtml(step, index) {
-    const safe = { ...ritualPadrao().steps[index], ...step };
-    return `<section class="admin-table-card ap-ritual-step-editor">
-        <h3>Passo ${index + 1}</h3>
-        <div>
-            <div class="ap-ritual-preview-image"><img id="ap-ritual-preview-${index}" src="${escapeAdminHtml(safe.imageUrl)}" alt="Prévia do passo ${index + 1}"></div>
-            <label class="admin-btn admin-btn-secondary" style="display: inline-flex; margin-top: 12px; cursor: pointer;"><i class="fa-solid fa-image"></i> Alterar imagem<input data-ritual-file="${index}" type="file" accept="image/jpeg,image/png,image/webp" style="display:none"></label>
-            <span class="ap-ritual-upload-note">JPG, PNG ou WEBP. Proporção recomendada: 4:3. A imagem é comprimida antes de salvar.</span>
-        </div>
-        <div>
-            <div class="admin-input-group"><label class="admin-label" for="ap-ritual-number-${index}">Número</label><input id="ap-ritual-number-${index}" data-ritual-field="number" class="admin-input" required maxlength="4" value="${escapeAdminHtml(safe.number)}"></div>
-            <div class="admin-input-group"><label class="admin-label" for="ap-ritual-step-title-${index}">Título</label><input id="ap-ritual-step-title-${index}" data-ritual-field="title" class="admin-input" required maxlength="80" value="${escapeAdminHtml(safe.title)}"></div>
-            <div class="admin-input-group"><label class="admin-label" for="ap-ritual-step-desc-${index}">Descrição</label><textarea id="ap-ritual-step-desc-${index}" data-ritual-field="description" class="admin-textarea" required maxlength="220">${escapeAdminHtml(safe.description)}</textarea></div>
-            <div class="admin-input-group"><label class="admin-label" for="ap-ritual-image-url-${index}">URL da imagem</label><input id="ap-ritual-image-url-${index}" data-ritual-field="imageUrl" class="admin-input" required value="${escapeAdminHtml(safe.imageUrl)}"></div>
-        </div>
-    </section>`;
-}
-
-async function loadRitualLumieTab() {
-    const form = document.getElementById('ap-ritual-form');
-    if (!form) return;
-    try {
-        const dados = await DB.ritualLumie.get();
-        const padrao = ritualPadrao();
-        apRitual = { ...padrao, ...dados, steps: (dados.steps || padrao.steps).map((step, index) => ({ ...padrao.steps[index], ...step })) };
-        document.getElementById('ap-ritual-eyebrow').value = apRitual.eyebrow;
-        document.getElementById('ap-ritual-title').value = apRitual.title;
-        document.getElementById('ap-ritual-subtitle').value = apRitual.subtitle;
-        document.getElementById('ap-ritual-steps').innerHTML = apRitual.steps.slice(0, 3).map(ritualStepEditorHtml).join('');
-        document.getElementById('ap-ritual-status').textContent = '';
-    } catch (erro) {
-        console.error('Erro ao carregar Ritual Lumiê:', erro);
-        document.getElementById('ap-ritual-status').textContent = 'Não foi possível carregar o conteúdo.';
-    }
-}
-
-function handleRitualImageUrlInput(event) {
-    const input = event.target.closest('[data-ritual-field="imageUrl"]');
-    if (!input) return;
-    const index = input.id.split('-').pop();
-    const preview = document.getElementById(`ap-ritual-preview-${index}`);
-    if (preview && input.value.trim()) preview.src = input.value.trim();
-}
-
-async function handleRitualImageUpload(event) {
-    const input = event.target.closest('[data-ritual-file]');
-    const file = input?.files?.[0];
-    if (!input || !file) return;
-    const index = input.dataset.ritualFile;
-    const urlInput = document.getElementById(`ap-ritual-image-url-${index}`);
-    const preview = document.getElementById(`ap-ritual-preview-${index}`);
-    input.disabled = true;
-    apPendingUploads++;
-    try {
-        const url = await DB.storage.uploadImage(file, 'ritual');
-        urlInput.value = url;
-        preview.src = url;
-    } catch (erro) {
-        console.error('Erro ao preparar imagem do Ritual Lumiê:', erro);
-        alert('Não foi possível usar esta imagem: ' + erro.message);
-    } finally {
-        apPendingUploads--;
-        input.disabled = false;
-        input.value = '';
-    }
-}
-
-async function saveRitualLumie(event) {
-    event.preventDefault();
-    if (apPendingUploads > 0) { alert('Aguarde o processamento das imagens terminar.'); return; }
-    const saveButton = document.getElementById('ap-ritual-save-btn');
-    const status = document.getElementById('ap-ritual-status');
-    const textoOriginal = saveButton.innerHTML;
-    const steps = [0, 1, 2].map(index => ({
-        number: document.getElementById(`ap-ritual-number-${index}`).value.trim(),
-        title: document.getElementById(`ap-ritual-step-title-${index}`).value.trim(),
-        description: document.getElementById(`ap-ritual-step-desc-${index}`).value.trim(),
-        imageUrl: document.getElementById(`ap-ritual-image-url-${index}`).value.trim()
-    }));
-    if (steps.some(step => !step.number || !step.title || !step.description || !step.imageUrl)) return;
-
-    saveButton.disabled = true;
-    saveButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
-    status.textContent = '';
-    try {
-        await DB.ritualLumie.save({
-            eyebrow: document.getElementById('ap-ritual-eyebrow').value.trim(),
-            title: document.getElementById('ap-ritual-title').value.trim(),
-            subtitle: document.getElementById('ap-ritual-subtitle').value.trim(),
-            steps
-        });
-        await logAudit('Atualizou', 'Ritual Lumiê', 'ritualLumie', 'Atualizou a seção O Ritual Lumiê em 3 Passos.');
-        status.textContent = 'Alterações salvas com sucesso.';
-    } catch (erro) {
-        console.error('Erro ao salvar Ritual Lumiê:', erro);
-        status.textContent = 'Não foi possível salvar as alterações. Tente novamente.';
-        status.style.color = '#A34E36';
-    } finally {
-        saveButton.disabled = false;
-        saveButton.innerHTML = textoOriginal;
-    }
-}
-
-function previewRitualLumie() {
-    closeAdminPanel();
-    if (typeof navegar === 'function') navegar('inicio');
-    window.setTimeout(() => document.getElementById('ritual-lumie')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 180);
 }
 
 /* ============================================================

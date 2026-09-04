@@ -13,17 +13,6 @@
     --admin-color-danger: #A34E36;
 }
 
-.ap-ritual-form { max-width: 940px; }
-.ap-ritual-editor-card { margin-bottom: 20px; padding: 26px; }
-.ap-ritual-editor-card h3 { margin-bottom: 20px; color: var(--admin-color-accent); font-size: 22px; }
-.ap-ritual-step-editor { display: grid; grid-template-columns: minmax(190px, .7fr) minmax(0, 1.3fr); gap: 24px; margin-bottom: 20px; padding: 24px; }
-.ap-ritual-step-editor h3 { grid-column: 1 / -1; margin: 0; color: var(--admin-color-accent); font-family: var(--font-serif); font-size: 21px; }
-.ap-ritual-preview-image { width: 100%; aspect-ratio: 4 / 3; overflow: hidden; border: 1px solid var(--admin-color-border); border-radius: 5px; background: #FAF9F6; }
-.ap-ritual-preview-image img { width: 100%; height: 100%; object-fit: cover; }
-.ap-ritual-upload-note { display: block; margin-top: 6px; color: #9B8E85; font-size: 10px; line-height: 1.45; }
-.ap-ritual-actions { display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding: 4px 0 30px; }
-#ap-ritual-status { color: #607255; font-size: 12px; font-weight: 600; }
-@media (max-width: 700px) { .ap-ritual-step-editor { grid-template-columns: 1fr; padding: 18px; } .ap-ritual-actions { align-items: stretch; flex-direction: column; } }
 
 /* ==========================================
    Generic full-screen overlay (login & panel)
