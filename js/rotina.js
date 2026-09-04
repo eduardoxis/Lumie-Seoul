@@ -106,15 +106,35 @@
     const selecionadas = Array.isArray(estado.respostas[pergunta.chave]) ? estado.respostas[pergunta.chave] : [];
     const multipla = Boolean(pergunta.max);
     app.innerHTML = `<div class="rotina-journey-head"><span class="rotina-eyebrow">RITUAL PERSONALIZADO</span><h2 class="serif-title"><b>01 —</b> Descubra sua rotina</h2><p>Responda algumas perguntas rápidas e descubra os produtos ideais para as necessidades da sua pele.</p></div><div class="rotina-quiz"><span class="rotina-step">Pergunta ${estado.indice + 1} de ${perguntas.length}</span><div class="rotina-progress" aria-label="Progresso"><span style="width:${((estado.indice + 1) / perguntas.length) * 100}%"></span></div><h2 class="rotina-question">${pergunta.titulo}</h2><div class="rotina-options" role="listbox" aria-multiselectable="${multipla}">${pergunta.opcoes.map(opcao => `<button type="button" class="rotina-option ${selecionadas.includes(opcao) ? "is-selected" : ""}" data-opcao="${esc(opcao)}" aria-selected="${selecionadas.includes(opcao)}"><span class="rotina-option-check">✓</span>${esc(opcao)}</button>`).join("")}</div><div class="rotina-actions"><button class="btn btn-secondary" id="rotina-back" type="button" ${estado.indice === 0 ? "disabled" : ""}>Voltar</button><p class="rotina-note">${multipla ? `Escolha até ${pergunta.max} opções` : "Escolha uma opção"}</p><button class="btn btn-primary" id="rotina-next" type="button" ${selecionadas.length ? "" : "disabled"}>${estado.indice === perguntas.length - 1 ? "Ver meu ritual" : "Continuar →"}</button></div></div>`;
+    const avancarComTransicao = () => {
+      const quiz = app.querySelector(".rotina-quiz");
+      if (quiz) quiz.classList.add("is-leaving");
+      window.setTimeout(() => {
+        if (estado.indice < perguntas.length - 1) {
+          estado.indice++;
+          salvarEstado();
+          renderPergunta();
+        } else {
+          renderAnalise();
+        }
+      }, 340);
+    };
+
     app.querySelectorAll(".rotina-option").forEach(botao => botao.onclick = () => {
       const opcao = botao.dataset.opcao;
       let escolhas = [...selecionadas];
       if (multipla) escolhas = escolhas.includes(opcao) ? escolhas.filter(x => x !== opcao) : (escolhas.length < pergunta.max ? [...escolhas, opcao] : escolhas);
       else escolhas = [opcao];
-      estado.respostas[pergunta.chave] = escolhas; salvarEstado(); renderPergunta();
+      estado.respostas[pergunta.chave] = escolhas;
+      salvarEstado();
+
+      // Respostas únicas avançam no clique. Nas perguntas de até duas escolhas,
+      // a transição acontece ao completar a segunda resposta.
+      if (!multipla || escolhas.length === pergunta.max) avancarComTransicao();
+      else renderPergunta();
     });
     app.querySelector("#rotina-back").onclick = () => { if (estado.indice) { estado.indice--; salvarEstado(); renderPergunta(); } };
-    app.querySelector("#rotina-next").onclick = () => { if (!selecionadas.length) return; if (estado.indice < perguntas.length - 1) { estado.indice++; salvarEstado(); renderPergunta(); } else renderAnalise(); };
+    app.querySelector("#rotina-next").onclick = () => { if (selecionadas.length) avancarComTransicao(); };
   }
 
   function renderAnalise() { app.innerHTML = `<div class="rotina-quiz rotina-loading"><span class="rotina-sparkle">✦</span><h2 class="rotina-question">Estamos preparando seu Ritual Lumiê…</h2><p class="rotina-note">Analisando as necessidades da sua pele...</p></div>`; setTimeout(renderResultado, 1200); }
