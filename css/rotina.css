@@ -16,11 +16,11 @@
 .rotina-progress { height: 3px; margin: 1.3rem 0 2.5rem; background: #eee6dc; }
 .rotina-progress > span { display: block; height: 100%; background: #b18a58; transition: width .35s ease; }
 .rotina-question { margin: .65rem auto 2rem; max-width: 690px; color: #3f3228; font-family: var(--font-serif); font-size: clamp(1.65rem, 3vw, 2.45rem); font-weight: 500; line-height: 1.25; }
-.rotina-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .75rem; max-width: 760px; margin: 0 auto 1.7rem; }
-.rotina-option { position: relative; min-height: 92px; padding: .9rem 1rem; border: 1px solid #e4d9ca; background: #fff; color: #5f5144; font-family: var(--font-serif); font-size: 1.1rem; text-align: center; cursor: pointer; transition: .2s ease; }
+.rotina-options { display: flex; flex-wrap: wrap; justify-content: center; gap: .8rem; max-width: 900px; margin: 0 auto 1.7rem; }
+.rotina-option { position: relative; flex: 0 1 270px; min-height: 64px; padding: .8rem 1.3rem; border: 1px solid #e4d9ca; border-radius: 4px; background: #fffdfb; color: #5f5144; font-family: var(--font-serif); font-size: 1.05rem; text-align: center; cursor: pointer; transition: border-color .2s ease, background-color .2s ease, transform .2s ease; }
 .rotina-option-check { position: absolute; top: .55rem; right: .6rem; display: none; width: 1.25rem; height: 1.25rem; border-radius: 50%; background: #af7c39; color: #fff; font-family: Arial, sans-serif; font-size: .78rem; line-height: 1.25rem; }
 .rotina-option:hover, .rotina-option:focus-visible { border-color: #b18a58; background: #fbf6ed; outline: none; }
-.rotina-option.is-selected { border-color: #9f7644; background: #fdf8f0; box-shadow: inset 0 0 0 1px #9f7644; color: #4c3825; }
+.rotina-option.is-selected { border-color: #9f7644; background: #fdf8f0; box-shadow: inset 0 0 0 1px #9f7644; color: #4c3825; transform: translateY(-1px); }
 .rotina-option.is-selected .rotina-option-check { display: block; }
 .rotina-actions { display: flex; justify-content: space-between; align-items: center; gap: 1rem; max-width: 760px; margin: 0 auto; }
 .rotina-note { margin: 0; color: #9a8a7b; font-size: .78rem; }
@@ -52,4 +52,4 @@
 @media (min-width: 701px) { .hero-buttons { flex-wrap: nowrap; } .hero-buttons .btn { flex: 0 0 auto; padding-inline: 1rem; white-space: nowrap; } }
 @media (prefers-reduced-motion: reduce) { .rotina-quiz, .rotina-quiz.is-leaving { animation: none; } }
 @media (max-width: 850px) { .rotina-products { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 600px) { .rotina-intro, .rotina-quiz, .rotina-result { padding: 2rem 1.15rem; } .rotina-options { grid-template-columns: 1fr; } .rotina-actions { align-items: stretch; flex-direction: column-reverse; } .rotina-actions .btn { width: 100%; } .rotina-products { display: flex; overflow-x: auto; padding-bottom: .5rem; scroll-snap-type: x mandatory; } .rotina-product { min-width: 78%; scroll-snap-align: start; } }
+@media (max-width: 600px) { .rotina-intro, .rotina-quiz, .rotina-result { padding: 2rem 1.15rem; } .rotina-options { gap: .65rem; } .rotina-option { flex-basis: min(100%, 210px); min-height: 60px; padding-inline: 1rem; } .rotina-actions { align-items: stretch; flex-direction: column-reverse; } .rotina-actions .btn { width: 100%; } .rotina-products { display: flex; overflow-x: auto; padding-bottom: .5rem; scroll-snap-type: x mandatory; } .rotina-product { min-width: 78%; scroll-snap-align: start; } }
